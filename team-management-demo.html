@@ -1950,10 +1950,10 @@ body.is-points-detail .simulation-switch {
 .credit-subtab.is-active { color: #000; border-bottom-color: #000; }
 .credit-subtab:hover { color: #000; }
 .credit-subtab:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; border-radius: 2px; }
-#pointsOverview { display: block; padding: 24px 28px; }
-.unallocated-summary { display: flex; flex-direction: column; gap: 8px; }
+#pointsOverview { display: block; flex-shrink: 0; margin: 0; padding: 10px 16px; border-radius: 12px; box-shadow: none; }
+.unallocated-summary { display: flex; align-items: center; gap: 14px; }
 .unallocated-summary > span { color: var(--text-secondary); font-size: 14px; }
-.unallocated-summary > strong { font-size: 30px; line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; }
+.unallocated-summary > strong { font-size: 22px; line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; }
 .points-table { min-width: 740px; grid-template-columns: minmax(220px, 1.6fr) minmax(110px, 1fr) minmax(100px, 1fr) minmax(160px, 1.2fr) 122px; }
 
 .append-editor label { display:flex; align-items:center; gap:10px; font-size:13px; }
@@ -1970,6 +1970,13 @@ body.is-points-detail .simulation-switch {
 .allocation-menu-options button { display: block; width: 100%; border: 0; border-radius: 6px; background: transparent; padding: 9px 12px; text-align: left; white-space: nowrap; font: inherit; font-size: 14px; cursor: pointer; }
 .allocation-menu-options button:hover { background: #f3f3f5; }
 .allocation-menu-options button:disabled { opacity: .4; cursor: default; }
+
+.credit-workspace-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
+.credit-workspace-toolbar #creditTypeTabs { margin-bottom: 0; }
+@media (max-width: 700px) {
+  .credit-workspace-toolbar { flex-wrap: wrap; gap: 12px; }
+  .credit-workspace-toolbar #pointsOverview { margin-left: auto; }
+}
 
 </style>
   </head>
@@ -2119,9 +2126,11 @@ body.is-points-detail .simulation-switch {
         </section>
 
         <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
-          <div class="credit-subtabs" id="creditTypeTabs" role="tablist" aria-label="积分类型"></div>
+          <div class="credit-workspace-toolbar">
+            <div class="credit-subtabs" id="creditTypeTabs" role="tablist" aria-label="积分类型"></div>
+            <div class="points-overview" id="pointsOverview" aria-live="polite"></div>
+          </div>
           <section id="creditTypeContent" role="tabpanel" aria-labelledby="credit-tab-general">
-          <div class="points-overview" id="pointsOverview"></div>
           <div class="shortage-banner" id="shortageBanner" hidden></div>
           <div class="table-card points-table-card">
             <div class="data-table points-table table-head">
