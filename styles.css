@@ -182,9 +182,53 @@ select:focus-visible {
   height: 64px;
   align-items: center;
   justify-content: flex-end;
+  gap: 10px;
   padding: 0 24px;
   background: rgba(245, 245, 246, 0.9);
   backdrop-filter: blur(18px);
+}
+
+.simulation-switch {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgba(22, 22, 27, 0.07);
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.035);
+  backdrop-filter: blur(12px);
+}
+
+.simulation-switch-label {
+  padding: 0 6px 0 8px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.simulation-option {
+  height: 24px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 12px;
+  color: var(--text-secondary);
+  background: transparent;
+  font-size: 11px;
+  cursor: pointer;
+  transition: 140ms ease;
+}
+
+.simulation-option:hover {
+  color: var(--text);
+  background: #f0f0f2;
+}
+
+.simulation-option.is-active {
+  color: #fff;
+  background: #19191d;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.13);
 }
 
 .credit-pill {
@@ -568,14 +612,6 @@ select:focus-visible {
   gap: 8px;
 }
 
-.toolbar-credit-button {
-  border-radius: 18px;
-}
-
-.toolbar-credit-button[hidden] {
-  display: none;
-}
-
 .tabs {
   gap: 4px;
 }
@@ -752,6 +788,11 @@ select:focus-visible {
   font-size: 12px;
 }
 
+.action-link:disabled {
+  color: var(--text-tertiary);
+  cursor: default;
+}
+
 .action-link.danger:hover {
   color: var(--danger);
 }
@@ -917,29 +958,6 @@ select:focus-visible {
 .credit-readonly {
   color: #2f2f35;
   font-variant-numeric: tabular-nums;
-}
-
-.consumed-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0;
-  border: 0;
-  color: #2f2f35;
-  background: transparent;
-  cursor: pointer;
-}
-
-.consumed-trigger span {
-  color: var(--text-tertiary);
-  font-size: 10px;
-  opacity: 0;
-  transition: opacity 120ms ease;
-}
-
-.table-row:hover .consumed-trigger span,
-.consumed-trigger:focus-visible span {
-  opacity: 1;
 }
 
 .points-table.table-row.is-editing {

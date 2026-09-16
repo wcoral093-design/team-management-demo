@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="团队管理与积分管理交互 Demo" />
     <title>团队管理 · 交互 Demo</title>
-    <link rel="stylesheet" href="./styles.css?v=20260916-5" />
+    <link rel="stylesheet" href="./styles.css?v=20260916-6" />
   </head>
   <body>
     <aside class="sidebar" aria-label="主导航">
@@ -42,6 +42,11 @@
     </aside>
 
     <header class="topbar">
+      <div class="simulation-switch" role="group" aria-label="模拟数据模式">
+        <span class="simulation-switch-label">模拟</span>
+        <button type="button" class="simulation-option is-active" data-simulation-mode="all" aria-pressed="true">全积分</button>
+        <button type="button" class="simulation-option" data-simulation-mode="general" aria-pressed="false">仅通用</button>
+      </div>
       <button class="credit-pill" data-action="buy">
         <span class="credit-gem" aria-hidden="true">✦</span>
         <span id="headerCredit">7,698</span>
@@ -86,7 +91,7 @@
           <div class="summary-topline">
             <div>
               <div class="card-label">剩余总积分</div>
-              <div class="large-number"><span id="availableTotal">27,076</span></div>
+              <div class="large-number"><span id="availableTotal">36,842</span></div>
             </div>
             <div class="card-actions">
               <button class="link-button" data-action="details">明细</button>
@@ -95,8 +100,8 @@
             </div>
           </div>
           <div class="allocation-stats summary-credit-meta" aria-label="积分分配情况">
-            <div class="allocation-stat"><span>已分配</span><strong id="assignedTotal">4,220</strong></div>
-            <div class="allocation-stat unallocated" title="团队剩余可分配余额"><span>未分配</span><strong id="unassignedTotal">22,856</strong></div>
+            <div class="allocation-stat"><span>已分配</span><strong id="assignedTotal">15,400</strong></div>
+            <div class="allocation-stat unallocated" title="团队剩余可分配余额"><span>未分配</span><strong id="unassignedTotal">21,442</strong></div>
           </div>
         </article>
 
@@ -104,11 +109,11 @@
           <div class="summary-topline">
             <div>
               <div class="card-label">可用席位 / 总席位</div>
-              <div class="seat-number"><span id="seatUsed">3</span><small>/5</small></div>
+              <div class="seat-number"><span id="seatUsed">2</span><small>/<span id="seatTotal">3</span></small></div>
             </div>
             <button class="link-button" data-action="seats">增加席位</button>
           </div>
-          <div class="card-footer-line seat-footer"><i></i><span id="seatUsage">已使用 3/5</span></div>
+          <div class="card-footer-line seat-footer"><i></i><span id="seatUsage">已使用 2/3</span></div>
         </article>
       </section>
 
@@ -120,7 +125,6 @@
             <button class="tab" id="tab-invites" role="tab" aria-selected="false" aria-controls="panel-invites" data-tab="invites">团队审批</button>
           </div>
           <div class="toolbar-actions">
-            <button class="primary-button toolbar-credit-button" id="pointsDetailButton" data-action="points-details" hidden>积分明细</button>
             <button class="primary-button invite-button" data-action="invite">邀请成员</button>
           </div>
         </div>
@@ -156,7 +160,7 @@
             <div class="data-table points-table table-head">
               <div>用户</div>
               <div>团队角色</div>
-              <div>已消耗 <span class="info-dot" title="点击成员的消耗数可查看分类明细">i</span></div>
+              <div>已消耗</div>
               <div>剩余总积分</div>
               <div class="credit-header">通用积分</div>
               <div class="credit-header">SD 2.5积分</div>
@@ -196,6 +200,6 @@
 
     <div class="toast-region" aria-live="polite" aria-atomic="true" id="toastRegion"></div>
 
-    <script src="./app.js?v=20260916-4"></script>
+    <script src="./app.js?v=20260916-5"></script>
   </body>
 </html>

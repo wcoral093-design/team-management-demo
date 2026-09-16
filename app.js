@@ -1,64 +1,85 @@
 const creditTypes = ["general", "sd25", "sd20"];
 
+const simulationPresets = {
+  all: {
+    pools: {
+      general: { label: "通用积分", total: 23100, available: 11700 },
+      sd25: { label: "SD 2.5积分", total: 8280, available: 5880 },
+      sd20: { label: "SD 2.0积分", total: 5462, available: 3862 },
+    },
+    seats: { used: 2, total: 3 },
+    members: [
+      {
+        id: 1,
+        name: "用户5382311869083",
+        role: "创建者",
+        avatar: "用",
+        avatarClass: "owner",
+        consumed: { general: 0, sd25: 0, sd20: 0 },
+        joined: "2026-09-08 21:14",
+        credits: { general: 5700, sd25: 1200, sd20: 800 },
+        locked: true,
+      },
+      {
+        id: 2,
+        name: "陈俊生",
+        role: "管理员",
+        avatar: "陈",
+        avatarClass: "admin",
+        consumed: { general: 0, sd25: 0, sd20: 0 },
+        joined: "2026-09-09 21:36",
+        credits: { general: 5700, sd25: 1200, sd20: 800 },
+      },
+    ],
+  },
+  general: {
+    pools: {
+      general: { label: "通用积分", total: 23100, available: 7700 },
+      sd25: { label: "SD 2.5积分", total: 0, available: 0 },
+      sd20: { label: "SD 2.0积分", total: 0, available: 0 },
+    },
+    seats: { used: 2, total: 3 },
+    members: [
+      {
+        id: 1,
+        name: "用户5382311869083",
+        role: "创建者",
+        avatar: "用",
+        avatarClass: "owner",
+        consumed: { general: 0, sd25: 0, sd20: 0 },
+        joined: "2026-09-08 21:14",
+        credits: { general: 7700, sd25: 0, sd20: 0 },
+        locked: true,
+      },
+      {
+        id: 2,
+        name: "陈俊生",
+        role: "管理员",
+        avatar: "陈",
+        avatarClass: "admin",
+        consumed: { general: 0, sd25: 0, sd20: 0 },
+        joined: "2026-09-09 21:36",
+        credits: { general: 7700, sd25: 0, sd20: 0 },
+      },
+    ],
+  },
+};
+
+function cloneSimulationPreset(mode) {
+  return JSON.parse(JSON.stringify(simulationPresets[mode]));
+}
+
+const initialSimulation = cloneSimulationPreset("all");
+
 const state = {
   activeTab: "members",
-  pools: {
-    general: { label: "通用积分", total: 16760, available: 14760 },
-    sd25: { label: "SD 2.5积分", total: 8280, available: 7100 },
-    sd20: { label: "SD 2.0积分", total: 2036, available: 996 },
-  },
+  simulationMode: "all",
+  pools: initialSimulation.pools,
   perSeat: { general: 800, sd25: 400, sd20: 240 },
-  seats: { used: 3, total: 5 },
-  members: [
-    {
-      id: 1,
-      name: "用户5382311869083",
-      role: "创建者",
-      avatar: "用",
-      avatarClass: "owner",
-      consumed: { general: 2, sd25: 0, sd20: 0 },
-      joined: "2026-09-08 21:14",
-      credits: { general: 800, sd25: 400, sd20: 240 },
-      locked: true,
-    },
-    {
-      id: 2,
-      name: "陈俊生",
-      role: "管理员",
-      avatar: "陈",
-      avatarClass: "admin",
-      consumed: { general: 0, sd25: 0, sd20: 0 },
-      joined: "2026-09-09 21:36",
-      credits: { general: 760, sd25: 500, sd20: 120 },
-    },
-    {
-      id: 3,
-      name: "Felix",
-      role: "协作者",
-      avatar: "F",
-      avatarClass: "collab",
-      consumed: { general: 0, sd25: 2, sd20: 0 },
-      joined: "2026-09-11 13:20",
-      credits: { general: 80, sd25: 80, sd20: 40 },
-    },
-    {
-      id: 4,
-      name: "Li Lei",
-      role: "协作者",
-      avatar: "L",
-      avatarClass: "designer",
-      consumed: { general: 0, sd25: 0, sd20: 0 },
-      joined: "2026-09-12 09:42",
-      credits: { general: 360, sd25: 200, sd20: 640 },
-    },
-  ],
+  seats: initialSimulation.seats,
+  members: initialSimulation.members,
   pendingInvites: [],
-  transactions: [
-    { time: "2026-09-12 09:42", member: "Li Lei", type: "general", amount: 360, action: "自动分配" },
-    { time: "2026-09-12 09:42", member: "Li Lei", type: "sd25", amount: 200, action: "自动分配" },
-    { time: "2026-09-12 09:42", member: "Li Lei", type: "sd20", amount: 640, action: "自动分配" },
-    { time: "2026-09-11 13:20", member: "Felix", type: "general", amount: 80, action: "自动分配" },
-  ],
+  transactions: [],
   editingMemberId: null,
   draftCredits: null,
   shortage: null,
@@ -154,6 +175,14 @@ function renderPointCards() {
   }).join("");
 }
 
+function renderSimulationSwitch() {
+  $$('[data-simulation-mode]').forEach((button) => {
+    const active = button.dataset.simulationMode === state.simulationMode;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+}
+
 function creditEditorMarkup(member, type) {
   const value = state.draftCredits[type];
   const label = state.pools[type].label;
@@ -196,7 +225,7 @@ function renderPointsRows() {
       : readonlyCreditMarkup(member, type, candidate)
     ).join("");
 
-    let action = `<button class="allocation-button" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ""}>积分调配</button>`;
+    let action = `<button class="action-link" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ""}>积分调配</button>`;
     if (editing) {
       action = '<div class="row-actions"><button class="allocation-button confirm-button" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>';
     } else if (candidate) {
@@ -207,7 +236,7 @@ function renderPointsRows() {
       <div class="${rowClasses.join(" ")}" data-member-id="${member.id}">
         <div class="user-cell">${avatarMarkup(member)}<span class="user-name">${escapeHTML(member.name)}</span></div>
         ${staticRoleMarkup(member)}
-        <div><button class="consumed-trigger" data-consumed-details="${member.id}">${format(consumedTotal(member))}<span>明细</span></button></div>
+        <div>${format(consumedTotal(member))}</div>
         ${pointMarkup(memberTotal(member))}
         ${creditCells}
         <div class="points-operation">${action}</div>
@@ -241,6 +270,7 @@ function renderSummary() {
   $("#assignedTotal").textContent = format(assigned);
   $("#unassignedTotal").textContent = format(available);
   $("#seatUsed").textContent = String(state.seats.used);
+  $("#seatTotal").textContent = String(state.seats.total);
   $("#seatUsage").textContent = `已使用 ${state.seats.used}/${state.seats.total}`;
 }
 
@@ -274,6 +304,7 @@ function renderInvites() {
 }
 
 function renderAll() {
+  renderSimulationSwitch();
   renderMemberRows();
   renderPointCards();
   renderPointsRows();
@@ -298,7 +329,23 @@ function switchTab(tabName) {
     panel.hidden = !active;
     panel.classList.toggle("is-active", active);
   });
-  $("#pointsDetailButton").hidden = tabName !== "credits";
+}
+
+function applySimulationMode(mode) {
+  if (!simulationPresets[mode] || mode === state.simulationMode) return;
+  const preset = cloneSimulationPreset(mode);
+  if (!$("#modalBackdrop").hidden) closeModal();
+  state.simulationMode = mode;
+  state.pools = preset.pools;
+  state.seats = preset.seats;
+  state.members = preset.members;
+  state.pendingInvites = [];
+  state.transactions = [];
+  state.editingMemberId = null;
+  state.draftCredits = null;
+  state.shortage = null;
+  renderAll();
+  showToast(mode === "all" ? "已切换至全积分模拟数据" : "已切换至仅通用积分模拟数据");
 }
 
 function beginCreditEdit(memberId) {
@@ -437,25 +484,6 @@ function openRenameModal() {
     subtitle: "团队名称对所有成员可见",
     body: '<label class="form-field"><span>团队名称</span><input name="teamName" value="Team-12be3d2" maxlength="30" required /></label>',
     confirmText: "保存",
-  });
-}
-
-function openConsumedDetails(memberId) {
-  const member = state.members.find((item) => item.id === Number(memberId));
-  if (!member) return;
-  openModal({
-    type: "read-only",
-    title: "已消耗积分明细",
-    subtitle: `${member.name} · 共消耗 ${format(consumedTotal(member))}`,
-    body: `
-      <div class="details-list">
-        <div class="details-row is-head"><div>积分类型</div><div>已消耗</div><div>剩余</div><div>状态</div></div>
-        ${creditTypes.map((type) => `<div class="details-row"><div>${state.pools[type].label}</div><div>${format(member.consumed[type])}</div><div>${format(member.credits[type])}</div><div>正常</div></div>`).join("")}
-      </div>
-      <div class="rule-note">主表保留“已消耗”汇总，点击后查看分类明细，既便于管理员核对积分去向，也避免主表信息过载。</div>
-    `,
-    confirmText: "关闭",
-    readOnly: true,
   });
 }
 
@@ -672,6 +700,12 @@ async function copyText(value, successMessage) {
 }
 
 document.addEventListener("click", (event) => {
+  const simulationButton = event.target.closest("[data-simulation-mode]");
+  if (simulationButton) {
+    applySimulationMode(simulationButton.dataset.simulationMode);
+    return;
+  }
+
   const tab = event.target.closest("[data-tab]");
   if (tab) {
     switchTab(tab.dataset.tab);
@@ -717,12 +751,6 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  const consumedButton = event.target.closest("[data-consumed-details]");
-  if (consumedButton) {
-    openConsumedDetails(consumedButton.dataset.consumedDetails);
-    return;
-  }
-
   const approveButton = event.target.closest("[data-approve-invite]");
   if (approveButton) {
     approveInvite(approveButton.dataset.approveInvite);
@@ -757,7 +785,7 @@ document.addEventListener("click", (event) => {
   else if (action === "allocate-first") {
     switchTab("credits");
     beginCreditEdit(state.members[0].id);
-  } else if (action === "points-details" || action === "details") openPointsDetails();
+  } else if (action === "details") openPointsDetails();
   else if (action === "buy") openBuyModal();
   else if (action === "renew") showToast("续费流程已唤起（Demo）");
   else if (action === "seats") showToast("席位购买流程已唤起（Demo）");
