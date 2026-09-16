@@ -72,7 +72,10 @@ function cloneSimulationPreset(mode) {
 const initialSimulation = cloneSimulationPreset("all");
 
 const state = {
+  activeView: "team",
   activeTab: "members",
+  detailAnalysisTab: "model",
+  detailLedgerTab: "acquired",
   simulationMode: "all",
   pools: initialSimulation.pools,
   perSeat: { general: 800, sd25: 400, sd20: 240 },
@@ -80,6 +83,8 @@ const state = {
   members: initialSimulation.members,
   pendingInvites: [],
   transactions: [],
+  rechargeCredits: 0,
+  giftCredits: 0,
   editingMemberId: null,
   draftCredits: null,
   shortage: null,
@@ -303,6 +308,112 @@ function renderInvites() {
   `;
 }
 
+function teamConsumedTotal() {
+  return state.members.reduce((sum, member) => sum + consumedTotal(member), 0);
+}
+
+function detailRankingData() {
+  const total = teamConsumedTotal();
+  if (state.detailAnalysisTab === "project") {
+    return [
+      { name: "团队内容项目", value: total },
+      { name: "未归属项目", value: 0 },
+    ];
+  }
+  return [
+    { name: "小云雀 AnyCook · 3K", value: total },
+    { name: "Seedream 4.0 美感版 · 2K", value: 0 },
+  ];
+}
+
+function renderDetailRanking() {
+  const title = state.detailAnalysisTab === "model" ? "模型消耗排行" : "项目消耗排行";
+  const ranking = detailRankingData();
+  const max = Math.max(...ranking.map((item) => item.value), 0);
+  $("#detailRankingTitle").textContent = title;
+  $("#detailRankingList").innerHTML = ranking.map((item, index) => {
+    const width = max > 0 ? Math.round((item.value / max) * 100) : 0;
+    return `
+      <div class="detail-ranking-row">
+        <span class="detail-ranking-index">${index + 1}</span>
+        <span class="detail-ranking-name">${escapeHTML(item.name)}</span>
+        <span class="detail-ranking-bar" aria-label="${escapeHTML(item.name)}消耗${format(item.value)}积分"><i style="width:${width}%"></i></span>
+        <span class="detail-ranking-value">${format(item.value)}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderDetailLedger() {
+  const acquired = state.detailLedgerTab === "acquired";
+  $("#detailLedgerHead").innerHTML = acquired
+    ? "<div>获取时间</div><div>获取来源</div><div>成员名称</div><div>获取积分</div>"
+    : "<div>消耗时间</div><div>消耗来源</div><div>成员名称</div><div>消耗积分</div>";
+
+  if (acquired) {
+    const purchaseRows = state.transactions
+      .filter((item) => item.action === "购买入账")
+      .map((item) => `
+        <div class="detail-ledger-table detail-ledger-row">
+          <div>${item.time.replaceAll("-", "/")}</div>
+          <div>购买充值积分 · ${escapeHTML(state.pools[item.type].label)}</div>
+          <div>团队</div>
+          <div>+${format(item.amount)}</div>
+        </div>
+      `).join("");
+    $("#detailLedgerRows").innerHTML = `${purchaseRows}
+      <div class="detail-ledger-table detail-ledger-row">
+        <div>2026/09/08 21:14</div>
+        <div>团队会员积分</div>
+        <div>团队</div>
+        <div>+23,100</div>
+      </div>
+    `;
+    return;
+  }
+
+  const consumedRows = state.members.flatMap((member) => creditTypes
+    .filter((type) => member.consumed[type] > 0)
+    .map((type) => `
+      <div class="detail-ledger-table detail-ledger-row">
+        <div>${member.joined.replaceAll("-", "/")}</div>
+        <div>${escapeHTML(state.pools[type].label)}消耗</div>
+        <div>${escapeHTML(member.name)}</div>
+        <div>-${format(member.consumed[type])}</div>
+      </div>
+    `));
+  $("#detailLedgerRows").innerHTML = consumedRows.join("") || '<div class="detail-ledger-empty">暂无消耗记录</div>';
+}
+
+function renderPointsDetail() {
+  if (!$("#pointsDetailView")) return;
+  const available = availableTotal();
+  const subscription = Math.max(0, available - state.rechargeCredits - state.giftCredits);
+  const consumed = teamConsumedTotal();
+  const consumedCount = state.members.reduce((count, member) => count + creditTypes.filter((type) => member.consumed[type] > 0).length, 0);
+
+  $("#detailAvailableTotal").textContent = format(available);
+  $("#detailSubscriptionTotal").textContent = format(subscription);
+  $("#detailRechargeTotal").textContent = format(state.rechargeCredits);
+  $("#detailGiftTotal").textContent = format(state.giftCredits);
+  $("#detailConsumedTotal").textContent = format(consumed);
+  $("#detailConsumedCount").textContent = format(consumedCount);
+
+  $$('[data-detail-analysis-tab]').forEach((button) => {
+    const active = button.dataset.detailAnalysisTab === state.detailAnalysisTab;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  $$('[data-detail-ledger-tab]').forEach((button) => {
+    const active = button.dataset.detailLedgerTab === state.detailLedgerTab;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+
+  renderDetailRanking();
+  renderDetailLedger();
+}
+
 function renderAll() {
   renderSimulationSwitch();
   renderMemberRows();
@@ -311,6 +422,7 @@ function renderAll() {
   renderShortageBanner();
   renderSummary();
   renderInvites();
+  renderPointsDetail();
 }
 
 function emptyRows(message) {
@@ -331,6 +443,48 @@ function switchTab(tabName) {
   });
 }
 
+function setView(view, { updateHistory = true, intent = "details" } = {}) {
+  const showingDetail = view === "points-detail";
+  state.activeView = showingDetail ? "points-detail" : "team";
+  $("#teamManagementView").hidden = showingDetail;
+  $("#pointsDetailView").hidden = !showingDetail;
+  document.body.classList.toggle("is-points-detail", showingDetail);
+  document.title = showingDetail ? "积分明细 · 团队管理" : "团队管理 · 交互 Demo";
+
+  if (updateHistory) {
+    const target = showingDetail ? "#points-details" : `${window.location.pathname}${window.location.search}`;
+    if (showingDetail ? window.location.hash !== "#points-details" : Boolean(window.location.hash)) {
+      window.history.pushState({ view: state.activeView }, "", target);
+    }
+  }
+
+  window.scrollTo({ top: 0, behavior: "auto" });
+  if (!showingDetail) return;
+  renderPointsDetail();
+
+  const purchaseCard = $("#detailPurchaseCard");
+  purchaseCard.classList.toggle("is-highlighted", intent === "purchase");
+  if (intent === "purchase") {
+    window.setTimeout(() => $("#detailBuyButton")?.focus(), 80);
+    window.setTimeout(() => purchaseCard.classList.remove("is-highlighted"), 1600);
+  }
+}
+
+function showPointsDetailPage(intent = "details", updateHistory = true) {
+  if (!$("#modalBackdrop").hidden) closeModal();
+  setView("points-detail", { updateHistory, intent });
+}
+
+function showTeamManagementPage(updateHistory = true) {
+  if (!$("#modalBackdrop").hidden) closeModal();
+  setView("team", { updateHistory });
+}
+
+function syncViewFromLocation() {
+  if (window.location.hash === "#points-details") showPointsDetailPage("details", false);
+  else showTeamManagementPage(false);
+}
+
 function applySimulationMode(mode) {
   if (!simulationPresets[mode] || mode === state.simulationMode) return;
   const preset = cloneSimulationPreset(mode);
@@ -341,6 +495,8 @@ function applySimulationMode(mode) {
   state.members = preset.members;
   state.pendingInvites = [];
   state.transactions = [];
+  state.rechargeCredits = 0;
+  state.giftCredits = 0;
   state.editingMemberId = null;
   state.draftCredits = null;
   state.shortage = null;
@@ -487,22 +643,6 @@ function openRenameModal() {
   });
 }
 
-function openPointsDetails() {
-  openModal({
-    type: "read-only",
-    title: "积分明细",
-    subtitle: "最近的分配、回收与自动发放记录",
-    body: `
-      <div class="details-list">
-        <div class="details-row is-head"><div>时间 / 成员</div><div>类型</div><div>数量</div><div>动作</div></div>
-        ${state.transactions.slice(0, 8).map((item) => `<div class="details-row"><div>${item.time}<br>${escapeHTML(item.member)}</div><div>${state.pools[item.type].label}</div><div>${format(item.amount)}</div><div>${item.action}</div></div>`).join("") || '<div class="details-row"><div>暂无记录</div></div>'}
-      </div>
-    `,
-    confirmText: "关闭",
-    readOnly: true,
-  });
-}
-
 function openBuyModal() {
   openModal({
     type: "buy",
@@ -643,6 +783,7 @@ function handleModalSubmit(event) {
     }
     state.pools[type].total += amount;
     state.pools[type].available += amount;
+    state.rechargeCredits += amount;
     recordTransaction("团队积分池", type, amount, "购买入账");
     recalculateShortage();
     renderAll();
@@ -703,6 +844,20 @@ document.addEventListener("click", (event) => {
   const simulationButton = event.target.closest("[data-simulation-mode]");
   if (simulationButton) {
     applySimulationMode(simulationButton.dataset.simulationMode);
+    return;
+  }
+
+  const detailAnalysisTab = event.target.closest("[data-detail-analysis-tab]");
+  if (detailAnalysisTab) {
+    state.detailAnalysisTab = detailAnalysisTab.dataset.detailAnalysisTab;
+    renderPointsDetail();
+    return;
+  }
+
+  const detailLedgerTab = event.target.closest("[data-detail-ledger-tab]");
+  if (detailLedgerTab) {
+    state.detailLedgerTab = detailLedgerTab.dataset.detailLedgerTab;
+    renderPointsDetail();
     return;
   }
 
@@ -782,8 +937,10 @@ document.addEventListener("click", (event) => {
 
   if (action === "invite") openInviteModal();
   else if (action === "rename") openRenameModal();
-  else if (action === "details") openPointsDetails();
-  else if (action === "buy") openBuyModal();
+  else if (action === "details") showPointsDetailPage("details");
+  else if (action === "buy") showPointsDetailPage("purchase");
+  else if (action === "buy-modal") openBuyModal();
+  else if (action === "back-team") showTeamManagementPage();
   else if (action === "renew") showToast("续费流程已唤起（Demo）");
   else if (action === "seats") showToast("席位购买流程已唤起（Demo）");
   else if (action === "orders") showToast("订单管理已打开（Demo）");
@@ -805,6 +962,7 @@ $("#modalBody").addEventListener("change", (event) => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !$("#modalBackdrop").hidden) closeModal();
+  else if (event.key === "Escape" && state.activeView === "points-detail") showTeamManagementPage();
   if (event.key === "Enter" && event.target.matches("[data-draft-input]")) {
     event.preventDefault();
     confirmCreditEdit();
@@ -818,5 +976,8 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+window.addEventListener("popstate", syncViewFromLocation);
+
 renderAll();
 switchTab("members");
+syncViewFromLocation();

@@ -8,7 +8,7 @@ const [source, css, script] = await Promise.all([
 ]);
 const styleReference = /<link\b[^>]*href="\.\/styles\.css(?:\?[^\"]*)?"[^>]*>/g;
 const scriptReference = /<script\s+src="\.\/app\.js(?:\?[^\"]*)?"\s*><\/script>/g;
-const svgAssetReference = /src="\.\/(assets\/sidebar\/[^\"]+\.svg)"/g;
+const svgAssetReference = /src="\.\/(assets\/[^\"]+\.svg)"/g;
 if ([...source.matchAll(styleReference)].length !== 1 || [...source.matchAll(scriptReference)].length !== 1) {
   throw new Error('Expected one local stylesheet and one local application script.');
 }

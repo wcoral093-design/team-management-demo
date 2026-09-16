@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="团队管理与积分管理交互 Demo" />
     <title>团队管理 · 交互 Demo</title>
-    <link rel="stylesheet" href="./styles.css?v=20260916-8" />
+    <link rel="stylesheet" href="./styles.css?v=20260916-9" />
   </head>
   <body>
     <aside class="sidebar" aria-label="主导航">
@@ -56,7 +56,7 @@
       </button>
     </header>
 
-    <main class="page-shell">
+    <main class="page-shell" id="teamManagementView">
       <section class="team-heading" aria-labelledby="teamTitle">
         <div class="team-identity">
           <span class="team-avatar" aria-hidden="true">T</span>
@@ -171,6 +171,121 @@
       </section>
     </main>
 
+    <main class="points-detail-page" id="pointsDetailView" hidden>
+      <div class="points-detail-content">
+        <header class="points-detail-header">
+          <div class="points-detail-title-line">
+            <h1>积分明细</h1>
+            <button type="button" class="detail-scope-badge" data-action="back-team" title="返回团队管理">团队空间</button>
+          </div>
+          <p>查看积分余额、收支明细与消耗分析</p>
+        </header>
+
+        <section class="detail-section detail-balance-section" id="detailBalanceSection" aria-labelledby="detailBalanceTitle">
+          <h2 id="detailBalanceTitle">余额明细</h2>
+          <div class="detail-total-balance">
+            <span>团队内可用积分</span>
+            <strong id="detailAvailableTotal">21,442</strong>
+          </div>
+          <div class="detail-balance-grid">
+            <article class="detail-balance-card">
+              <h3>订阅积分</h3>
+              <div class="detail-balance-row">
+                <strong id="detailSubscriptionTotal">21,442</strong>
+                <button type="button" class="detail-text-button" data-action="renew">升级会员</button>
+              </div>
+            </article>
+            <article class="detail-balance-card detail-purchase-card" id="detailPurchaseCard">
+              <h3>充值积分</h3>
+              <div class="detail-balance-row">
+                <strong id="detailRechargeTotal">0</strong>
+                <button type="button" class="detail-text-button" id="detailBuyButton" data-action="buy-modal">购买积分</button>
+              </div>
+            </article>
+            <article class="detail-balance-card">
+              <h3>赠送及免费积分</h3>
+              <div class="detail-balance-row">
+                <strong id="detailGiftTotal">0</strong>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="detail-section detail-analysis-section" aria-labelledby="detailAnalysisTitle">
+          <h2 id="detailAnalysisTitle">积分消耗分析</h2>
+          <div class="detail-analysis-card">
+            <div class="detail-filter-grid" aria-label="积分消耗筛选条件">
+              <label class="detail-filter-field">
+                <span>日期范围</span>
+                <button type="button" class="detail-filter-control detail-date-control">
+                  <img src="./assets/detail/calendar.svg" alt="" />
+                  <span>2026/08/16 — 2026/09/16</span>
+                </button>
+              </label>
+              <label class="detail-filter-field">
+                <span>模型</span>
+                <button type="button" class="detail-filter-control" aria-haspopup="listbox">
+                  <span>全部模型</span>
+                  <img src="./assets/detail/chevron.svg" alt="" />
+                </button>
+              </label>
+              <label class="detail-filter-field">
+                <span>项目</span>
+                <button type="button" class="detail-filter-control" aria-haspopup="listbox">
+                  <span>全部项目</span>
+                  <img src="./assets/detail/chevron.svg" alt="" />
+                </button>
+              </label>
+              <label class="detail-filter-field">
+                <span>成员</span>
+                <button type="button" class="detail-filter-control detail-member-control" aria-haspopup="listbox">
+                  <span>全部成员</span>
+                  <img src="./assets/detail/member.svg" alt="" />
+                </button>
+              </label>
+              <div class="detail-filter-actions">
+                <button type="button" disabled>重置筛选</button>
+                <button type="button" disabled>应用筛选</button>
+              </div>
+            </div>
+
+            <div class="detail-pill-tabs" role="tablist" aria-label="消耗分析维度">
+              <button type="button" class="is-active" role="tab" aria-selected="true" data-detail-analysis-tab="model">模型</button>
+              <button type="button" role="tab" aria-selected="false" data-detail-analysis-tab="project">项目</button>
+            </div>
+
+            <div class="detail-analysis-panel">
+              <article class="detail-metric-card">
+                <div>
+                  <span>总消耗积分</span>
+                  <strong id="detailConsumedTotal">0</strong>
+                </div>
+                <div class="detail-metric-footer"><span>消耗记录数</span><span id="detailConsumedCount">0</span></div>
+              </article>
+              <article class="detail-ranking-card">
+                <h3 id="detailRankingTitle">模型消耗排行</h3>
+                <div class="detail-ranking-list" id="detailRankingList"></div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="detail-section detail-ledger-section" aria-labelledby="detailLedgerTitle">
+          <h2 id="detailLedgerTitle">积分明细</h2>
+          <div class="detail-pill-tabs" role="tablist" aria-label="积分明细类型">
+            <button type="button" class="is-active" role="tab" aria-selected="true" data-detail-ledger-tab="acquired">已获取</button>
+            <button type="button" role="tab" aria-selected="false" data-detail-ledger-tab="consumed">已消耗</button>
+          </div>
+          <div class="detail-ledger-card">
+            <div class="detail-ledger-table detail-ledger-head" id="detailLedgerHead">
+              <div>获取时间</div><div>获取来源</div><div>成员名称</div><div>获取积分</div>
+            </div>
+            <div id="detailLedgerRows"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
     <button class="help-button" aria-label="帮助" data-action="help">?</button>
 
     <div class="modal-backdrop" id="modalBackdrop" hidden>
@@ -194,6 +309,6 @@
 
     <div class="toast-region" aria-live="polite" aria-atomic="true" id="toastRegion"></div>
 
-    <script src="./app.js?v=20260916-7"></script>
+    <script src="./app.js?v=20260916-8"></script>
   </body>
 </html>

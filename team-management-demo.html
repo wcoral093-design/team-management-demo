@@ -461,6 +461,7 @@ select:focus-visible {
 }
 
 .summary-card {
+  position: relative;
   min-width: 0;
   height: 128px;
   padding: 22px 24px;
@@ -562,6 +563,27 @@ select:focus-visible {
 
 .credits-card .link-button + .link-button {
   border-left: 1px solid #ededee;
+}
+
+.membership-row > .link-button,
+.seats-card .summary-topline > .link-button {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  display: inline-flex;
+  height: 18px;
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.credits-card .card-actions {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  height: 18px;
+  align-items: center;
+  margin-top: 0;
 }
 
 .allocation-stats {
@@ -1107,6 +1129,492 @@ select:focus-visible {
   line-height: 1.6;
 }
 
+body.is-points-detail {
+  background: #f2f2f2;
+}
+
+body.is-points-detail .topbar {
+  height: 68px;
+  background: rgba(236, 236, 236, 0.92);
+}
+
+body.is-points-detail .simulation-switch {
+  display: none;
+}
+
+.points-detail-page {
+  min-height: 100vh;
+  margin-left: 72px;
+  padding: 100px 32px 64px;
+  background: #f2f2f2;
+}
+
+.points-detail-content {
+  display: flex;
+  width: 100%;
+  max-width: 1440px;
+  flex-direction: column;
+  gap: 32px;
+  margin: 0 auto;
+}
+
+.points-detail-header {
+  display: flex;
+  min-height: 64px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.points-detail-title-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.points-detail-title-line h1 {
+  margin: 0;
+  font-family: "Times New Roman", "PingFang SC", serif;
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 35px;
+}
+
+.detail-scope-badge {
+  height: 20px;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: 24px;
+  color: var(--text);
+  background: #e8e9eb;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  cursor: pointer;
+}
+
+.detail-scope-badge:hover {
+  background: #dedfe2;
+}
+
+.points-detail-header p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 14px;
+  line-height: 21px;
+  letter-spacing: -0.15px;
+}
+
+.detail-section {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.detail-section > h2 {
+  width: 100%;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.31px;
+}
+
+.detail-total-balance {
+  display: flex;
+  min-height: 79px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.detail-total-balance > span {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.detail-total-balance > strong {
+  font-family: "Times New Roman", "PingFang SC", serif;
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 51px;
+  letter-spacing: -1px;
+}
+
+.detail-balance-grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.detail-balance-card {
+  display: flex;
+  height: 109px;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  overflow: hidden;
+  border-radius: 32px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.detail-balance-card.is-highlighted {
+  box-shadow: 0 0 0 2px rgba(129, 73, 242, 0.26), 0 8px 24px rgba(129, 73, 242, 0.08);
+  transform: translateY(-1px);
+}
+
+.detail-balance-card h3,
+.detail-ranking-card h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 21px;
+  letter-spacing: -0.15px;
+}
+
+.detail-balance-row {
+  display: flex;
+  height: 32px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.detail-balance-row strong {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.31px;
+}
+
+.detail-text-button {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 32px;
+  color: var(--text);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.detail-text-button:hover {
+  color: var(--brand-dark);
+  background: rgba(72, 72, 73, 0.04);
+}
+
+.detail-analysis-card {
+  width: 100%;
+  min-height: 308px;
+  padding: 24px;
+  border-radius: 32px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.detail-filter-grid {
+  display: grid;
+  min-height: 62px;
+  grid-template-columns: 199.5px minmax(260px, 2.5fr) minmax(220px, 2fr) 176px 172px;
+  align-items: end;
+  gap: 12px;
+}
+
+.detail-filter-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-filter-field > span {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 19px;
+  letter-spacing: -0.08px;
+}
+
+.detail-filter-control,
+.detail-filter-actions button {
+  display: flex;
+  height: 36px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 0 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 32px;
+  color: var(--text);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.detail-filter-control {
+  width: 100%;
+  cursor: pointer;
+}
+
+.detail-filter-control:hover {
+  border-color: rgba(0, 0, 0, 0.16);
+  background: rgba(72, 72, 73, 0.02);
+}
+
+.detail-filter-control img {
+  display: block;
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.detail-filter-control > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-date-control {
+  justify-content: center;
+  gap: 4px;
+}
+
+.detail-member-control {
+  padding: 0 12px;
+  border-color: transparent;
+  background: rgba(72, 72, 73, 0.04);
+  font-size: 13px;
+}
+
+.detail-member-control img {
+  width: 16px;
+  height: 16px;
+}
+
+.detail-filter-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.detail-filter-actions button {
+  justify-content: center;
+  min-width: 82px;
+  padding: 0 16px;
+  border-color: transparent;
+  color: rgba(0, 0, 0, 0.2);
+  background: rgba(72, 72, 73, 0.04);
+}
+
+.detail-filter-actions button:disabled {
+  cursor: default;
+}
+
+.detail-pill-tabs {
+  display: flex;
+  height: 32px;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-analysis-card > .detail-pill-tabs {
+  margin-top: 16px;
+}
+
+.detail-pill-tabs button {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  padding: 6px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  color: rgba(0, 0, 0, 0.6);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 14px;
+  cursor: pointer;
+}
+
+.detail-pill-tabs button.is-active {
+  border-color: transparent;
+  color: #8149f2;
+  background: #ccb2ff;
+}
+
+.detail-analysis-panel {
+  display: grid;
+  min-height: 134px;
+  grid-template-columns: 1fr 2fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.detail-metric-card,
+.detail-ranking-card {
+  padding: 20px;
+  border-radius: 24px;
+  background: rgba(72, 72, 73, 0.04);
+}
+
+.detail-metric-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.detail-metric-card > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-metric-card span {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.detail-metric-card strong {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.detail-metric-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.detail-ranking-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-ranking-row {
+  display: grid;
+  grid-template-columns: 32px minmax(160px, 228px) minmax(120px, 1fr) 56px;
+  align-items: center;
+  gap: 4px;
+  min-height: 21px;
+  padding: 2px 8px;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 13px;
+  line-height: 15px;
+}
+
+.detail-ranking-index {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.detail-ranking-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-ranking-bar {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #f2f2f2;
+}
+
+.detail-ranking-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #aa80ff;
+}
+
+.detail-ranking-value {
+  text-align: right;
+}
+
+.detail-ledger-section {
+  min-height: 616px;
+}
+
+.detail-ledger-card {
+  width: 100%;
+  min-height: 528px;
+  padding: 24px;
+  overflow: hidden;
+  border-radius: 32px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.detail-ledger-table {
+  display: grid;
+  grid-template-columns: 160px minmax(280px, 1fr) 144px 96px;
+  align-items: center;
+  column-gap: 2px;
+}
+
+.detail-ledger-head {
+  height: 48px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 19px;
+}
+
+.detail-ledger-head > div,
+.detail-ledger-row > div {
+  padding: 0 12px;
+}
+
+.detail-ledger-head > div:last-child,
+.detail-ledger-row > div:last-child {
+  text-align: right;
+}
+
+.detail-ledger-row {
+  min-height: 45px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.detail-ledger-row > div:first-child {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.detail-ledger-row > div:last-child {
+  color: #8149f2;
+}
+
+.detail-ledger-empty {
+  display: grid;
+  min-height: 180px;
+  place-items: center;
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 13px;
+}
+
 .empty-illustration {
   display: grid;
   width: 54px;
@@ -1286,8 +1794,20 @@ select:focus-visible {
 @media (max-width: 1260px) {
   .page-shell { padding-left: 26px; padding-right: 26px; }
   .summary-card { padding-left: 18px; padding-right: 18px; }
+  .membership-row > .link-button,
+  .seats-card .summary-topline > .link-button,
+  .credits-card .card-actions { right: 18px; }
   .legend-row { gap: 9px; }
   .data-table { column-gap: 16px; padding-left: 18px; padding-right: 18px; }
+}
+
+@media (max-width: 1500px) {
+  .detail-analysis-card { min-height: 360px; }
+  .detail-filter-grid {
+    grid-template-columns: 199.5px minmax(180px, 1fr) minmax(180px, 1fr) 160px;
+  }
+  .detail-filter-actions { grid-column: 1 / -1; }
+  .detail-ranking-row { grid-template-columns: 28px minmax(150px, 210px) minmax(100px, 1fr) 48px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1349,7 +1869,7 @@ select:focus-visible {
       </button>
     </header>
 
-    <main class="page-shell">
+    <main class="page-shell" id="teamManagementView">
       <section class="team-heading" aria-labelledby="teamTitle">
         <div class="team-identity">
           <span class="team-avatar" aria-hidden="true">T</span>
@@ -1464,6 +1984,121 @@ select:focus-visible {
       </section>
     </main>
 
+    <main class="points-detail-page" id="pointsDetailView" hidden>
+      <div class="points-detail-content">
+        <header class="points-detail-header">
+          <div class="points-detail-title-line">
+            <h1>积分明细</h1>
+            <button type="button" class="detail-scope-badge" data-action="back-team" title="返回团队管理">团队空间</button>
+          </div>
+          <p>查看积分余额、收支明细与消耗分析</p>
+        </header>
+
+        <section class="detail-section detail-balance-section" id="detailBalanceSection" aria-labelledby="detailBalanceTitle">
+          <h2 id="detailBalanceTitle">余额明细</h2>
+          <div class="detail-total-balance">
+            <span>团队内可用积分</span>
+            <strong id="detailAvailableTotal">21,442</strong>
+          </div>
+          <div class="detail-balance-grid">
+            <article class="detail-balance-card">
+              <h3>订阅积分</h3>
+              <div class="detail-balance-row">
+                <strong id="detailSubscriptionTotal">21,442</strong>
+                <button type="button" class="detail-text-button" data-action="renew">升级会员</button>
+              </div>
+            </article>
+            <article class="detail-balance-card detail-purchase-card" id="detailPurchaseCard">
+              <h3>充值积分</h3>
+              <div class="detail-balance-row">
+                <strong id="detailRechargeTotal">0</strong>
+                <button type="button" class="detail-text-button" id="detailBuyButton" data-action="buy-modal">购买积分</button>
+              </div>
+            </article>
+            <article class="detail-balance-card">
+              <h3>赠送及免费积分</h3>
+              <div class="detail-balance-row">
+                <strong id="detailGiftTotal">0</strong>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="detail-section detail-analysis-section" aria-labelledby="detailAnalysisTitle">
+          <h2 id="detailAnalysisTitle">积分消耗分析</h2>
+          <div class="detail-analysis-card">
+            <div class="detail-filter-grid" aria-label="积分消耗筛选条件">
+              <label class="detail-filter-field">
+                <span>日期范围</span>
+                <button type="button" class="detail-filter-control detail-date-control">
+                  <img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjExLjM3NSIgaGVpZ2h0PSIxMi41NDE3IiB2aWV3Qm94PSIwIDAgMTEuMzc1IDEyLjU0MTciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJNYXNrIGdyb3VwIj4KPG1hc2sgaWQ9Im1hc2swXzBfMTQiIHN0eWxlPSJtYXNrLXR5cGU6bHVtaW5hbmNlIiBtYXNrVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSIwIiB5PSIwIiB3aWR0aD0iMTIiIGhlaWdodD0iMTMiPgo8ZyBpZD0iR3JvdXAiPgo8cGF0aCBpZD0iVmVjdG9yIiBkPSJNOC4wMjA4MyAwLjQzNzVWMi43NzA4M00zLjM1NDE3IDAuNDM3NVYyLjc3MDgzIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjAuODc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggaWQ9IlZlY3Rvcl8yIiBkPSJNNi4yNzA4MyAxLjYwNDE3SDUuMTA0MTdDMi45MDQyOCAxLjYwNDE3IDEuODA0MzQgMS42MDQxNyAxLjEyMDkyIDIuMjg3NThDMC40Mzc1IDIuOTcxIDAuNDM3NSA0LjA3MDk0IDAuNDM3NSA2LjI3MDgzVjcuNDM3NUMwLjQzNzUgOS42MzczNyAwLjQzNzUgMTAuNzM3NCAxLjEyMDkyIDExLjQyMDdDMS44MDQzNCAxMi4xMDQyIDIuOTA0MjggMTIuMTA0MiA1LjEwNDE3IDEyLjEwNDJINi4yNzA4M0M4LjQ3MDcgMTIuMTA0MiA5LjU3MDY5IDEyLjEwNDIgMTAuMjU0MSAxMS40MjA3QzEwLjkzNzUgMTAuNzM3NCAxMC45Mzc1IDkuNjM3MzcgMTAuOTM3NSA3LjQzNzVWNi4yNzA4M0MxMC45Mzc1IDQuMDcwOTQgMTAuOTM3NSAyLjk3MSAxMC4yNTQxIDIuMjg3NThDOS41NzA2OSAxLjYwNDE3IDguNDcwNyAxLjYwNDE3IDYuMjcwODMgMS42MDQxN1oiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMC44NzUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBpZD0iVmVjdG9yXzMiIGQ9Ik0wLjQzNzUgNS4xMDQxN0gxMC45Mzc1IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjAuODc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggaWQ9IlZlY3Rvcl80IiBkPSJNNS43NjA4OCA3LjQzNzVINS42ODc5N001Ljc2MDg4IDkuNzcwODNINS42ODc5N00zLjEzNTQyIDcuNDM3NUgzLjA2MjVNMy4xMzU0MiA5Ljc3MDgzSDMuMDYyNU04LjM4NTQyIDcuNDM3NUg4LjMxMjVNNS44MzM4IDcuNDM3NUM1LjgzMzggNy41MTgwNiA1Ljc2ODUzIDcuNTgzMzMgNS42ODc5NyA3LjU4MzMzQzUuNjA3NDcgNy41ODMzMyA1LjU0MjEzIDcuNTE4MDYgNS41NDIxMyA3LjQzNzVDNS41NDIxMyA3LjM1Njk0IDUuNjA3NDcgNy4yOTE2NyA1LjY4Nzk3IDcuMjkxNjdDNS43Njg1MyA3LjI5MTY3IDUuODMzOCA3LjM1Njk0IDUuODMzOCA3LjQzNzVaTTUuODMzOCA5Ljc3MDgzQzUuODMzOCA5Ljg1MTM5IDUuNzY4NTMgOS45MTY2NyA1LjY4Nzk3IDkuOTE2NjdDNS42MDc0NyA5LjkxNjY3IDUuNTQyMTMgOS44NTEzOSA1LjU0MjEzIDkuNzcwODNDNS41NDIxMyA5LjY5MDI3IDUuNjA3NDcgOS42MjUgNS42ODc5NyA5LjYyNUM1Ljc2ODUzIDkuNjI1IDUuODMzOCA5LjY5MDI3IDUuODMzOCA5Ljc3MDgzWk0zLjIwODMzIDcuNDM3NUMzLjIwODMzIDcuNTE4MDYgMy4xNDMwNCA3LjU4MzMzIDMuMDYyNSA3LjU4MzMzQzIuOTgxOTYgNy41ODMzMyAyLjkxNjY3IDcuNTE4MDYgMi45MTY2NyA3LjQzNzVDMi45MTY2NyA3LjM1Njk0IDIuOTgxOTYgNy4yOTE2NyAzLjA2MjUgNy4yOTE2N0MzLjE0MzA0IDcuMjkxNjcgMy4yMDgzMyA3LjM1Njk0IDMuMjA4MzMgNy40Mzc1Wk0zLjIwODMzIDkuNzcwODNDMy4yMDgzMyA5Ljg1MTM5IDMuMTQzMDQgOS45MTY2NyAzLjA2MjUgOS45MTY2N0MyLjk4MTk2IDkuOTE2NjcgMi45MTY2NyA5Ljg1MTM5IDIuOTE2NjcgOS43NzA4M0MyLjkxNjY3IDkuNjkwMjcgMi45ODE5NiA5LjYyNSAzLjA2MjUgOS42MjVDMy4xNDMwNCA5LjYyNSAzLjIwODMzIDkuNjkwMjcgMy4yMDgzMyA5Ljc3MDgzWk04LjQ1ODMzIDcuNDM3NUM4LjQ1ODMzIDcuNTE4MDYgOC4zOTMwNiA3LjU4MzMzIDguMzEyNSA3LjU4MzMzQzguMjMxOTQgNy41ODMzMyA4LjE2NjY3IDcuNTE4MDYgOC4xNjY2NyA3LjQzNzVDOC4xNjY2NyA3LjM1Njk0IDguMjMxOTQgNy4yOTE2NyA4LjMxMjUgNy4yOTE2N0M4LjM5MzA2IDcuMjkxNjcgOC40NTgzMyA3LjM1Njk0IDguNDU4MzMgNy40Mzc1WiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIwLjg3NSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjwvZz4KPC9tYXNrPgo8ZyBtYXNrPSJ1cmwoI21hc2swXzBfMTQpIj4KPHBhdGggaWQ9IlZlY3Rvcl81IiBkPSJNLTEuMzEyNSAtMC43MjkxNjdIMTIuNjg3NVYxMy4yNzA4SC0xLjMxMjVWLTAuNzI5MTY3WiIgZmlsbD0iYmxhY2siLz4KPC9nPgo8L2c+Cjwvc3ZnPgo=" alt="" />
+                  <span>2026/08/16 — 2026/09/16</span>
+                </button>
+              </label>
+              <label class="detail-filter-field">
+                <span>模型</span>
+                <button type="button" class="detail-filter-control" aria-haspopup="listbox">
+                  <span>全部模型</span>
+                  <img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjcuODc1MDYiIGhlaWdodD0iNC4zNzUwMyIgdmlld0JveD0iMCAwIDcuODc1MDYgNC4zNzUwMyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgaWQ9Ik1hc2sgZ3JvdXAiPgo8bWFzayBpZD0ibWFzazBfMF8xMCIgc3R5bGU9Im1hc2stdHlwZTpsdW1pbmFuY2UiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHg9IjAiIHk9IjAiIHdpZHRoPSI4IiBoZWlnaHQ9IjUiPgo8ZyBpZD0iR3JvdXAiPgo8cGF0aCBpZD0iVmVjdG9yIiBkPSJNNy40Mzc1MyAwLjQzNzU1OEM3LjQzNzUzIDAuNDM3NTU4IDQuODU5ODQgMy45Mzc1MyAzLjkzNzUzIDMuOTM3NTNDMy4wMTUxNiAzLjkzNzUzIDAuNDM3NTI5IDAuNDM3NTI5IDAuNDM3NTI5IDAuNDM3NTI5IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjAuODc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9nPgo8L21hc2s+CjxnIG1hc2s9InVybCgjbWFzazBfMF8xMCkiPgo8cGF0aCBpZD0iVmVjdG9yXzIiIGQ9Ik0tMy4wNjI0NyAtNC44MTI0N0gxMC45Mzc1VjkuMTg3NTNILTMuMDYyNDdWLTQuODEyNDdaIiBmaWxsPSJibGFjayIvPgo8L2c+CjwvZz4KPC9zdmc+Cg==" alt="" />
+                </button>
+              </label>
+              <label class="detail-filter-field">
+                <span>项目</span>
+                <button type="button" class="detail-filter-control" aria-haspopup="listbox">
+                  <span>全部项目</span>
+                  <img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjcuODc1MDYiIGhlaWdodD0iNC4zNzUwMyIgdmlld0JveD0iMCAwIDcuODc1MDYgNC4zNzUwMyIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgaWQ9Ik1hc2sgZ3JvdXAiPgo8bWFzayBpZD0ibWFzazBfMF8xMCIgc3R5bGU9Im1hc2stdHlwZTpsdW1pbmFuY2UiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHg9IjAiIHk9IjAiIHdpZHRoPSI4IiBoZWlnaHQ9IjUiPgo8ZyBpZD0iR3JvdXAiPgo8cGF0aCBpZD0iVmVjdG9yIiBkPSJNNy40Mzc1MyAwLjQzNzU1OEM3LjQzNzUzIDAuNDM3NTU4IDQuODU5ODQgMy45Mzc1MyAzLjkzNzUzIDMuOTM3NTNDMy4wMTUxNiAzLjkzNzUzIDAuNDM3NTI5IDAuNDM3NTI5IDAuNDM3NTI5IDAuNDM3NTI5IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjAuODc1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9nPgo8L21hc2s+CjxnIG1hc2s9InVybCgjbWFzazBfMF8xMCkiPgo8cGF0aCBpZD0iVmVjdG9yXzIiIGQ9Ik0tMy4wNjI0NyAtNC44MTI0N0gxMC45Mzc1VjkuMTg3NTNILTMuMDYyNDdWLTQuODEyNDdaIiBmaWxsPSJibGFjayIvPgo8L2c+CjwvZz4KPC9zdmc+Cg==" alt="" />
+                </button>
+              </label>
+              <label class="detail-filter-field">
+                <span>成员</span>
+                <button type="button" class="detail-filter-control detail-member-control" aria-haspopup="listbox">
+                  <span>全部成员</span>
+                  <img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjgiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCA4IDEyIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8ZyBpZD0iTWFzayBncm91cCI+CjxtYXNrIGlkPSJtYXNrMF8wXzQiIHN0eWxlPSJtYXNrLXR5cGU6bHVtaW5hbmNlIiBtYXNrVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4PSIwIiB5PSIwIiB3aWR0aD0iOCIgaGVpZ2h0PSIxMiI+CjxnIGlkPSJHcm91cCI+CjxnIGlkPSJHcm91cF8yIj4KPHBhdGggaWQ9IlZlY3RvciIgZD0iTTAuNjY2NjY3IDRMNCAwLjY2NjY2N0w3LjMzMzMzIDQiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMS4zMzMzMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGlkPSJWZWN0b3JfMiIgZD0iTTAuNjY2NjY3IDhMNCAxMS4zMzMzTDcuMzMzMzMgOCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjMzMzMzIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9nPgo8L2c+CjwvbWFzaz4KPGcgbWFzaz0idXJsKCNtYXNrMF8wXzQpIj4KPHBhdGggaWQ9IlZlY3Rvcl8zIiBkPSJNLTQgLTJIMTJWMTRILTRWLTJaIiBmaWxsPSJibGFjayIgZmlsbC1vcGFjaXR5PSIwLjQiLz4KPC9nPgo8L2c+Cjwvc3ZnPgo=" alt="" />
+                </button>
+              </label>
+              <div class="detail-filter-actions">
+                <button type="button" disabled>重置筛选</button>
+                <button type="button" disabled>应用筛选</button>
+              </div>
+            </div>
+
+            <div class="detail-pill-tabs" role="tablist" aria-label="消耗分析维度">
+              <button type="button" class="is-active" role="tab" aria-selected="true" data-detail-analysis-tab="model">模型</button>
+              <button type="button" role="tab" aria-selected="false" data-detail-analysis-tab="project">项目</button>
+            </div>
+
+            <div class="detail-analysis-panel">
+              <article class="detail-metric-card">
+                <div>
+                  <span>总消耗积分</span>
+                  <strong id="detailConsumedTotal">0</strong>
+                </div>
+                <div class="detail-metric-footer"><span>消耗记录数</span><span id="detailConsumedCount">0</span></div>
+              </article>
+              <article class="detail-ranking-card">
+                <h3 id="detailRankingTitle">模型消耗排行</h3>
+                <div class="detail-ranking-list" id="detailRankingList"></div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="detail-section detail-ledger-section" aria-labelledby="detailLedgerTitle">
+          <h2 id="detailLedgerTitle">积分明细</h2>
+          <div class="detail-pill-tabs" role="tablist" aria-label="积分明细类型">
+            <button type="button" class="is-active" role="tab" aria-selected="true" data-detail-ledger-tab="acquired">已获取</button>
+            <button type="button" role="tab" aria-selected="false" data-detail-ledger-tab="consumed">已消耗</button>
+          </div>
+          <div class="detail-ledger-card">
+            <div class="detail-ledger-table detail-ledger-head" id="detailLedgerHead">
+              <div>获取时间</div><div>获取来源</div><div>成员名称</div><div>获取积分</div>
+            </div>
+            <div id="detailLedgerRows"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
     <button class="help-button" aria-label="帮助" data-action="help">?</button>
 
     <div class="modal-backdrop" id="modalBackdrop" hidden>
@@ -1562,7 +2197,10 @@ function cloneSimulationPreset(mode) {
 const initialSimulation = cloneSimulationPreset("all");
 
 const state = {
+  activeView: "team",
   activeTab: "members",
+  detailAnalysisTab: "model",
+  detailLedgerTab: "acquired",
   simulationMode: "all",
   pools: initialSimulation.pools,
   perSeat: { general: 800, sd25: 400, sd20: 240 },
@@ -1570,6 +2208,8 @@ const state = {
   members: initialSimulation.members,
   pendingInvites: [],
   transactions: [],
+  rechargeCredits: 0,
+  giftCredits: 0,
   editingMemberId: null,
   draftCredits: null,
   shortage: null,
@@ -1793,6 +2433,112 @@ function renderInvites() {
   `;
 }
 
+function teamConsumedTotal() {
+  return state.members.reduce((sum, member) => sum + consumedTotal(member), 0);
+}
+
+function detailRankingData() {
+  const total = teamConsumedTotal();
+  if (state.detailAnalysisTab === "project") {
+    return [
+      { name: "团队内容项目", value: total },
+      { name: "未归属项目", value: 0 },
+    ];
+  }
+  return [
+    { name: "小云雀 AnyCook · 3K", value: total },
+    { name: "Seedream 4.0 美感版 · 2K", value: 0 },
+  ];
+}
+
+function renderDetailRanking() {
+  const title = state.detailAnalysisTab === "model" ? "模型消耗排行" : "项目消耗排行";
+  const ranking = detailRankingData();
+  const max = Math.max(...ranking.map((item) => item.value), 0);
+  $("#detailRankingTitle").textContent = title;
+  $("#detailRankingList").innerHTML = ranking.map((item, index) => {
+    const width = max > 0 ? Math.round((item.value / max) * 100) : 0;
+    return `
+      <div class="detail-ranking-row">
+        <span class="detail-ranking-index">${index + 1}</span>
+        <span class="detail-ranking-name">${escapeHTML(item.name)}</span>
+        <span class="detail-ranking-bar" aria-label="${escapeHTML(item.name)}消耗${format(item.value)}积分"><i style="width:${width}%"></i></span>
+        <span class="detail-ranking-value">${format(item.value)}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderDetailLedger() {
+  const acquired = state.detailLedgerTab === "acquired";
+  $("#detailLedgerHead").innerHTML = acquired
+    ? "<div>获取时间</div><div>获取来源</div><div>成员名称</div><div>获取积分</div>"
+    : "<div>消耗时间</div><div>消耗来源</div><div>成员名称</div><div>消耗积分</div>";
+
+  if (acquired) {
+    const purchaseRows = state.transactions
+      .filter((item) => item.action === "购买入账")
+      .map((item) => `
+        <div class="detail-ledger-table detail-ledger-row">
+          <div>${item.time.replaceAll("-", "/")}</div>
+          <div>购买充值积分 · ${escapeHTML(state.pools[item.type].label)}</div>
+          <div>团队</div>
+          <div>+${format(item.amount)}</div>
+        </div>
+      `).join("");
+    $("#detailLedgerRows").innerHTML = `${purchaseRows}
+      <div class="detail-ledger-table detail-ledger-row">
+        <div>2026/09/08 21:14</div>
+        <div>团队会员积分</div>
+        <div>团队</div>
+        <div>+23,100</div>
+      </div>
+    `;
+    return;
+  }
+
+  const consumedRows = state.members.flatMap((member) => creditTypes
+    .filter((type) => member.consumed[type] > 0)
+    .map((type) => `
+      <div class="detail-ledger-table detail-ledger-row">
+        <div>${member.joined.replaceAll("-", "/")}</div>
+        <div>${escapeHTML(state.pools[type].label)}消耗</div>
+        <div>${escapeHTML(member.name)}</div>
+        <div>-${format(member.consumed[type])}</div>
+      </div>
+    `));
+  $("#detailLedgerRows").innerHTML = consumedRows.join("") || '<div class="detail-ledger-empty">暂无消耗记录</div>';
+}
+
+function renderPointsDetail() {
+  if (!$("#pointsDetailView")) return;
+  const available = availableTotal();
+  const subscription = Math.max(0, available - state.rechargeCredits - state.giftCredits);
+  const consumed = teamConsumedTotal();
+  const consumedCount = state.members.reduce((count, member) => count + creditTypes.filter((type) => member.consumed[type] > 0).length, 0);
+
+  $("#detailAvailableTotal").textContent = format(available);
+  $("#detailSubscriptionTotal").textContent = format(subscription);
+  $("#detailRechargeTotal").textContent = format(state.rechargeCredits);
+  $("#detailGiftTotal").textContent = format(state.giftCredits);
+  $("#detailConsumedTotal").textContent = format(consumed);
+  $("#detailConsumedCount").textContent = format(consumedCount);
+
+  $$('[data-detail-analysis-tab]').forEach((button) => {
+    const active = button.dataset.detailAnalysisTab === state.detailAnalysisTab;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  $$('[data-detail-ledger-tab]').forEach((button) => {
+    const active = button.dataset.detailLedgerTab === state.detailLedgerTab;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+
+  renderDetailRanking();
+  renderDetailLedger();
+}
+
 function renderAll() {
   renderSimulationSwitch();
   renderMemberRows();
@@ -1801,6 +2547,7 @@ function renderAll() {
   renderShortageBanner();
   renderSummary();
   renderInvites();
+  renderPointsDetail();
 }
 
 function emptyRows(message) {
@@ -1821,6 +2568,48 @@ function switchTab(tabName) {
   });
 }
 
+function setView(view, { updateHistory = true, intent = "details" } = {}) {
+  const showingDetail = view === "points-detail";
+  state.activeView = showingDetail ? "points-detail" : "team";
+  $("#teamManagementView").hidden = showingDetail;
+  $("#pointsDetailView").hidden = !showingDetail;
+  document.body.classList.toggle("is-points-detail", showingDetail);
+  document.title = showingDetail ? "积分明细 · 团队管理" : "团队管理 · 交互 Demo";
+
+  if (updateHistory) {
+    const target = showingDetail ? "#points-details" : `${window.location.pathname}${window.location.search}`;
+    if (showingDetail ? window.location.hash !== "#points-details" : Boolean(window.location.hash)) {
+      window.history.pushState({ view: state.activeView }, "", target);
+    }
+  }
+
+  window.scrollTo({ top: 0, behavior: "auto" });
+  if (!showingDetail) return;
+  renderPointsDetail();
+
+  const purchaseCard = $("#detailPurchaseCard");
+  purchaseCard.classList.toggle("is-highlighted", intent === "purchase");
+  if (intent === "purchase") {
+    window.setTimeout(() => $("#detailBuyButton")?.focus(), 80);
+    window.setTimeout(() => purchaseCard.classList.remove("is-highlighted"), 1600);
+  }
+}
+
+function showPointsDetailPage(intent = "details", updateHistory = true) {
+  if (!$("#modalBackdrop").hidden) closeModal();
+  setView("points-detail", { updateHistory, intent });
+}
+
+function showTeamManagementPage(updateHistory = true) {
+  if (!$("#modalBackdrop").hidden) closeModal();
+  setView("team", { updateHistory });
+}
+
+function syncViewFromLocation() {
+  if (window.location.hash === "#points-details") showPointsDetailPage("details", false);
+  else showTeamManagementPage(false);
+}
+
 function applySimulationMode(mode) {
   if (!simulationPresets[mode] || mode === state.simulationMode) return;
   const preset = cloneSimulationPreset(mode);
@@ -1831,6 +2620,8 @@ function applySimulationMode(mode) {
   state.members = preset.members;
   state.pendingInvites = [];
   state.transactions = [];
+  state.rechargeCredits = 0;
+  state.giftCredits = 0;
   state.editingMemberId = null;
   state.draftCredits = null;
   state.shortage = null;
@@ -1977,22 +2768,6 @@ function openRenameModal() {
   });
 }
 
-function openPointsDetails() {
-  openModal({
-    type: "read-only",
-    title: "积分明细",
-    subtitle: "最近的分配、回收与自动发放记录",
-    body: `
-      <div class="details-list">
-        <div class="details-row is-head"><div>时间 / 成员</div><div>类型</div><div>数量</div><div>动作</div></div>
-        ${state.transactions.slice(0, 8).map((item) => `<div class="details-row"><div>${item.time}<br>${escapeHTML(item.member)}</div><div>${state.pools[item.type].label}</div><div>${format(item.amount)}</div><div>${item.action}</div></div>`).join("") || '<div class="details-row"><div>暂无记录</div></div>'}
-      </div>
-    `,
-    confirmText: "关闭",
-    readOnly: true,
-  });
-}
-
 function openBuyModal() {
   openModal({
     type: "buy",
@@ -2133,6 +2908,7 @@ function handleModalSubmit(event) {
     }
     state.pools[type].total += amount;
     state.pools[type].available += amount;
+    state.rechargeCredits += amount;
     recordTransaction("团队积分池", type, amount, "购买入账");
     recalculateShortage();
     renderAll();
@@ -2193,6 +2969,20 @@ document.addEventListener("click", (event) => {
   const simulationButton = event.target.closest("[data-simulation-mode]");
   if (simulationButton) {
     applySimulationMode(simulationButton.dataset.simulationMode);
+    return;
+  }
+
+  const detailAnalysisTab = event.target.closest("[data-detail-analysis-tab]");
+  if (detailAnalysisTab) {
+    state.detailAnalysisTab = detailAnalysisTab.dataset.detailAnalysisTab;
+    renderPointsDetail();
+    return;
+  }
+
+  const detailLedgerTab = event.target.closest("[data-detail-ledger-tab]");
+  if (detailLedgerTab) {
+    state.detailLedgerTab = detailLedgerTab.dataset.detailLedgerTab;
+    renderPointsDetail();
     return;
   }
 
@@ -2272,8 +3062,10 @@ document.addEventListener("click", (event) => {
 
   if (action === "invite") openInviteModal();
   else if (action === "rename") openRenameModal();
-  else if (action === "details") openPointsDetails();
-  else if (action === "buy") openBuyModal();
+  else if (action === "details") showPointsDetailPage("details");
+  else if (action === "buy") showPointsDetailPage("purchase");
+  else if (action === "buy-modal") openBuyModal();
+  else if (action === "back-team") showTeamManagementPage();
   else if (action === "renew") showToast("续费流程已唤起（Demo）");
   else if (action === "seats") showToast("席位购买流程已唤起（Demo）");
   else if (action === "orders") showToast("订单管理已打开（Demo）");
@@ -2295,6 +3087,7 @@ $("#modalBody").addEventListener("change", (event) => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !$("#modalBackdrop").hidden) closeModal();
+  else if (event.key === "Escape" && state.activeView === "points-detail") showTeamManagementPage();
   if (event.key === "Enter" && event.target.matches("[data-draft-input]")) {
     event.preventDefault();
     confirmCreditEdit();
@@ -2308,8 +3101,11 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+window.addEventListener("popstate", syncViewFromLocation);
+
 renderAll();
 switchTab("members");
+syncViewFromLocation();
 
 </script>
   </body>
