@@ -1950,10 +1950,10 @@ body.is-points-detail .simulation-switch {
 .credit-subtab.is-active { color: #000; border-bottom-color: #000; }
 .credit-subtab:hover { color: #000; }
 .credit-subtab:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; border-radius: 2px; }
-#pointsOverview { display: block; flex-shrink: 0; margin: 0; padding: 10px 16px; border-radius: 12px; box-shadow: none; }
-.unallocated-summary { display: flex; align-items: center; gap: 14px; }
+#pointsOverview { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin: 0 0 20px; padding: 20px 28px; border-radius: 16px; box-shadow: none; }
+.unallocated-summary { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; flex-shrink: 0; }
 .unallocated-summary > span { color: var(--text-secondary); font-size: 14px; }
-.unallocated-summary > strong { font-size: 22px; line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; }
+.unallocated-summary > strong { font-size: 28px; line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; }
 .points-table { min-width: 740px; grid-template-columns: minmax(220px, 1.6fr) minmax(110px, 1fr) minmax(100px, 1fr) minmax(160px, 1.2fr) 122px; }
 
 .append-editor label { display:flex; align-items:center; gap:10px; font-size:13px; }
@@ -1986,6 +1986,9 @@ body.is-points-detail .simulation-switch {
 .balance-stepper input::-webkit-inner-spin-button, .balance-stepper input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .balance-stepper:focus-within { outline: 2px solid #9254ff; outline-offset: 2px; }
 .balance-stepper input:focus { outline: none; }
+
+.allocation-guidance { margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.5; }
+@media (max-width: 700px) { #pointsOverview { align-items: flex-start; flex-direction: column; gap: 12px; padding: 20px; } }
 
 </style>
   </head>
@@ -2137,9 +2140,9 @@ body.is-points-detail .simulation-switch {
         <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
           <div class="credit-workspace-toolbar">
             <div class="credit-subtabs" id="creditTypeTabs" role="tablist" aria-label="积分类型"></div>
-            <div class="points-overview" id="pointsOverview" aria-live="polite"></div>
           </div>
           <section id="creditTypeContent" role="tabpanel" aria-labelledby="credit-tab-general">
+          <div class="points-overview" id="pointsOverview" aria-live="polite"></div>
           <div class="shortage-banner" id="shortageBanner" hidden></div>
           <div class="table-card points-table-card">
             <div class="data-table points-table table-head">
@@ -2469,7 +2472,7 @@ function renderPointCards() {
   const pool = state.pools[type];
   $("#creditTypeTabs").innerHTML = creditTypes.map((key) => `<button type="button" class="credit-subtab${key === type ? ' is-active' : ''}" id="credit-tab-${key}" role="tab" aria-selected="${key === type}" aria-controls="creditTypeContent" tabindex="${key === type ? 0 : -1}" data-credit-tab="${key}">${key === 'general' ? '通用积分' : key === 'sd25' ? 'SD 2.5' : 'SD 2.0'}</button>`).join('');
   $("#creditTypeContent").setAttribute("aria-labelledby", "credit-tab-" + type);
-  $("#pointsOverview").innerHTML = `<div class="unallocated-summary"><span>待分配总积分</span><strong>${format(pool.available)}</strong></div>`;
+  $("#pointsOverview").innerHTML = `<div class="unallocated-summary"><span>待分配总积分</span><strong>${format(pool.available)}</strong></div><p class="allocation-guidance">成员积分可灵活调配，支持追加或回收未使用积分。</p>`;
   $("#creditBalanceHeader").textContent = "剩余" + pool.label;
 }
 

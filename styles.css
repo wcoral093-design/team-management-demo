@@ -1942,10 +1942,10 @@ body.is-points-detail .simulation-switch {
 .credit-subtab.is-active { color: #000; border-bottom-color: #000; }
 .credit-subtab:hover { color: #000; }
 .credit-subtab:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; border-radius: 2px; }
-#pointsOverview { display: block; flex-shrink: 0; margin: 0; padding: 10px 16px; border-radius: 12px; box-shadow: none; }
-.unallocated-summary { display: flex; align-items: center; gap: 14px; }
+#pointsOverview { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin: 0 0 20px; padding: 20px 28px; border-radius: 16px; box-shadow: none; }
+.unallocated-summary { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; flex-shrink: 0; }
 .unallocated-summary > span { color: var(--text-secondary); font-size: 14px; }
-.unallocated-summary > strong { font-size: 22px; line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; }
+.unallocated-summary > strong { font-size: 28px; line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; }
 .points-table { min-width: 740px; grid-template-columns: minmax(220px, 1.6fr) minmax(110px, 1fr) minmax(100px, 1fr) minmax(160px, 1.2fr) 122px; }
 
 .append-editor label { display:flex; align-items:center; gap:10px; font-size:13px; }
@@ -1978,3 +1978,6 @@ body.is-points-detail .simulation-switch {
 .balance-stepper input::-webkit-inner-spin-button, .balance-stepper input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .balance-stepper:focus-within { outline: 2px solid #9254ff; outline-offset: 2px; }
 .balance-stepper input:focus { outline: none; }
+
+.allocation-guidance { margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.5; }
+@media (max-width: 700px) { #pointsOverview { align-items: flex-start; flex-direction: column; gap: 12px; padding: 20px; } }
