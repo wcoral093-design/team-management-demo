@@ -5,39 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="团队管理与积分管理交互 Demo" />
     <title>团队管理 · 交互 Demo</title>
-    <link rel="stylesheet" href="./styles.css?v=20260916-7" />
+    <link rel="stylesheet" href="./styles.css?v=20260916-8" />
   </head>
   <body>
     <aside class="sidebar" aria-label="主导航">
-      <button class="brand-mark" aria-label="首页">J</button>
-
       <nav class="side-nav" aria-label="业务导航">
         <button class="side-item" data-tooltip="灵感" aria-label="灵感">
-          <span class="side-icon sparkle-icon" aria-hidden="true">✦</span>
+          <span class="side-item-surface"><span class="side-icon-frame"><img class="side-icon" src="./assets/sidebar/sparkle.svg" alt="" /></span></span>
         </button>
         <button class="side-item" data-tooltip="生成" aria-label="生成">
-          <span class="side-icon play-icon" aria-hidden="true">▻</span>
+          <span class="side-item-surface"><span class="side-icon-frame"><img class="side-icon" src="./assets/sidebar/video.svg" alt="" /></span></span>
         </button>
         <button class="side-item" data-tooltip="任务" aria-label="任务">
-          <span class="side-icon timer-icon" aria-hidden="true">◷</span>
+          <span class="side-item-surface"><span class="side-icon-frame"><img class="side-icon" src="./assets/sidebar/tasks.svg" alt="" /></span></span>
         </button>
-        <span class="side-separator" aria-hidden="true"></span>
-        <button class="side-item" data-tooltip="资产" aria-label="资产">
-          <span class="side-icon folder-icon" aria-hidden="true">□</span>
-        </button>
-        <button class="side-item" data-tooltip="画布" aria-label="画布">
-          <span class="side-icon canvas-icon" aria-hidden="true">⌁</span>
-        </button>
-        <button class="side-item" data-tooltip="更多" aria-label="更多">
-          <span class="side-icon more-icon" aria-hidden="true">∞</span>
-        </button>
+        <div class="side-nav-secondary">
+          <button class="side-item" data-tooltip="资产" aria-label="资产">
+            <span class="side-item-surface"><span class="side-icon-frame"><img class="side-icon side-icon-folder" src="./assets/sidebar/folder.svg" alt="" /></span></span>
+          </button>
+          <button class="side-item" data-tooltip="画布" aria-label="画布">
+            <span class="side-item-surface"><span class="side-icon-frame"><img class="side-icon side-icon-canvas" src="./assets/sidebar/canvas.svg" alt="" /></span></span>
+          </button>
+          <button class="side-item" data-tooltip="更多" aria-label="更多">
+            <span class="side-item-surface"><span class="side-icon-frame"><img class="side-icon side-icon-more" src="./assets/sidebar/more.svg" alt="" /></span></span>
+          </button>
+        </div>
       </nav>
 
       <div class="side-bottom">
-        <button class="side-item" data-tooltip="通知" aria-label="通知">
-          <span class="side-icon bell-icon" aria-hidden="true">♧</span>
+        <button class="side-bottom-button" data-tooltip="通知" aria-label="通知">
+          <span class="side-icon-frame"><img class="side-icon side-icon-notifications" src="./assets/sidebar/notifications.svg" alt="" /></span>
         </button>
-        <button class="profile-dot" aria-label="个人中心">T</button>
+        <span class="side-bottom-divider" aria-hidden="true"></span>
+        <button class="profile-button" aria-label="个人中心"><span class="profile-dot">T</span></button>
       </div>
     </aside>
 

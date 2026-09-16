@@ -63,59 +63,59 @@ select:focus-visible {
   inset: 0 auto 0 0;
   z-index: 30;
   display: flex;
-  width: 66px;
+  width: 72px;
   flex-direction: column;
-  align-items: center;
-  border-right: 1px solid rgba(0, 0, 0, 0.025);
-  background: #fafafa;
-}
-
-.brand-mark {
-  width: 36px;
-  height: 36px;
-  margin-top: 16px;
-  border: 0;
-  border-radius: 10px;
-  color: white;
-  background: #09090b;
-  font-size: 18px;
-  font-weight: 800;
-  font-style: italic;
-  cursor: pointer;
-  transform: scaleX(0.55);
+  align-items: flex-start;
+  background: #ececec;
 }
 
 .side-nav {
   display: flex;
-  flex: 1;
+  width: 72px;
+  height: 340px;
+  flex: 0 0 340px;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding-top: 32px;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 32px 12px 16px;
 }
 
 .side-item {
   position: relative;
-  display: grid;
-  width: 42px;
-  height: 42px;
-  place-items: center;
+  display: flex;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  align-items: flex-start;
+  padding: 4px 0 4px 8px;
   border: 0;
-  border-radius: 11px;
-  color: #96979c;
   background: transparent;
   cursor: pointer;
-  transition: 160ms ease;
 }
 
-.side-item:hover {
-  color: #232328;
-  background: #eeeeef;
+.side-item-surface,
+.side-bottom-button,
+.profile-button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 140ms ease;
 }
 
-.side-item::after {
+.side-item:hover .side-item-surface,
+.side-bottom-button:hover,
+.profile-button:hover {
+  background: rgba(0, 0, 0, 0.045);
+}
+
+.side-item::after,
+.side-bottom-button::after {
   position: absolute;
-  left: calc(100% + 10px);
+  left: calc(100% + 20px);
   top: 50%;
   z-index: 2;
   padding: 6px 8px;
@@ -131,52 +131,102 @@ select:focus-visible {
   transition: 120ms ease;
 }
 
-.side-item:hover::after {
+.side-item:hover::after,
+.side-bottom-button:hover::after {
   opacity: 1;
   transform: translate(0, -50%);
 }
 
-.side-icon {
-  display: inline-grid;
+.side-icon-frame {
+  display: grid;
+  width: 20px;
+  height: 20px;
   place-items: center;
-  width: 21px;
-  height: 21px;
-  font-size: 22px;
-  font-weight: 400;
-  line-height: 1;
 }
 
-.side-separator {
-  width: 18px;
-  height: 1px;
-  margin: 2px 0;
-  background: #efeff0;
+.side-icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.side-icon-folder {
+  width: 16.169px;
+  height: 12.933px;
+}
+
+.side-icon-canvas {
+  width: 15px;
+  height: 15px;
+}
+
+.side-icon-more {
+  width: 19.981px;
+  height: 8.42px;
+}
+
+.side-icon-notifications {
+  width: 15.33px;
+  height: 16.667px;
+}
+
+.side-nav-secondary {
+  display: flex;
+  width: 48px;
+  height: 154px;
+  flex: 0 0 154px;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 22px;
 }
 
 .side-bottom {
   display: flex;
+  width: 72px;
+  min-height: 0;
+  flex: 1 1 auto;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding-bottom: 18px;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 0 16px 64px;
+}
+
+.side-bottom-button,
+.profile-button {
+  position: relative;
+  flex: 0 0 32px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.side-bottom-button::after {
+  left: calc(100% + 20px);
+}
+
+.side-bottom-divider {
+  width: 14px;
+  height: 1px;
+  flex: 0 0 1px;
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .profile-dot {
   display: grid;
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   place-items: center;
-  border: 0;
   border-radius: 50%;
-  color: #fff;
-  background: linear-gradient(145deg, #a978ff, #7954ed);
-  font-size: 12px;
-  cursor: pointer;
+  color: rgba(255, 255, 255, 0.95);
+  background: #aa80ff;
+  font-size: 11px;
+  line-height: 15.4px;
+  letter-spacing: 0.0645px;
 }
 
 .topbar {
   position: fixed;
-  inset: 0 0 auto 66px;
+  inset: 0 0 auto 72px;
   z-index: 20;
   display: flex;
   height: 64px;
@@ -269,7 +319,7 @@ select:focus-visible {
 .page-shell {
   max-width: 1840px;
   min-height: 100vh;
-  margin-left: 66px;
+  margin-left: 72px;
   padding: 84px 36px 64px;
 }
 

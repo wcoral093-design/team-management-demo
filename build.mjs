@@ -8,10 +8,17 @@ const [source, css, script] = await Promise.all([
 ]);
 const styleReference = /<link\b[^>]*href="\.\/styles\.css(?:\?[^\"]*)?"[^>]*>/g;
 const scriptReference = /<script\s+src="\.\/app\.js(?:\?[^\"]*)?"\s*><\/script>/g;
+const svgAssetReference = /src="\.\/(assets\/sidebar\/[^\"]+\.svg)"/g;
 if ([...source.matchAll(styleReference)].length !== 1 || [...source.matchAll(scriptReference)].length !== 1) {
   throw new Error('Expected one local stylesheet and one local application script.');
 }
+const svgPaths = [...new Set([...source.matchAll(svgAssetReference)].map((match) => match[1]))];
+const svgAssets = new Map(await Promise.all(svgPaths.map(async (path) => {
+  const contents = await readFile(new URL(path, root));
+  return [path, contents.toString('base64')];
+})));
 const html = source
+  .replace(svgAssetReference, (_match, path) => `src="data:image/svg+xml;base64,${svgAssets.get(path)}"`)
   .replace(styleReference, () => `<style>\n${css}\n</style>`)
   .replace(scriptReference, () => `<script>\n${script.replaceAll('</script', '<\\/script')}\n</script>`);
 await mkdir(new URL('out/', root), { recursive: true });
