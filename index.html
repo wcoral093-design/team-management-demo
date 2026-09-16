@@ -151,6 +151,8 @@
         </section>
 
         <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
+          <div class="credit-subtabs" id="creditTypeTabs" role="tablist" aria-label="积分类型"></div>
+          <section id="creditTypeContent" role="tabpanel" aria-labelledby="credit-tab-general">
           <div class="points-overview" id="pointsOverview"></div>
           <div class="shortage-banner" id="shortageBanner" hidden></div>
           <div class="table-card points-table-card">
@@ -158,14 +160,12 @@
               <div>用户</div>
               <div>团队角色</div>
               <div>已消耗</div>
-              <div>剩余总积分</div>
-              <div class="credit-header">通用积分</div>
-              <div class="credit-header">SD 2.5积分</div>
-              <div class="credit-header">SD 2.0积分</div>
+              <div id="creditBalanceHeader">剩余通用积分</div>
               <div>操作</div>
             </div>
             <div id="pointsRows"></div>
           </div>
+          </section>
         </section>
 
         <section class="tab-panel" id="panel-invites" role="tabpanel" aria-labelledby="tab-invites" hidden>

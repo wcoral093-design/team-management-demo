@@ -166,39 +166,22 @@ function renderMemberRows() {
 function renderPointCards() {
   const type = state.activeCreditType;
   const pool = state.pools[type];
-  const assigned = assignedForType(type);
-  const total = assigned + pool.available;
-  const assignedPercent = total ? assigned / total * 100 : 0;
-  const availablePercent = total ? pool.available / total * 100 : 0;
-  const percent = (value) => `${value.toFixed(1)}%`;
-  $("#pointsOverview").innerHTML = `
-    <div class="credit-subtabs" role="tablist" aria-label="积分类型">
-      ${creditTypes.map((key) => `<button type="button" class="credit-subtab${key === type ? ' is-active' : ''}" id="credit-tab-${key}" role="tab" aria-selected="${key === type}" aria-controls="credit-dashboard" tabindex="${key === type ? 0 : -1}" data-credit-tab="${key}">${key === 'general' ? '通用积分' : key === 'sd25' ? 'SD 2.5' : 'SD 2.0'}</button>`).join('')}
-    </div>
-    <section class="credit-dashboard" id="credit-dashboard" role="tabpanel" aria-labelledby="credit-tab-${type}" tabindex="0">
-      <div class="credit-chart-block">
-        <div class="credit-donut" style="--assigned-angle: ${assignedPercent * 3.6}deg;${total ? '' : 'background: var(--line);'}" role="img" aria-label="${pool.label}剩余 ${format(total)}，已分配 ${format(assigned)}，待分配 ${format(pool.available)}">
-          <div class="credit-donut-center"><span>剩余${pool.label}</span><strong>${format(total)}</strong></div>
-        </div>
-        <div class="credit-chart-legend"><span><i class="assigned-swatch"></i>已分配</span><span><i class="available-swatch"></i>待分配</span></div>
-      </div>
-      <div class="credit-dashboard-metrics">
-        <article class="credit-metric">
-          <div class="credit-metric-heading"><span><i class="assigned-swatch"></i>已分配</span><span class="credit-metric-share">占剩余积分 ${percent(assignedPercent)}</span></div>
-          <strong>${format(assigned)}</strong><p>已分配给成员的未使用积分</p>
-        </article>
-        <article class="credit-metric">
-          <div class="credit-metric-heading"><span><i class="available-swatch"></i>待分配</span><span class="credit-metric-share">占剩余积分 ${percent(availablePercent)}</span></div>
-          <strong>${format(pool.available)}</strong><p>${total ? '可继续分配给团队成员' : '当前暂无该类积分'}</p>
-        </article>
-      </div>
-    </section>`;
+  $("#creditTypeTabs").innerHTML = creditTypes.map((key) => `<button type="button" class="credit-subtab${key === type ? ' is-active' : ''}" id="credit-tab-${key}" role="tab" aria-selected="${key === type}" aria-controls="creditTypeContent" tabindex="${key === type ? 0 : -1}" data-credit-tab="${key}">${key === 'general' ? '通用积分' : key === 'sd25' ? 'SD 2.5' : 'SD 2.0'}</button>`).join('');
+  $("#creditTypeContent").setAttribute("aria-labelledby", "credit-tab-" + type);
+  $("#pointsOverview").innerHTML = `<div class="unallocated-summary"><span>待分配总积分</span><strong>${format(pool.available)}</strong></div>`;
+  $("#creditBalanceHeader").textContent = "剩余" + pool.label;
 }
 
 function selectCreditTab(type, focus = false) {
   if (!creditTypes.includes(type)) return;
+  if (type !== state.activeCreditType && state.editingMemberId !== null) {
+    showToast("请先确认或取消当前积分调整");
+    if (focus) $("#credit-tab-" + state.activeCreditType).focus();
+    return;
+  }
   state.activeCreditType = type;
   renderPointCards();
+  renderPointsRows();
   if (focus) $("#credit-tab-" + type).focus();
 }
 
@@ -241,16 +224,14 @@ function readonlyCreditMarkup(member, type, candidate) {
 }
 
 function renderPointsRows() {
+  const type = state.activeCreditType;
   $("#pointsRows").innerHTML = state.members.map((member) => {
     const editing = member.id === state.editingMemberId;
     const candidate = isRecoveryCandidate(member);
     const rowClasses = ["data-table", "points-table", "table-row"];
     if (editing) rowClasses.push("is-editing");
     if (candidate) rowClasses.push("is-recovery-candidate");
-    const creditCells = creditTypes.map((type) => editing
-      ? creditEditorMarkup(member, type)
-      : readonlyCreditMarkup(member, type, candidate)
-    ).join("");
+    const creditCells = editing ? creditEditorMarkup(member, type) : readonlyCreditMarkup(member, type, candidate);
 
     let action = `<button class="action-link" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ""}>积分调配</button>`;
     if (editing) {
@@ -263,8 +244,7 @@ function renderPointsRows() {
       <div class="${rowClasses.join(" ")}" data-member-id="${member.id}">
         <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span><span class="member-joined">${member.joined} 加入</span></span></div>
         ${staticRoleMarkup(member)}
-        <div>${format(consumedTotal(member))}</div>
-        ${pointMarkup(memberTotal(member))}
+        <div>${format(member.consumed[type])}</div>
         ${creditCells}
         <div class="points-operation">${action}</div>
       </div>

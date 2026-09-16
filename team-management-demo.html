@@ -1936,34 +1936,17 @@ body.is-points-detail .simulation-switch {
   .points-overview { overflow-x: auto; }
 }
 
-/* Per-type credit overview. */
-#pointsOverview { display: block; padding: 0; overflow: hidden; }
-.credit-subtabs { display: flex; gap: 28px; padding: 0 28px; border-bottom: 1px solid var(--line); }
-.credit-subtab { position: relative; border: 0; background: transparent; padding: 18px 2px 16px; color: var(--text-secondary); font: inherit; font-size: 14px; cursor: pointer; }
+/* Credit tabs control both the balance and member allocation list. */
+#creditTypeTabs { display: flex; gap: 28px; padding: 0 4px; margin-bottom: 20px; border-bottom: 1px solid var(--line); }
+.credit-subtab { position: relative; border: 0; background: transparent; padding: 14px 2px 16px; color: var(--text-secondary); font: inherit; font-size: 14px; cursor: pointer; }
 .credit-subtab.is-active { color: var(--text); font-weight: 600; }
 .credit-subtab.is-active::after { content: ''; position: absolute; height: 3px; bottom: -1px; left: 0; right: 0; background: #9254ff; border-radius: 3px; }
 .credit-subtab:focus-visible { outline: 2px solid #9254ff; outline-offset: -4px; border-radius: 4px; }
-.credit-dashboard { display: grid; grid-template-columns: minmax(270px, .85fr) minmax(0, 2fr); gap: 36px; padding: 26px 32px; align-items: center; }
-.credit-chart-block { display: flex; flex-direction: column; align-items: center; gap: 17px; }
-.credit-donut { width: 176px; height: 176px; flex-shrink: 0; border-radius: 50%; padding: 14px; background: conic-gradient(#9254ff 0deg var(--assigned-angle), #d9c8f5 var(--assigned-angle) 360deg); }
-.credit-donut-center { height: 100%; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
-.credit-donut-center span { color: var(--text-secondary); font-size: 12px; }
-.credit-donut-center strong { font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.credit-chart-legend { display: flex; gap: 24px; font-size: 13px; color: var(--text-secondary); }
-.credit-chart-legend span, .credit-metric-heading > span:first-child { display: inline-flex; align-items: center; gap: 8px; }
-.assigned-swatch, .available-swatch { display: inline-block; width: 8px; height: 12px; border-radius: 3px; background: #9254ff; }
-.available-swatch { background: #d9c8f5; }
-.credit-dashboard-metrics { display: grid; gap: 12px; }
-.credit-metric { position: relative; padding: 16px 20px; border-radius: 12px; background: #f7f7f9; }
-.credit-metric-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 14px; }
-.credit-metric-share { color: var(--text-secondary); font-size: 12px; }
-.credit-metric > strong { display: block; margin-top: 8px; font-size: 25px; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
-.credit-metric p { position: absolute; right: 20px; bottom: 18px; margin: 0; color: var(--text-secondary); font-size: 12px; }
-@media (max-width: 700px) {
-  .credit-dashboard { grid-template-columns: 1fr; gap: 24px; padding: 24px 16px; }
-  .credit-subtabs { gap: 24px; padding: 0 20px; }
-  .credit-metric p { position: static; margin-top: 8px; }
-}
+#pointsOverview { display: block; padding: 24px 28px; }
+.unallocated-summary { display: flex; flex-direction: column; gap: 8px; }
+.unallocated-summary > span { color: var(--text-secondary); font-size: 14px; }
+.unallocated-summary > strong { font-size: 30px; line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; }
+.points-table { min-width: 740px; grid-template-columns: minmax(220px, 1.6fr) minmax(110px, 1fr) minmax(100px, 1fr) minmax(160px, 1.2fr) 122px; }
 
 </style>
   </head>
@@ -2111,6 +2094,8 @@ body.is-points-detail .simulation-switch {
         </section>
 
         <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
+          <div class="credit-subtabs" id="creditTypeTabs" role="tablist" aria-label="积分类型"></div>
+          <section id="creditTypeContent" role="tabpanel" aria-labelledby="credit-tab-general">
           <div class="points-overview" id="pointsOverview"></div>
           <div class="shortage-banner" id="shortageBanner" hidden></div>
           <div class="table-card points-table-card">
@@ -2118,14 +2103,12 @@ body.is-points-detail .simulation-switch {
               <div>用户</div>
               <div>团队角色</div>
               <div>已消耗</div>
-              <div>剩余总积分</div>
-              <div class="credit-header">通用积分</div>
-              <div class="credit-header">SD 2.5积分</div>
-              <div class="credit-header">SD 2.0积分</div>
+              <div id="creditBalanceHeader">剩余通用积分</div>
               <div>操作</div>
             </div>
             <div id="pointsRows"></div>
           </div>
+          </section>
         </section>
 
         <section class="tab-panel" id="panel-invites" role="tabpanel" aria-labelledby="tab-invites" hidden>
@@ -2441,39 +2424,22 @@ function renderMemberRows() {
 function renderPointCards() {
   const type = state.activeCreditType;
   const pool = state.pools[type];
-  const assigned = assignedForType(type);
-  const total = assigned + pool.available;
-  const assignedPercent = total ? assigned / total * 100 : 0;
-  const availablePercent = total ? pool.available / total * 100 : 0;
-  const percent = (value) => `${value.toFixed(1)}%`;
-  $("#pointsOverview").innerHTML = `
-    <div class="credit-subtabs" role="tablist" aria-label="积分类型">
-      ${creditTypes.map((key) => `<button type="button" class="credit-subtab${key === type ? ' is-active' : ''}" id="credit-tab-${key}" role="tab" aria-selected="${key === type}" aria-controls="credit-dashboard" tabindex="${key === type ? 0 : -1}" data-credit-tab="${key}">${key === 'general' ? '通用积分' : key === 'sd25' ? 'SD 2.5' : 'SD 2.0'}</button>`).join('')}
-    </div>
-    <section class="credit-dashboard" id="credit-dashboard" role="tabpanel" aria-labelledby="credit-tab-${type}" tabindex="0">
-      <div class="credit-chart-block">
-        <div class="credit-donut" style="--assigned-angle: ${assignedPercent * 3.6}deg;${total ? '' : 'background: var(--line);'}" role="img" aria-label="${pool.label}剩余 ${format(total)}，已分配 ${format(assigned)}，待分配 ${format(pool.available)}">
-          <div class="credit-donut-center"><span>剩余${pool.label}</span><strong>${format(total)}</strong></div>
-        </div>
-        <div class="credit-chart-legend"><span><i class="assigned-swatch"></i>已分配</span><span><i class="available-swatch"></i>待分配</span></div>
-      </div>
-      <div class="credit-dashboard-metrics">
-        <article class="credit-metric">
-          <div class="credit-metric-heading"><span><i class="assigned-swatch"></i>已分配</span><span class="credit-metric-share">占剩余积分 ${percent(assignedPercent)}</span></div>
-          <strong>${format(assigned)}</strong><p>已分配给成员的未使用积分</p>
-        </article>
-        <article class="credit-metric">
-          <div class="credit-metric-heading"><span><i class="available-swatch"></i>待分配</span><span class="credit-metric-share">占剩余积分 ${percent(availablePercent)}</span></div>
-          <strong>${format(pool.available)}</strong><p>${total ? '可继续分配给团队成员' : '当前暂无该类积分'}</p>
-        </article>
-      </div>
-    </section>`;
+  $("#creditTypeTabs").innerHTML = creditTypes.map((key) => `<button type="button" class="credit-subtab${key === type ? ' is-active' : ''}" id="credit-tab-${key}" role="tab" aria-selected="${key === type}" aria-controls="creditTypeContent" tabindex="${key === type ? 0 : -1}" data-credit-tab="${key}">${key === 'general' ? '通用积分' : key === 'sd25' ? 'SD 2.5' : 'SD 2.0'}</button>`).join('');
+  $("#creditTypeContent").setAttribute("aria-labelledby", "credit-tab-" + type);
+  $("#pointsOverview").innerHTML = `<div class="unallocated-summary"><span>待分配总积分</span><strong>${format(pool.available)}</strong></div>`;
+  $("#creditBalanceHeader").textContent = "剩余" + pool.label;
 }
 
 function selectCreditTab(type, focus = false) {
   if (!creditTypes.includes(type)) return;
+  if (type !== state.activeCreditType && state.editingMemberId !== null) {
+    showToast("请先确认或取消当前积分调整");
+    if (focus) $("#credit-tab-" + state.activeCreditType).focus();
+    return;
+  }
   state.activeCreditType = type;
   renderPointCards();
+  renderPointsRows();
   if (focus) $("#credit-tab-" + type).focus();
 }
 
@@ -2516,16 +2482,14 @@ function readonlyCreditMarkup(member, type, candidate) {
 }
 
 function renderPointsRows() {
+  const type = state.activeCreditType;
   $("#pointsRows").innerHTML = state.members.map((member) => {
     const editing = member.id === state.editingMemberId;
     const candidate = isRecoveryCandidate(member);
     const rowClasses = ["data-table", "points-table", "table-row"];
     if (editing) rowClasses.push("is-editing");
     if (candidate) rowClasses.push("is-recovery-candidate");
-    const creditCells = creditTypes.map((type) => editing
-      ? creditEditorMarkup(member, type)
-      : readonlyCreditMarkup(member, type, candidate)
-    ).join("");
+    const creditCells = editing ? creditEditorMarkup(member, type) : readonlyCreditMarkup(member, type, candidate);
 
     let action = `<button class="action-link" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ""}>积分调配</button>`;
     if (editing) {
@@ -2538,8 +2502,7 @@ function renderPointsRows() {
       <div class="${rowClasses.join(" ")}" data-member-id="${member.id}">
         <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span><span class="member-joined">${member.joined} 加入</span></span></div>
         ${staticRoleMarkup(member)}
-        <div>${format(consumedTotal(member))}</div>
-        ${pointMarkup(memberTotal(member))}
+        <div>${format(member.consumed[type])}</div>
         ${creditCells}
         <div class="points-operation">${action}</div>
       </div>

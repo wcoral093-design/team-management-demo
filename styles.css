@@ -1928,31 +1928,14 @@ body.is-points-detail .simulation-switch {
   .points-overview { overflow-x: auto; }
 }
 
-/* Per-type credit overview. */
-#pointsOverview { display: block; padding: 0; overflow: hidden; }
-.credit-subtabs { display: flex; gap: 28px; padding: 0 28px; border-bottom: 1px solid var(--line); }
-.credit-subtab { position: relative; border: 0; background: transparent; padding: 18px 2px 16px; color: var(--text-secondary); font: inherit; font-size: 14px; cursor: pointer; }
+/* Credit tabs control both the balance and member allocation list. */
+#creditTypeTabs { display: flex; gap: 28px; padding: 0 4px; margin-bottom: 20px; border-bottom: 1px solid var(--line); }
+.credit-subtab { position: relative; border: 0; background: transparent; padding: 14px 2px 16px; color: var(--text-secondary); font: inherit; font-size: 14px; cursor: pointer; }
 .credit-subtab.is-active { color: var(--text); font-weight: 600; }
 .credit-subtab.is-active::after { content: ''; position: absolute; height: 3px; bottom: -1px; left: 0; right: 0; background: #9254ff; border-radius: 3px; }
 .credit-subtab:focus-visible { outline: 2px solid #9254ff; outline-offset: -4px; border-radius: 4px; }
-.credit-dashboard { display: grid; grid-template-columns: minmax(270px, .85fr) minmax(0, 2fr); gap: 36px; padding: 26px 32px; align-items: center; }
-.credit-chart-block { display: flex; flex-direction: column; align-items: center; gap: 17px; }
-.credit-donut { width: 176px; height: 176px; flex-shrink: 0; border-radius: 50%; padding: 14px; background: conic-gradient(#9254ff 0deg var(--assigned-angle), #d9c8f5 var(--assigned-angle) 360deg); }
-.credit-donut-center { height: 100%; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
-.credit-donut-center span { color: var(--text-secondary); font-size: 12px; }
-.credit-donut-center strong { font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.credit-chart-legend { display: flex; gap: 24px; font-size: 13px; color: var(--text-secondary); }
-.credit-chart-legend span, .credit-metric-heading > span:first-child { display: inline-flex; align-items: center; gap: 8px; }
-.assigned-swatch, .available-swatch { display: inline-block; width: 8px; height: 12px; border-radius: 3px; background: #9254ff; }
-.available-swatch { background: #d9c8f5; }
-.credit-dashboard-metrics { display: grid; gap: 12px; }
-.credit-metric { position: relative; padding: 16px 20px; border-radius: 12px; background: #f7f7f9; }
-.credit-metric-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 14px; }
-.credit-metric-share { color: var(--text-secondary); font-size: 12px; }
-.credit-metric > strong { display: block; margin-top: 8px; font-size: 25px; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
-.credit-metric p { position: absolute; right: 20px; bottom: 18px; margin: 0; color: var(--text-secondary); font-size: 12px; }
-@media (max-width: 700px) {
-  .credit-dashboard { grid-template-columns: 1fr; gap: 24px; padding: 24px 16px; }
-  .credit-subtabs { gap: 24px; padding: 0 20px; }
-  .credit-metric p { position: static; margin-top: 8px; }
-}
+#pointsOverview { display: block; padding: 24px 28px; }
+.unallocated-summary { display: flex; flex-direction: column; gap: 8px; }
+.unallocated-summary > span { color: var(--text-secondary); font-size: 14px; }
+.unallocated-summary > strong { font-size: 30px; line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; }
+.points-table { min-width: 740px; grid-template-columns: minmax(220px, 1.6fr) minmax(110px, 1fr) minmax(100px, 1fr) minmax(160px, 1.2fr) 122px; }
