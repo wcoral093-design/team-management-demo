@@ -255,18 +255,8 @@ function renderPointsRows() {
 
 function renderShortageBanner() {
   const banner = $("#shortageBanner");
-  if (!state.shortage) {
-    banner.hidden = true;
-    banner.innerHTML = "";
-    return;
-  }
-
-  const summary = shortageTypes().map((type) => `${state.pools[type].label}缺 ${format(state.shortage.amounts[type])}`).join("，");
-  const recoverable = state.members
-    .filter((member) => isRecoveryCandidate(member))
-    .reduce((total, member) => total + shortageTypes().reduce((sum, type) => sum + member.credits[type], 0), 0);
-  banner.innerHTML = `<span>团队待分配余额不足：<strong>${summary}</strong>。已高亮有可回收余额的成员。</span><span>可回收 ${format(recoverable)}</span>`;
-  banner.hidden = false;
+  banner.hidden = true;
+  banner.innerHTML = "";
 }
 
 function renderSummary() {
@@ -556,10 +546,14 @@ function confirmCreditEdit() {
     state.shortage = { targetMemberId: member.id, amounts: shortages };
     renderPointsRows();
     renderShortageBanner();
-    showToast("团队待分配余额不足，请先从高亮成员回收积分");
+    openShortageModal(member);
     return;
   }
 
+  commitCreditEdit(member);
+}
+
+function commitCreditEdit(member, successMessage = "") {
   const changes = [];
   creditTypes.forEach((type) => {
     const previous = member.credits[type];
@@ -576,7 +570,7 @@ function confirmCreditEdit() {
   state.draftCredits = null;
   state.shortage = null;
   renderAll();
-  showToast(changes.length ? `已确认 ${member.name} 的积分调整` : "积分未发生变化");
+  showToast(successMessage || (changes.length ? `已确认 ${member.name} 的积分调整` : "积分未发生变化"));
 }
 
 function recordTransaction(member, type, amount, action) {
@@ -597,7 +591,10 @@ function openModal(config) {
   $("#modalForm .modal-actions [data-close-modal]").hidden = config.readOnly === true;
   $("#modalBackdrop").hidden = false;
   document.body.style.overflow = "hidden";
-  window.setTimeout(() => $("#modalBody input, #modalBody select")?.focus(), 30);
+  window.setTimeout(() => {
+    const focusTarget = $("#modalBody input, #modalBody select") || $("#modalConfirm");
+    focusTarget?.focus();
+  }, 30);
 }
 
 function closeModal() {
@@ -681,6 +678,75 @@ function openRecoveryModal(memberId) {
   });
 }
 
+function recoverableForType(type, targetMemberId) {
+  return state.members
+    .filter((member) => member.id !== targetMemberId)
+    .reduce((total, member) => total + member.credits[type], 0);
+}
+
+function openShortageModal(member) {
+  const types = shortageTypes();
+  const canResolve = types.every((type) => recoverableForType(type, member.id) >= state.shortage.amounts[type]);
+  const rows = types.map((type) => `
+    <div class="shortage-modal-row">
+      <strong>${state.pools[type].label}</strong>
+      <span>缺口 ${format(state.shortage.amounts[type])}</span>
+      <span>可回收 ${format(recoverableForType(type, member.id))}</span>
+    </div>
+  `).join("");
+
+  openModal({
+    type: canResolve ? "shortage-auto" : "read-only",
+    memberId: member.id,
+    title: "待分配积分不足",
+    subtitle: `为 ${member.name} 完成本次积分调配`,
+    body: `
+      <p class="shortage-modal-intro">团队待分配余额不足，可从其他成员的可用余额中回收后继续分配。</p>
+      <div class="shortage-modal-list">${rows}</div>
+      <p class="shortage-modal-note">${canResolve ? "确认后将按缺口自动回收，并立即完成本次分配。" : "当前成员可回收余额不足，暂时无法完成本次分配。"}</p>
+    `,
+    confirmText: canResolve ? "一键回收并分配" : "知道了",
+    readOnly: !canResolve,
+  });
+}
+
+function autoRecoverAndAssign() {
+  const targetMember = state.members.find((member) => member.id === state.modal?.memberId);
+  if (!targetMember || !state.shortage || !state.draftCredits) return;
+  const types = shortageTypes();
+  const canResolve = types.every((type) => recoverableForType(type, targetMember.id) >= state.shortage.amounts[type]);
+  if (!canResolve) {
+    closeModal();
+    showToast("可回收积分不足，暂无法完成分配");
+    return;
+  }
+
+  let recoveredTotal = 0;
+  types.forEach((type) => {
+    let remaining = state.shortage.amounts[type];
+    state.members
+      .filter((member) => member.id !== targetMember.id && member.credits[type] > 0)
+      .forEach((member) => {
+        if (remaining <= 0) return;
+        const amount = Math.min(member.credits[type], remaining);
+        member.credits[type] -= amount;
+        state.pools[type].available += amount;
+        remaining -= amount;
+        recoveredTotal += amount;
+        recordTransaction(member.name, type, amount, "一键回收");
+      });
+  });
+
+  recalculateShortage();
+  closeModal();
+  if (state.shortage) {
+    renderAll();
+    showToast("可回收积分不足，未完成分配");
+    return;
+  }
+  commitCreditEdit(targetMember, `已回收 ${format(recoveredTotal)} 积分并完成分配`);
+}
+
 function recalculateShortage() {
   const member = state.members.find((item) => item.id === state.editingMemberId);
   if (!member || !state.draftCredits) {
@@ -739,6 +805,10 @@ function handleModalSubmit(event) {
   if (!state.modal) return;
   if (state.modal.type === "read-only") {
     closeModal();
+    return;
+  }
+  if (state.modal.type === "shortage-auto") {
+    autoRecoverAndAssign();
     return;
   }
   const data = new FormData(event.currentTarget);
@@ -820,8 +890,7 @@ function showToast(message) {
   toast.textContent = message;
   $("#toastRegion").appendChild(toast);
   window.setTimeout(() => {
-    toast.style.opacity = "0";
-    toast.style.transform = "translateY(-4px)";
+    toast.classList.add("is-leaving");
     window.setTimeout(() => toast.remove(), 180);
   }, 2600);
 }
