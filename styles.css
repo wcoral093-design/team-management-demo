@@ -1993,3 +1993,10 @@ body.is-points-detail .simulation-switch {
 .summary-credit-meta .allocation-stat strong { font-size: 13px; line-height: 18px; }
 .summary-grid { grid-template-columns: minmax(0, 1fr) minmax(440px, 1.18fr) minmax(0, 1fr); }
 @media (max-width: 900px) { .summary-grid { grid-template-columns: 1fr; } }
+
+.summary-credit-meta { justify-content: flex-start; gap: 16px; }
+.summary-credit-meta .allocation-stat::before { content: none; }
+.toolbar { --toolbar-control-height: 36px; align-items: center; }
+.toolbar > .tabs, .toolbar .invite-button { box-sizing: border-box; height: var(--toolbar-control-height); min-height: var(--toolbar-control-height); }
+.toolbar > .tabs { align-items: center; }
+.toolbar > .tabs > .tab { height: calc(var(--toolbar-control-height) - 4px); }
