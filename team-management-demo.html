@@ -2503,7 +2503,7 @@ function renderPointsRows() {
 
     return `
       <div class="${rowClasses.join(" ")}" data-member-id="${member.id}">
-        <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span><span class="member-joined">${member.joined} 加入</span></span></div>
+        <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span></span></div>
         ${staticRoleMarkup(member)}
         <div>${format(member.consumed[type])}</div>
         ${creditCells}
