@@ -300,7 +300,6 @@ select:focus-visible {
 .toolbar,
 .toolbar-actions,
 .tabs,
-.section-title-row,
 .filter-group,
 .role-cell,
 .user-cell,
@@ -694,35 +693,6 @@ select:focus-visible {
   white-space: nowrap;
 }
 
-.allocation-button {
-  height: 30px;
-  padding: 0 11px;
-  border: 1px solid rgba(133, 87, 255, 0.18);
-  border-radius: 7px;
-  color: var(--brand-dark);
-  background: var(--brand-soft);
-  font-size: 12px;
-  font-weight: 550;
-  cursor: pointer;
-}
-
-.allocation-button:hover {
-  background: #e9e0ff;
-}
-
-.allocation-button:disabled {
-  color: var(--text-tertiary);
-  border-color: var(--line);
-  background: #f0f0f2;
-  cursor: default;
-}
-
-.allocation-button.confirm-button {
-  color: #fff;
-  border-color: var(--brand);
-  background: var(--brand);
-}
-
 .table-head {
   height: 48px;
   color: #36363b;
@@ -874,18 +844,11 @@ select:focus-visible {
   font-size: 15px;
 }
 
-.section-title-row {
-  justify-content: space-between;
-  margin: 0 2px 10px;
-}
-
-.section-title-row h2,
 .invite-state h2 {
   margin: 0;
   font-size: 15px;
 }
 
-.section-title-row p,
 .invite-state p {
   margin: 4px 0 0;
   color: var(--text-secondary);
@@ -969,8 +932,8 @@ select:focus-visible {
 }
 
 .points-table.table-row.is-editing {
-  background: #fbf9ff;
-  box-shadow: inset 3px 0 var(--brand);
+  background: rgba(72, 72, 73, 0.04);
+  box-shadow: none;
 }
 
 .points-table.table-row.is-recovery-candidate {
@@ -990,16 +953,6 @@ select:focus-visible {
 .confirm-link {
   color: var(--brand-dark);
   font-weight: 650;
-}
-
-.candidate-recover {
-  padding: 3px 7px;
-  border: 0;
-  border-radius: 6px;
-  color: var(--brand-dark);
-  background: var(--brand-soft);
-  cursor: pointer;
-  font-size: 10px;
 }
 
 .shortage-banner {
@@ -1439,11 +1392,6 @@ select:focus-visible {
 
         <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
           <div class="points-overview" id="pointsOverview"></div>
-          <div class="section-title-row">
-            <div>
-              <h2>成员积分</h2>
-            </div>
-          </div>
           <div class="shortage-banner" id="shortageBanner" hidden></div>
           <div class="table-card points-table-card">
             <div class="data-table points-table table-head">
@@ -1719,9 +1667,9 @@ function renderPointsRows() {
 
     let action = `<button class="action-link" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ""}>积分调配</button>`;
     if (editing) {
-      action = '<div class="row-actions"><button class="allocation-button confirm-button" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>';
+      action = '<div class="row-actions"><button class="action-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>';
     } else if (candidate) {
-      action = `<div class="row-actions"><button class="candidate-recover" data-recover-candidate="${member.id}">回收可用</button></div>`;
+      action = `<div class="row-actions"><button class="action-link" data-recover-candidate="${member.id}">回收可用</button></div>`;
     }
 
     return `

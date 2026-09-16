@@ -227,9 +227,9 @@ function renderPointsRows() {
 
     let action = `<button class="action-link" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ""}>积分调配</button>`;
     if (editing) {
-      action = '<div class="row-actions"><button class="allocation-button confirm-button" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>';
+      action = '<div class="row-actions"><button class="action-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>';
     } else if (candidate) {
-      action = `<div class="row-actions"><button class="candidate-recover" data-recover-candidate="${member.id}">回收可用</button></div>`;
+      action = `<div class="row-actions"><button class="action-link" data-recover-candidate="${member.id}">回收可用</button></div>`;
     }
 
     return `
