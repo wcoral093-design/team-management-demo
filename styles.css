@@ -1946,3 +1946,11 @@ body.is-points-detail .simulation-switch {
 .simulation-divider { width: 1px; height: 12px; background: var(--line-strong); margin: 0 5px; }
 .simulation-cycle { color: #8545eb; }
 .points-table.table-row.is-recovery-candidate { background:#f0e8ff; box-shadow:inset 3px 0 #9254ff; }
+
+.allocation-menu { position: relative; }
+.allocation-menu > summary { list-style: none; cursor: pointer; }
+.allocation-menu > summary::-webkit-details-marker { display: none; }
+.allocation-menu-options { position: relative; z-index: 5; margin: 6px 0; min-width: 112px; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: #fff; box-shadow: 0 4px 18px rgba(0,0,0,.1); }
+.allocation-menu-options button { display: block; width: 100%; border: 0; border-radius: 6px; background: transparent; padding: 9px 12px; text-align: left; white-space: nowrap; font: inherit; font-size: 14px; cursor: pointer; }
+.allocation-menu-options button:hover { background: #f3f3f5; }
+.allocation-menu-options button:disabled { opacity: .4; cursor: default; }

@@ -227,7 +227,9 @@ function renderPointsRows() {
     if (candidate) rowClasses.push("is-recovery-candidate");
     const creditCells = editing ? creditEditorMarkup(member, type) : readonlyCreditMarkup(member, type, candidate);
 
-    let action = `<button class="action-link" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ""}>追加</button><button class="action-link" data-recover-candidate="${member.id}"${state.editingMemberId !== null || !member.credits[type] ? " disabled" : ""}>回收</button>`;
+    let action = state.editingMemberId !== null
+      ? '<button class="action-link" disabled title="请先确认或取消当前成员的修改">积分调配</button>'
+      : `<details class="allocation-menu"><summary class="action-link">积分调配</summary><div class="allocation-menu-options"><button type="button" data-edit-credits="${member.id}">追加积分</button><button type="button" data-recover-candidate="${member.id}"${!member.credits[type] ? ' disabled' : ''}>回收积分</button></div></details>`;
     if (editing) {
       action = '<div class="row-actions"><button class="action-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>';
     } else if (candidate) {
