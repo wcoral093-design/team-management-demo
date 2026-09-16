@@ -148,20 +148,6 @@ function pointMarkup(value) {
   return `<div class="point-value"><span class="point-gem" aria-hidden="true">✦</span><span>${format(value)}</span></div>`;
 }
 
-function renderMemberRows() {
-  const rows = state.members.map((member) => `
-    <div class="data-table member-table table-row" data-member-id="${member.id}">
-      <div class="user-cell">${avatarMarkup(member)}<span class="user-name">${escapeHTML(member.name)}</span></div>
-      ${staticRoleMarkup(member)}
-      ${pointMarkup(consumedTotal(member))}
-      ${pointMarkup(memberTotal(member))}
-      <div>${member.joined}</div>
-      <div>${member.locked ? '<span class="empty-action">—</span>' : `<button class="action-link danger" data-delete="${member.id}">删除</button>`}</div>
-    </div>
-  `).join("");
-  $("#memberRows").innerHTML = rows || emptyRows("暂无团队成员");
-}
-
 function renderPointCards() {
   const total = availableTotal();
   const typeCards = creditTypes.map((type) => {
@@ -240,9 +226,13 @@ function renderPointsRows() {
       action = `<div class="row-actions"><button class="action-link" data-recover-candidate="${member.id}">回收可用</button></div>`;
     }
 
+    if (!editing && !candidate && !member.locked) {
+      action += `<button class="action-link danger" data-delete="${member.id}"${state.editingMemberId !== null ? " disabled" : ""}>删除</button>`;
+    }
+
     return `
       <div class="${rowClasses.join(" ")}" data-member-id="${member.id}">
-        <div class="user-cell">${avatarMarkup(member)}<span class="user-name">${escapeHTML(member.name)}</span></div>
+        <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span><span class="member-joined">${member.joined} 加入</span></span></div>
         ${staticRoleMarkup(member)}
         <div>${format(consumedTotal(member))}</div>
         ${pointMarkup(memberTotal(member))}
@@ -265,8 +255,10 @@ function renderSummary() {
   const total = assigned + available;
 
   $("#availableTotal").textContent = format(total);
-  $("#assignedTotal").textContent = format(assigned);
-  $("#unassignedTotal").textContent = format(available);
+  ["remainingGeneral", "remainingSd25", "remainingSd20"].forEach((id, index) => {
+    const type = creditTypes[index];
+    $("#" + id).textContent = format(state.pools[type].available + assignedForType(type));
+  });
   $("#pointsAvailableTotal").textContent = format(available);
   $("#seatUsed").textContent = String(state.seats.used);
   $("#seatTotal").textContent = String(state.seats.total);
@@ -409,7 +401,6 @@ function renderPointsDetail() {
 
 function renderAll() {
   renderSimulationSwitch();
-  renderMemberRows();
   renderPointCards();
   renderPointsRows();
   renderShortageBanner();

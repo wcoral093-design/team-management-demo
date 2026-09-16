@@ -101,9 +101,10 @@
               <button class="link-button" data-action="buy">购买</button>
             </div>
           </div>
-          <div class="allocation-stats summary-credit-meta" aria-label="积分分配情况">
-            <div class="allocation-stat"><span>已分配</span><strong id="assignedTotal">15,400</strong></div>
-            <div class="allocation-stat unallocated" title="团队剩余可分配余额"><span>待分配</span><strong id="unassignedTotal">21,442</strong></div>
+          <div class="allocation-stats summary-credit-meta" aria-label="各类积分余量">
+            <div class="allocation-stat"><span>通用积分</span><strong id="remainingGeneral">23,100</strong></div>
+            <div class="allocation-stat"><span>SD 2.5积分</span><strong id="remainingSd25">8,280</strong></div>
+            <div class="allocation-stat"><span>SD 2.0积分</span><strong id="remainingSd20">5,462</strong></div>
           </div>
         </article>
 
@@ -121,8 +122,7 @@
       <section class="workspace" aria-label="团队管理工作区">
         <div class="toolbar">
           <div class="tabs" role="tablist" aria-label="团队管理分类">
-            <button class="tab is-active" id="tab-members" role="tab" aria-selected="true" aria-controls="panel-members" data-tab="members">成员管理</button>
-            <button class="tab" id="tab-credits" role="tab" aria-selected="false" aria-controls="panel-credits" data-tab="credits">积分管理</button>
+            <button class="tab is-active" id="tab-members" role="tab" aria-selected="true" aria-controls="panel-members" data-tab="members">成员与积分</button>
             <button class="tab" id="tab-invites" role="tab" aria-selected="false" aria-controls="panel-invites" data-tab="invites">团队审批</button>
           </div>
           <div class="toolbar-actions">
@@ -131,25 +131,6 @@
         </div>
 
         <section class="tab-panel is-active" id="panel-members" role="tabpanel" aria-labelledby="tab-members">
-          <div class="table-card">
-            <div class="data-table member-table table-head">
-              <div>用户</div>
-              <div>团队角色</div>
-              <div>已消耗</div>
-              <div>剩余积分</div>
-              <div>加入时间</div>
-              <div>操作 <span class="info-dot" title="创建者不可删除">i</span></div>
-            </div>
-            <div id="memberRows"></div>
-          </div>
-          <div class="pagination" aria-label="分页">
-            <button disabled aria-label="上一页">‹</button>
-            <button class="current" aria-current="page">1</button>
-            <button disabled aria-label="下一页">›</button>
-          </div>
-        </section>
-
-        <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
           <div class="points-overview" id="pointsOverview"></div>
           <div class="shortage-banner" id="shortageBanner" hidden></div>
           <div class="table-card points-table-card">

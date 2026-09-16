@@ -1910,3 +1910,20 @@ body.is-points-detail .simulation-switch {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Unified member and credit workspace. */
+.summary-card { height: auto; min-height: 142px; }
+.summary-credit-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.summary-credit-meta .allocation-stat { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.summary-credit-meta .allocation-stat + .allocation-stat { padding-left: 10px; }
+.summary-credit-meta .allocation-stat span { font-size: 12px; }
+.summary-credit-meta .allocation-stat strong { font-size: 17px; }
+.member-identity { display: flex; flex-direction: column; min-width: 0; gap: 5px; }
+.member-joined { color: var(--text-secondary); font-size: 12px; white-space: nowrap; }
+.points-operation { display: flex; gap: 14px; align-items: center; }
+.points-table { grid-template-columns: minmax(190px, 1.5fr) minmax(76px, .65fr) minmax(72px, .6fr) minmax(90px, .75fr) repeat(3, minmax(112px, .95fr)) 122px; }
+@media (max-width: 900px) {
+  .summary-grid { grid-template-columns: 1fr; }
+  .summary-card { min-height: 128px; }
+  .points-overview { overflow-x: auto; }
+}

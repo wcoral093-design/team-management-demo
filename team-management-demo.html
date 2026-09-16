@@ -1919,6 +1919,23 @@ body.is-points-detail .simulation-switch {
   }
 }
 
+/* Unified member and credit workspace. */
+.summary-card { height: auto; min-height: 142px; }
+.summary-credit-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.summary-credit-meta .allocation-stat { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.summary-credit-meta .allocation-stat + .allocation-stat { padding-left: 10px; }
+.summary-credit-meta .allocation-stat span { font-size: 12px; }
+.summary-credit-meta .allocation-stat strong { font-size: 17px; }
+.member-identity { display: flex; flex-direction: column; min-width: 0; gap: 5px; }
+.member-joined { color: var(--text-secondary); font-size: 12px; white-space: nowrap; }
+.points-operation { display: flex; gap: 14px; align-items: center; }
+.points-table { grid-template-columns: minmax(190px, 1.5fr) minmax(76px, .65fr) minmax(72px, .6fr) minmax(90px, .75fr) repeat(3, minmax(112px, .95fr)) 122px; }
+@media (max-width: 900px) {
+  .summary-grid { grid-template-columns: 1fr; }
+  .summary-card { min-height: 128px; }
+  .points-overview { overflow-x: auto; }
+}
+
 </style>
   </head>
   <body>
@@ -2015,9 +2032,10 @@ body.is-points-detail .simulation-switch {
               <button class="link-button" data-action="buy">购买</button>
             </div>
           </div>
-          <div class="allocation-stats summary-credit-meta" aria-label="积分分配情况">
-            <div class="allocation-stat"><span>已分配</span><strong id="assignedTotal">15,400</strong></div>
-            <div class="allocation-stat unallocated" title="团队剩余可分配余额"><span>待分配</span><strong id="unassignedTotal">21,442</strong></div>
+          <div class="allocation-stats summary-credit-meta" aria-label="各类积分余量">
+            <div class="allocation-stat"><span>通用积分</span><strong id="remainingGeneral">23,100</strong></div>
+            <div class="allocation-stat"><span>SD 2.5积分</span><strong id="remainingSd25">8,280</strong></div>
+            <div class="allocation-stat"><span>SD 2.0积分</span><strong id="remainingSd20">5,462</strong></div>
           </div>
         </article>
 
@@ -2035,8 +2053,7 @@ body.is-points-detail .simulation-switch {
       <section class="workspace" aria-label="团队管理工作区">
         <div class="toolbar">
           <div class="tabs" role="tablist" aria-label="团队管理分类">
-            <button class="tab is-active" id="tab-members" role="tab" aria-selected="true" aria-controls="panel-members" data-tab="members">成员管理</button>
-            <button class="tab" id="tab-credits" role="tab" aria-selected="false" aria-controls="panel-credits" data-tab="credits">积分管理</button>
+            <button class="tab is-active" id="tab-members" role="tab" aria-selected="true" aria-controls="panel-members" data-tab="members">成员与积分</button>
             <button class="tab" id="tab-invites" role="tab" aria-selected="false" aria-controls="panel-invites" data-tab="invites">团队审批</button>
           </div>
           <div class="toolbar-actions">
@@ -2045,25 +2062,6 @@ body.is-points-detail .simulation-switch {
         </div>
 
         <section class="tab-panel is-active" id="panel-members" role="tabpanel" aria-labelledby="tab-members">
-          <div class="table-card">
-            <div class="data-table member-table table-head">
-              <div>用户</div>
-              <div>团队角色</div>
-              <div>已消耗</div>
-              <div>剩余积分</div>
-              <div>加入时间</div>
-              <div>操作 <span class="info-dot" title="创建者不可删除">i</span></div>
-            </div>
-            <div id="memberRows"></div>
-          </div>
-          <div class="pagination" aria-label="分页">
-            <button disabled aria-label="上一页">‹</button>
-            <button class="current" aria-current="page">1</button>
-            <button disabled aria-label="下一页">›</button>
-          </div>
-        </section>
-
-        <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
           <div class="points-overview" id="pointsOverview"></div>
           <div class="shortage-banner" id="shortageBanner" hidden></div>
           <div class="table-card points-table-card">
@@ -2376,20 +2374,6 @@ function pointMarkup(value) {
   return `<div class="point-value"><span class="point-gem" aria-hidden="true">✦</span><span>${format(value)}</span></div>`;
 }
 
-function renderMemberRows() {
-  const rows = state.members.map((member) => `
-    <div class="data-table member-table table-row" data-member-id="${member.id}">
-      <div class="user-cell">${avatarMarkup(member)}<span class="user-name">${escapeHTML(member.name)}</span></div>
-      ${staticRoleMarkup(member)}
-      ${pointMarkup(consumedTotal(member))}
-      ${pointMarkup(memberTotal(member))}
-      <div>${member.joined}</div>
-      <div>${member.locked ? '<span class="empty-action">—</span>' : `<button class="action-link danger" data-delete="${member.id}">删除</button>`}</div>
-    </div>
-  `).join("");
-  $("#memberRows").innerHTML = rows || emptyRows("暂无团队成员");
-}
-
 function renderPointCards() {
   const total = availableTotal();
   const typeCards = creditTypes.map((type) => {
@@ -2468,9 +2452,13 @@ function renderPointsRows() {
       action = `<div class="row-actions"><button class="action-link" data-recover-candidate="${member.id}">回收可用</button></div>`;
     }
 
+    if (!editing && !candidate && !member.locked) {
+      action += `<button class="action-link danger" data-delete="${member.id}"${state.editingMemberId !== null ? " disabled" : ""}>删除</button>`;
+    }
+
     return `
       <div class="${rowClasses.join(" ")}" data-member-id="${member.id}">
-        <div class="user-cell">${avatarMarkup(member)}<span class="user-name">${escapeHTML(member.name)}</span></div>
+        <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span><span class="member-joined">${member.joined} 加入</span></span></div>
         ${staticRoleMarkup(member)}
         <div>${format(consumedTotal(member))}</div>
         ${pointMarkup(memberTotal(member))}
@@ -2493,8 +2481,10 @@ function renderSummary() {
   const total = assigned + available;
 
   $("#availableTotal").textContent = format(total);
-  $("#assignedTotal").textContent = format(assigned);
-  $("#unassignedTotal").textContent = format(available);
+  ["remainingGeneral", "remainingSd25", "remainingSd20"].forEach((id, index) => {
+    const type = creditTypes[index];
+    $("#" + id).textContent = format(state.pools[type].available + assignedForType(type));
+  });
   $("#pointsAvailableTotal").textContent = format(available);
   $("#seatUsed").textContent = String(state.seats.used);
   $("#seatTotal").textContent = String(state.seats.total);
@@ -2637,7 +2627,6 @@ function renderPointsDetail() {
 
 function renderAll() {
   renderSimulationSwitch();
-  renderMemberRows();
   renderPointCards();
   renderPointsRows();
   renderShortageBanner();
