@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="团队管理与积分管理交互 Demo" />
+    <title>团队管理 · 交互 Demo</title>
+    <link rel="stylesheet" href="./styles.css?v=20260916-5" />
+  </head>
+  <body>
+    <aside class="sidebar" aria-label="主导航">
+      <button class="brand-mark" aria-label="首页">J</button>
+
+      <nav class="side-nav" aria-label="业务导航">
+        <button class="side-item" data-tooltip="灵感" aria-label="灵感">
+          <span class="side-icon sparkle-icon" aria-hidden="true">✦</span>
+        </button>
+        <button class="side-item" data-tooltip="生成" aria-label="生成">
+          <span class="side-icon play-icon" aria-hidden="true">▻</span>
+        </button>
+        <button class="side-item" data-tooltip="任务" aria-label="任务">
+          <span class="side-icon timer-icon" aria-hidden="true">◷</span>
+        </button>
+        <span class="side-separator" aria-hidden="true"></span>
+        <button class="side-item" data-tooltip="资产" aria-label="资产">
+          <span class="side-icon folder-icon" aria-hidden="true">□</span>
+        </button>
+        <button class="side-item" data-tooltip="画布" aria-label="画布">
+          <span class="side-icon canvas-icon" aria-hidden="true">⌁</span>
+        </button>
+        <button class="side-item" data-tooltip="更多" aria-label="更多">
+          <span class="side-icon more-icon" aria-hidden="true">∞</span>
+        </button>
+      </nav>
+
+      <div class="side-bottom">
+        <button class="side-item" data-tooltip="通知" aria-label="通知">
+          <span class="side-icon bell-icon" aria-hidden="true">♧</span>
+        </button>
+        <button class="profile-dot" aria-label="个人中心">T</button>
+      </div>
+    </aside>
+
+    <header class="topbar">
+      <button class="credit-pill" data-action="buy">
+        <span class="credit-gem" aria-hidden="true">✦</span>
+        <span id="headerCredit">7,698</span>
+        <span class="credit-divider"></span>
+        <span>团队会员</span>
+        <span class="discount-tag">低至5折</span>
+      </button>
+    </header>
+
+    <main class="page-shell">
+      <section class="team-heading" aria-labelledby="teamTitle">
+        <div class="team-identity">
+          <span class="team-avatar" aria-hidden="true">T</span>
+          <div>
+            <div class="team-name-row">
+              <h1 id="teamTitle">Team-12be3d2</h1>
+              <button class="icon-button edit-button" data-action="rename" aria-label="修改团队名称">⌕</button>
+            </div>
+            <p>团队 ID：7682691865522607422 <button class="copy-button" data-copy="7682691865522607422">复制</button></p>
+          </div>
+        </div>
+        <button class="secondary-button" data-action="orders">订单管理</button>
+      </section>
+
+      <section class="summary-grid" aria-label="团队概览">
+        <article class="summary-card membership-card">
+          <div class="card-label">当前套餐</div>
+          <div class="membership-row">
+            <div class="title-with-tag">
+              <strong>高级团队会员</strong>
+              <span class="status-tag">生效中</span>
+            </div>
+            <button class="link-button" data-action="renew">立即续费</button>
+          </div>
+          <div class="card-footer-line">
+            <span>会员有效期：2026-10-08</span>
+            <span class="info-dot" title="到期前可随时续费">i</span>
+          </div>
+        </article>
+
+        <article class="summary-card credits-card">
+          <div class="summary-topline">
+            <div>
+              <div class="card-label">剩余总积分</div>
+              <div class="large-number"><span id="availableTotal">27,076</span></div>
+            </div>
+            <div class="card-actions">
+              <button class="link-button" data-action="details">明细</button>
+              <button class="link-button" data-action="allocate-first">分配</button>
+              <button class="link-button" data-action="buy">购买</button>
+            </div>
+          </div>
+          <div class="allocation-stats summary-credit-meta" aria-label="积分分配情况">
+            <div class="allocation-stat"><span>已分配</span><strong id="assignedTotal">4,220</strong></div>
+            <div class="allocation-stat unallocated" title="团队剩余可分配余额"><span>未分配</span><strong id="unassignedTotal">22,856</strong></div>
+          </div>
+        </article>
+
+        <article class="summary-card seats-card">
+          <div class="summary-topline">
+            <div>
+              <div class="card-label">可用席位 / 总席位</div>
+              <div class="seat-number"><span id="seatUsed">3</span><small>/5</small></div>
+            </div>
+            <button class="link-button" data-action="seats">增加席位</button>
+          </div>
+          <div class="card-footer-line seat-footer"><i></i><span id="seatUsage">已使用 3/5</span></div>
+        </article>
+      </section>
+
+      <section class="workspace" aria-label="团队管理工作区">
+        <div class="toolbar">
+          <div class="tabs" role="tablist" aria-label="团队管理分类">
+            <button class="tab is-active" id="tab-members" role="tab" aria-selected="true" aria-controls="panel-members" data-tab="members">成员管理</button>
+            <button class="tab" id="tab-credits" role="tab" aria-selected="false" aria-controls="panel-credits" data-tab="credits">积分管理</button>
+            <button class="tab" id="tab-invites" role="tab" aria-selected="false" aria-controls="panel-invites" data-tab="invites">团队审批</button>
+          </div>
+          <div class="toolbar-actions">
+            <button class="primary-button toolbar-credit-button" id="pointsDetailButton" data-action="points-details" hidden>积分明细</button>
+            <button class="primary-button invite-button" data-action="invite">邀请成员</button>
+          </div>
+        </div>
+
+        <section class="tab-panel is-active" id="panel-members" role="tabpanel" aria-labelledby="tab-members">
+          <div class="table-card">
+            <div class="data-table member-table table-head">
+              <div>用户</div>
+              <div>团队角色</div>
+              <div>已消耗</div>
+              <div>剩余积分</div>
+              <div>加入时间</div>
+              <div>操作 <span class="info-dot" title="创建者不可删除">i</span></div>
+            </div>
+            <div id="memberRows"></div>
+          </div>
+          <div class="pagination" aria-label="分页">
+            <button disabled aria-label="上一页">‹</button>
+            <button class="current" aria-current="page">1</button>
+            <button disabled aria-label="下一页">›</button>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
+          <div class="points-overview" id="pointsOverview"></div>
+          <div class="section-title-row">
+            <div>
+              <h2>成员积分</h2>
+            </div>
+          </div>
+          <div class="shortage-banner" id="shortageBanner" hidden></div>
+          <div class="table-card points-table-card">
+            <div class="data-table points-table table-head">
+              <div>用户</div>
+              <div>团队角色</div>
+              <div>已消耗 <span class="info-dot" title="点击成员的消耗数可查看分类明细">i</span></div>
+              <div>剩余总积分</div>
+              <div class="credit-header">通用积分</div>
+              <div class="credit-header">SD 2.5积分</div>
+              <div class="credit-header">SD 2.0积分</div>
+              <div>操作</div>
+            </div>
+            <div id="pointsRows"></div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="panel-invites" role="tabpanel" aria-labelledby="tab-invites" hidden>
+          <div id="invitePanelContent"></div>
+        </section>
+      </section>
+    </main>
+
+    <button class="help-button" aria-label="帮助" data-action="help">?</button>
+
+    <div class="modal-backdrop" id="modalBackdrop" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-head">
+          <div>
+            <h2 id="modalTitle">操作</h2>
+            <p id="modalSubtitle"></p>
+          </div>
+          <button class="modal-close" data-close-modal aria-label="关闭">×</button>
+        </div>
+        <form id="modalForm">
+          <div id="modalBody"></div>
+          <div class="modal-actions">
+            <button type="button" class="secondary-button" data-close-modal>取消</button>
+            <button type="submit" class="primary-button" id="modalConfirm">确认</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="toast-region" aria-live="polite" aria-atomic="true" id="toastRegion"></div>
+
+    <script src="./app.js?v=20260916-4"></script>
+  </body>
+</html>

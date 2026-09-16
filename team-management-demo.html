@@ -1,0 +1,2272 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="团队管理与积分管理交互 Demo" />
+    <title>团队管理 · 交互 Demo</title>
+    <style>
+:root {
+  --bg: #f5f5f6;
+  --surface: #ffffff;
+  --surface-muted: #f0f0f1;
+  --text: #17171b;
+  --text-secondary: #6f7078;
+  --text-tertiary: #9b9ba3;
+  --line: rgba(22, 22, 27, 0.07);
+  --line-strong: rgba(22, 22, 27, 0.1);
+  --brand: #8557ff;
+  --brand-dark: #7446f5;
+  --brand-soft: #f2edff;
+  --cyan: #13a8bf;
+  --cyan-soft: #e7f8fa;
+  --iris: #6b5bea;
+  --pink: #f04aa6;
+  --danger: #e5484d;
+  --shadow: 0 14px 40px rgba(28, 25, 38, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html {
+  min-width: 1080px;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  background: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgba(133, 87, 255, 0.42);
+  outline-offset: 2px;
+}
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 30;
+  display: flex;
+  width: 66px;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid rgba(0, 0, 0, 0.025);
+  background: #fafafa;
+}
+
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  margin-top: 16px;
+  border: 0;
+  border-radius: 10px;
+  color: white;
+  background: #09090b;
+  font-size: 18px;
+  font-weight: 800;
+  font-style: italic;
+  cursor: pointer;
+  transform: scaleX(0.55);
+}
+
+.side-nav {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-top: 32px;
+}
+
+.side-item {
+  position: relative;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 0;
+  border-radius: 11px;
+  color: #96979c;
+  background: transparent;
+  cursor: pointer;
+  transition: 160ms ease;
+}
+
+.side-item:hover {
+  color: #232328;
+  background: #eeeeef;
+}
+
+.side-item::after {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  z-index: 2;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: #fff;
+  background: #242429;
+  content: attr(data-tooltip);
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-4px, -50%);
+  transition: 120ms ease;
+}
+
+.side-item:hover::after {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+.side-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.side-separator {
+  width: 18px;
+  height: 1px;
+  margin: 2px 0;
+  background: #efeff0;
+}
+
+.side-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 18px;
+}
+
+.profile-dot {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(145deg, #a978ff, #7954ed);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.topbar {
+  position: fixed;
+  inset: 0 0 auto 66px;
+  z-index: 20;
+  display: flex;
+  height: 64px;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 24px;
+  background: rgba(245, 245, 246, 0.9);
+  backdrop-filter: blur(18px);
+}
+
+.credit-pill {
+  display: flex;
+  height: 34px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.credit-gem,
+.mini-gem,
+.point-gem {
+  color: var(--brand);
+}
+
+.credit-divider {
+  width: 1px;
+  height: 13px;
+  background: var(--line-strong);
+}
+
+.discount-tag {
+  padding: 2px 5px;
+  border-radius: 5px;
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+  font-weight: 500;
+}
+
+.page-shell {
+  max-width: 1840px;
+  min-height: 100vh;
+  margin-left: 66px;
+  padding: 84px 36px 64px;
+}
+
+.team-heading {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.team-identity,
+.team-name-row,
+.title-with-tag,
+.membership-row,
+.summary-topline,
+.card-actions,
+.legend-row,
+.card-footer-line,
+.toolbar,
+.toolbar-actions,
+.tabs,
+.section-title-row,
+.filter-group,
+.role-cell,
+.user-cell,
+.point-value,
+.composition,
+.row-actions,
+.form-hint,
+.warning-box {
+  display: flex;
+  align-items: center;
+}
+
+.team-identity {
+  gap: 12px;
+}
+
+.team-avatar {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(145deg, #a977ff, #8454ef);
+  font-weight: 600;
+}
+
+.team-name-row {
+  gap: 5px;
+}
+
+.team-name-row h1 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.team-identity p {
+  margin: 3px 0 0;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.icon-button,
+.copy-button,
+.link-button,
+.action-link,
+.tab,
+.filter-chip,
+.modal-close {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.edit-button {
+  padding: 0;
+  color: #a9a9b0;
+  font-size: 15px;
+  transform: rotate(-35deg);
+}
+
+.copy-button {
+  margin-left: 3px;
+  padding: 0;
+  color: #9999a2;
+  font-size: 11px;
+}
+
+.secondary-button,
+.primary-button {
+  display: inline-flex;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  min-width: 82px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 150ms ease;
+}
+
+.secondary-button {
+  color: #202024;
+  background: #ededee;
+}
+
+.secondary-button:hover {
+  background: #e5e5e7;
+}
+
+.primary-button {
+  color: white;
+  background: #09090b;
+}
+
+.primary-button:hover {
+  background: #27272b;
+  transform: translateY(-1px);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.08fr 1fr;
+  gap: 12px;
+}
+
+.summary-card {
+  min-width: 0;
+  height: 128px;
+  padding: 22px 24px;
+  border: 1px solid rgba(0, 0, 0, 0.035);
+  border-radius: 22px;
+  background: var(--surface);
+}
+
+.card-label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.membership-row {
+  justify-content: space-between;
+  margin-top: 1px;
+}
+
+.title-with-tag {
+  gap: 6px;
+}
+
+.title-with-tag strong {
+  font-size: 18px;
+  line-height: 28px;
+}
+
+.status-tag {
+  padding: 2px 5px;
+  border-radius: 4px;
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.link-button {
+  padding: 2px;
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.link-button:hover,
+.action-link:hover {
+  color: var(--brand-dark);
+}
+
+.card-footer-line {
+  gap: 5px;
+  margin-top: 18px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.info-dot {
+  display: inline-grid;
+  width: 14px;
+  height: 14px;
+  place-items: center;
+  border: 1px solid #b8b8bf;
+  border-radius: 50%;
+  color: #96969e;
+  font-size: 9px;
+  font-style: normal;
+  line-height: 1;
+}
+
+.summary-topline {
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.large-number {
+  margin-top: 1px;
+  color: #101216;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.8px;
+  line-height: 35px;
+}
+
+.card-actions {
+  gap: 0;
+  margin-top: 23px;
+}
+
+.credits-card .link-button {
+  position: relative;
+  padding: 0 12px;
+  color: var(--brand);
+  font-size: 13px;
+}
+
+.credits-card .link-button:last-child {
+  padding-right: 0;
+}
+
+.credits-card .link-button + .link-button {
+  border-left: 1px solid #ededee;
+}
+
+.allocation-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 14px;
+}
+
+.allocation-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.allocation-stat + .allocation-stat {
+  border-left: 1px solid var(--line-strong);
+  padding-left: 20px;
+}
+
+.allocation-stat span {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.allocation-stat strong {
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.allocation-stat.unallocated strong {
+  color: var(--brand-dark);
+}
+
+.credits-card {
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+
+.legend-row {
+  gap: 16px;
+  margin-top: 9px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.legend-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-row b {
+  color: inherit;
+  font-weight: 500;
+}
+
+.legend {
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.seat-number {
+  margin-top: 1px;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.8px;
+  line-height: 35px;
+}
+
+.seat-number small {
+  margin-left: 2px;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+}
+
+.seat-footer {
+  margin-top: 25px;
+}
+
+.seat-footer i {
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--brand);
+}
+
+.workspace {
+  margin-top: 30px;
+}
+
+.toolbar {
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.toolbar-actions {
+  gap: 8px;
+}
+
+.toolbar-credit-button {
+  border-radius: 18px;
+}
+
+.toolbar-credit-button[hidden] {
+  display: none;
+}
+
+.tabs {
+  gap: 4px;
+}
+
+.tab {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  color: #4e4e55;
+  font-size: 13px;
+  font-weight: 600;
+  transition: 150ms ease;
+}
+
+.tab:hover {
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.025);
+}
+
+.tab.is-active {
+  color: var(--text);
+  background: #eaeaeb;
+}
+
+.invite-button {
+  border-radius: 18px;
+}
+
+.tab-panel {
+  animation: panel-in 180ms ease;
+}
+
+.tab-panel[hidden] {
+  display: none;
+}
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.table-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: transparent;
+}
+
+.data-table {
+  display: grid;
+  min-width: 960px;
+  align-items: center;
+  column-gap: 24px;
+  padding: 0 22px;
+}
+
+.member-table {
+  grid-template-columns: minmax(220px, 1.25fr) minmax(140px, 1fr) minmax(120px, 1fr) minmax(140px, 1fr) minmax(190px, 1.05fr) minmax(120px, 0.85fr);
+}
+
+.points-table {
+  min-width: 980px;
+  column-gap: 16px;
+  grid-template-columns: minmax(160px, 1.5fr) minmax(76px, 0.65fr) minmax(72px, 0.6fr) minmax(90px, 0.75fr) repeat(3, minmax(112px, 0.95fr)) 116px;
+}
+
+.points-table-card {
+  overflow-x: auto;
+}
+
+.points-operation {
+  white-space: nowrap;
+}
+
+.allocation-button {
+  height: 30px;
+  padding: 0 11px;
+  border: 1px solid rgba(133, 87, 255, 0.18);
+  border-radius: 7px;
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+  font-size: 12px;
+  font-weight: 550;
+  cursor: pointer;
+}
+
+.allocation-button:hover {
+  background: #e9e0ff;
+}
+
+.allocation-button:disabled {
+  color: var(--text-tertiary);
+  border-color: var(--line);
+  background: #f0f0f2;
+  cursor: default;
+}
+
+.allocation-button.confirm-button {
+  color: #fff;
+  border-color: var(--brand);
+  background: var(--brand);
+}
+
+.table-head {
+  height: 48px;
+  color: #36363b;
+  background: #ececed;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.table-row {
+  min-height: 70px;
+  border-top: 1px solid rgba(0, 0, 0, 0.045);
+  background: rgba(255, 255, 255, 0.02);
+  transition: 120ms ease;
+}
+
+.table-row:first-child {
+  border-top: 0;
+}
+
+.table-row:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.user-cell {
+  min-width: 0;
+  gap: 10px;
+}
+
+.avatar {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.avatar.owner { background: linear-gradient(145deg, #d98385, #f2c968); }
+.avatar.admin { background: linear-gradient(145deg, #17171b, #622319); }
+.avatar.collab { background: linear-gradient(145deg, #5d7195, #e98769); }
+.avatar.designer { background: linear-gradient(145deg, #4b314f, #918cb7); }
+
+.user-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.role-cell {
+  gap: 6px;
+}
+
+.point-value {
+  gap: 5px;
+}
+
+.point-gem {
+  font-size: 10px;
+}
+
+.row-actions {
+  gap: 12px;
+}
+
+.action-link {
+  padding: 0;
+  color: #2f2f34;
+  font-size: 12px;
+}
+
+.action-link.danger:hover {
+  color: var(--danger);
+}
+
+.empty-action {
+  color: transparent;
+  user-select: none;
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 14px;
+}
+
+.pagination button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: #ababaf;
+  background: transparent;
+}
+
+.pagination .current {
+  color: var(--text);
+  background: #ececed;
+}
+
+.points-overview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.point-card {
+  min-width: 0;
+  height: 116px;
+  padding: 16px 20px;
+  border: 1px solid rgba(22, 22, 27, 0.045);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.point-card .point-title {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.point-card .point-balance {
+  margin-top: 3px;
+  font-size: 22px;
+  font-weight: 580;
+  letter-spacing: -0.5px;
+}
+
+.point-meta {
+  gap: 18px;
+  margin-top: 13px;
+}
+
+.point-meta .allocation-stat + .allocation-stat {
+  padding-left: 18px;
+}
+
+.point-meta .allocation-stat strong {
+  font-size: 15px;
+}
+
+.section-title-row {
+  justify-content: space-between;
+  margin: 0 2px 10px;
+}
+
+.section-title-row h2,
+.invite-state h2 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.section-title-row p,
+.invite-state p {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.credit-header {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.credit-editor {
+  display: grid;
+  overflow: hidden;
+  width: 112px;
+  height: 34px;
+  grid-template-columns: 24px 1fr 24px;
+  align-items: center;
+  border: 1px solid rgba(15, 20, 25, 0.1);
+  border-radius: 9px;
+  background: #fff;
+  transition: 150ms ease;
+}
+
+.credit-editor:hover {
+  border-color: rgba(15, 20, 25, 0.18);
+}
+
+.credit-editor:focus-within {
+  border-color: rgba(133, 87, 255, 0.72);
+  box-shadow: 0 0 0 3px rgba(133, 87, 255, 0.1);
+}
+
+.credit-editor button {
+  height: 100%;
+  border: 0;
+  color: #75757c;
+  background: #f7f7f8;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.credit-editor button:hover {
+  color: #16161a;
+  background: #eeeeef;
+}
+
+.credit-editor input {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0 4px;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  background: #fff;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.credit-editor input::-webkit-inner-spin-button,
+.credit-editor input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.credit-editor.is-updated {
+  animation: credit-updated 420ms ease;
+}
+
+@keyframes credit-updated {
+  0%, 100% { background: #fff; }
+  40% { background: var(--cyan-soft); }
+}
+
+.credit-readonly {
+  color: #2f2f35;
+  font-variant-numeric: tabular-nums;
+}
+
+.consumed-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  color: #2f2f35;
+  background: transparent;
+  cursor: pointer;
+}
+
+.consumed-trigger span {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.table-row:hover .consumed-trigger span,
+.consumed-trigger:focus-visible span {
+  opacity: 1;
+}
+
+.points-table.table-row.is-editing {
+  background: #fbf9ff;
+  box-shadow: inset 3px 0 var(--brand);
+}
+
+.points-table.table-row.is-recovery-candidate {
+  background: rgba(133, 87, 255, 0.055);
+}
+
+.points-table.table-row.is-recovery-candidate .candidate-credit {
+  color: var(--brand-dark);
+  font-weight: 650;
+}
+
+.row-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.confirm-link {
+  color: var(--brand-dark);
+  font-weight: 650;
+}
+
+.candidate-recover {
+  padding: 3px 7px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.shortage-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 42px;
+  margin-bottom: 10px;
+  padding: 9px 14px;
+  border: 1px solid rgba(133, 87, 255, 0.18);
+  border-radius: 10px;
+  color: #5633b7;
+  background: #f7f3ff;
+  font-size: 12px;
+}
+
+.shortage-banner[hidden] {
+  display: none;
+}
+
+.shortage-banner strong {
+  margin: 0 3px;
+}
+
+.invite-state {
+  display: flex;
+  min-height: 330px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.36);
+  text-align: center;
+}
+
+.invite-state .secondary-button {
+  margin-top: 20px;
+}
+
+.approval-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.approval-row {
+  display: grid;
+  min-height: 66px;
+  grid-template-columns: minmax(220px, 1.5fr) minmax(120px, 0.8fr) minmax(200px, 1fr) minmax(160px, 0.7fr);
+  align-items: center;
+  gap: 20px;
+  padding: 0 22px;
+  border-top: 1px solid var(--line);
+}
+
+.approval-row:first-child {
+  border-top: 0;
+}
+
+.approval-row.is-head {
+  min-height: 46px;
+  background: #ececed;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.details-list {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.details-row {
+  display: grid;
+  min-height: 42px;
+  grid-template-columns: 1fr 0.85fr 0.8fr 0.58fr;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+}
+
+.details-row:first-child {
+  border-top: 0;
+}
+
+.details-row.is-head {
+  color: var(--text-secondary);
+  background: #f4f4f5;
+  font-weight: 650;
+}
+
+.rule-note {
+  margin-top: 14px;
+  padding: 11px 12px;
+  border-radius: 9px;
+  color: var(--text-secondary);
+  background: #f6f4fb;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.empty-illustration {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 16px;
+  place-items: center;
+  border-radius: 18px;
+  color: var(--brand);
+  background: var(--brand-soft);
+  font-size: 28px;
+  font-weight: 300;
+}
+
+.help-button {
+  position: fixed;
+  right: 24px;
+  bottom: 22px;
+  z-index: 12;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 15, 18, 0.32);
+  backdrop-filter: blur(4px);
+}
+
+.modal-backdrop[hidden] {
+  display: none;
+}
+
+.modal {
+  width: min(440px, 100%);
+  padding: 22px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: var(--shadow);
+  animation: modal-in 180ms ease;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.modal-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.modal-head p {
+  margin: 5px 0 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.modal-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  color: #7b7b82;
+  font-size: 22px;
+}
+
+.modal-close:hover {
+  background: #f0f0f1;
+}
+
+.form-field {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.form-field > span {
+  display: block;
+  margin-bottom: 7px;
+  color: #44444a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.form-field input,
+.form-field select {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  color: var(--text);
+  background: #fafafa;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+  border-color: rgba(133, 87, 255, 0.56);
+  background: #fff;
+}
+
+.form-hint {
+  justify-content: space-between;
+  margin-top: -8px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.warning-box {
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  color: #8e3437;
+  background: #fff1f1;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.modal .primary-button.danger {
+  background: var(--danger);
+}
+
+.toast-region {
+  position: fixed;
+  right: 24px;
+  top: 78px;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  min-width: 220px;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: #fff;
+  background: rgba(23, 23, 27, 0.92);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  font-size: 12px;
+  animation: toast-in 180ms ease;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1260px) {
+  .page-shell { padding-left: 26px; padding-right: 26px; }
+  .summary-card { padding-left: 18px; padding-right: 18px; }
+  .legend-row { gap: 9px; }
+  .data-table { column-gap: 16px; padding-left: 18px; padding-right: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+</style>
+  </head>
+  <body>
+    <aside class="sidebar" aria-label="主导航">
+      <button class="brand-mark" aria-label="首页">J</button>
+
+      <nav class="side-nav" aria-label="业务导航">
+        <button class="side-item" data-tooltip="灵感" aria-label="灵感">
+          <span class="side-icon sparkle-icon" aria-hidden="true">✦</span>
+        </button>
+        <button class="side-item" data-tooltip="生成" aria-label="生成">
+          <span class="side-icon play-icon" aria-hidden="true">▻</span>
+        </button>
+        <button class="side-item" data-tooltip="任务" aria-label="任务">
+          <span class="side-icon timer-icon" aria-hidden="true">◷</span>
+        </button>
+        <span class="side-separator" aria-hidden="true"></span>
+        <button class="side-item" data-tooltip="资产" aria-label="资产">
+          <span class="side-icon folder-icon" aria-hidden="true">□</span>
+        </button>
+        <button class="side-item" data-tooltip="画布" aria-label="画布">
+          <span class="side-icon canvas-icon" aria-hidden="true">⌁</span>
+        </button>
+        <button class="side-item" data-tooltip="更多" aria-label="更多">
+          <span class="side-icon more-icon" aria-hidden="true">∞</span>
+        </button>
+      </nav>
+
+      <div class="side-bottom">
+        <button class="side-item" data-tooltip="通知" aria-label="通知">
+          <span class="side-icon bell-icon" aria-hidden="true">♧</span>
+        </button>
+        <button class="profile-dot" aria-label="个人中心">T</button>
+      </div>
+    </aside>
+
+    <header class="topbar">
+      <button class="credit-pill" data-action="buy">
+        <span class="credit-gem" aria-hidden="true">✦</span>
+        <span id="headerCredit">7,698</span>
+        <span class="credit-divider"></span>
+        <span>团队会员</span>
+        <span class="discount-tag">低至5折</span>
+      </button>
+    </header>
+
+    <main class="page-shell">
+      <section class="team-heading" aria-labelledby="teamTitle">
+        <div class="team-identity">
+          <span class="team-avatar" aria-hidden="true">T</span>
+          <div>
+            <div class="team-name-row">
+              <h1 id="teamTitle">Team-12be3d2</h1>
+              <button class="icon-button edit-button" data-action="rename" aria-label="修改团队名称">⌕</button>
+            </div>
+            <p>团队 ID：7682691865522607422 <button class="copy-button" data-copy="7682691865522607422">复制</button></p>
+          </div>
+        </div>
+        <button class="secondary-button" data-action="orders">订单管理</button>
+      </section>
+
+      <section class="summary-grid" aria-label="团队概览">
+        <article class="summary-card membership-card">
+          <div class="card-label">当前套餐</div>
+          <div class="membership-row">
+            <div class="title-with-tag">
+              <strong>高级团队会员</strong>
+              <span class="status-tag">生效中</span>
+            </div>
+            <button class="link-button" data-action="renew">立即续费</button>
+          </div>
+          <div class="card-footer-line">
+            <span>会员有效期：2026-10-08</span>
+            <span class="info-dot" title="到期前可随时续费">i</span>
+          </div>
+        </article>
+
+        <article class="summary-card credits-card">
+          <div class="summary-topline">
+            <div>
+              <div class="card-label">剩余总积分</div>
+              <div class="large-number"><span id="availableTotal">27,076</span></div>
+            </div>
+            <div class="card-actions">
+              <button class="link-button" data-action="details">明细</button>
+              <button class="link-button" data-action="allocate-first">分配</button>
+              <button class="link-button" data-action="buy">购买</button>
+            </div>
+          </div>
+          <div class="allocation-stats summary-credit-meta" aria-label="积分分配情况">
+            <div class="allocation-stat"><span>已分配</span><strong id="assignedTotal">4,220</strong></div>
+            <div class="allocation-stat unallocated" title="团队剩余可分配余额"><span>未分配</span><strong id="unassignedTotal">22,856</strong></div>
+          </div>
+        </article>
+
+        <article class="summary-card seats-card">
+          <div class="summary-topline">
+            <div>
+              <div class="card-label">可用席位 / 总席位</div>
+              <div class="seat-number"><span id="seatUsed">3</span><small>/5</small></div>
+            </div>
+            <button class="link-button" data-action="seats">增加席位</button>
+          </div>
+          <div class="card-footer-line seat-footer"><i></i><span id="seatUsage">已使用 3/5</span></div>
+        </article>
+      </section>
+
+      <section class="workspace" aria-label="团队管理工作区">
+        <div class="toolbar">
+          <div class="tabs" role="tablist" aria-label="团队管理分类">
+            <button class="tab is-active" id="tab-members" role="tab" aria-selected="true" aria-controls="panel-members" data-tab="members">成员管理</button>
+            <button class="tab" id="tab-credits" role="tab" aria-selected="false" aria-controls="panel-credits" data-tab="credits">积分管理</button>
+            <button class="tab" id="tab-invites" role="tab" aria-selected="false" aria-controls="panel-invites" data-tab="invites">团队审批</button>
+          </div>
+          <div class="toolbar-actions">
+            <button class="primary-button toolbar-credit-button" id="pointsDetailButton" data-action="points-details" hidden>积分明细</button>
+            <button class="primary-button invite-button" data-action="invite">邀请成员</button>
+          </div>
+        </div>
+
+        <section class="tab-panel is-active" id="panel-members" role="tabpanel" aria-labelledby="tab-members">
+          <div class="table-card">
+            <div class="data-table member-table table-head">
+              <div>用户</div>
+              <div>团队角色</div>
+              <div>已消耗</div>
+              <div>剩余积分</div>
+              <div>加入时间</div>
+              <div>操作 <span class="info-dot" title="创建者不可删除">i</span></div>
+            </div>
+            <div id="memberRows"></div>
+          </div>
+          <div class="pagination" aria-label="分页">
+            <button disabled aria-label="上一页">‹</button>
+            <button class="current" aria-current="page">1</button>
+            <button disabled aria-label="下一页">›</button>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
+          <div class="points-overview" id="pointsOverview"></div>
+          <div class="section-title-row">
+            <div>
+              <h2>成员积分</h2>
+            </div>
+          </div>
+          <div class="shortage-banner" id="shortageBanner" hidden></div>
+          <div class="table-card points-table-card">
+            <div class="data-table points-table table-head">
+              <div>用户</div>
+              <div>团队角色</div>
+              <div>已消耗 <span class="info-dot" title="点击成员的消耗数可查看分类明细">i</span></div>
+              <div>剩余总积分</div>
+              <div class="credit-header">通用积分</div>
+              <div class="credit-header">SD 2.5积分</div>
+              <div class="credit-header">SD 2.0积分</div>
+              <div>操作</div>
+            </div>
+            <div id="pointsRows"></div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="panel-invites" role="tabpanel" aria-labelledby="tab-invites" hidden>
+          <div id="invitePanelContent"></div>
+        </section>
+      </section>
+    </main>
+
+    <button class="help-button" aria-label="帮助" data-action="help">?</button>
+
+    <div class="modal-backdrop" id="modalBackdrop" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-head">
+          <div>
+            <h2 id="modalTitle">操作</h2>
+            <p id="modalSubtitle"></p>
+          </div>
+          <button class="modal-close" data-close-modal aria-label="关闭">×</button>
+        </div>
+        <form id="modalForm">
+          <div id="modalBody"></div>
+          <div class="modal-actions">
+            <button type="button" class="secondary-button" data-close-modal>取消</button>
+            <button type="submit" class="primary-button" id="modalConfirm">确认</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="toast-region" aria-live="polite" aria-atomic="true" id="toastRegion"></div>
+
+    <script>
+const creditTypes = ["general", "sd25", "sd20"];
+
+const state = {
+  activeTab: "members",
+  pools: {
+    general: { label: "通用积分", total: 16760, available: 14760 },
+    sd25: { label: "SD 2.5积分", total: 8280, available: 7100 },
+    sd20: { label: "SD 2.0积分", total: 2036, available: 996 },
+  },
+  perSeat: { general: 800, sd25: 400, sd20: 240 },
+  seats: { used: 3, total: 5 },
+  members: [
+    {
+      id: 1,
+      name: "用户5382311869083",
+      role: "创建者",
+      avatar: "用",
+      avatarClass: "owner",
+      consumed: { general: 2, sd25: 0, sd20: 0 },
+      joined: "2026-09-08 21:14",
+      credits: { general: 800, sd25: 400, sd20: 240 },
+      locked: true,
+    },
+    {
+      id: 2,
+      name: "陈俊生",
+      role: "管理员",
+      avatar: "陈",
+      avatarClass: "admin",
+      consumed: { general: 0, sd25: 0, sd20: 0 },
+      joined: "2026-09-09 21:36",
+      credits: { general: 760, sd25: 500, sd20: 120 },
+    },
+    {
+      id: 3,
+      name: "Felix",
+      role: "协作者",
+      avatar: "F",
+      avatarClass: "collab",
+      consumed: { general: 0, sd25: 2, sd20: 0 },
+      joined: "2026-09-11 13:20",
+      credits: { general: 80, sd25: 80, sd20: 40 },
+    },
+    {
+      id: 4,
+      name: "Li Lei",
+      role: "协作者",
+      avatar: "L",
+      avatarClass: "designer",
+      consumed: { general: 0, sd25: 0, sd20: 0 },
+      joined: "2026-09-12 09:42",
+      credits: { general: 360, sd25: 200, sd20: 640 },
+    },
+  ],
+  pendingInvites: [],
+  transactions: [
+    { time: "2026-09-12 09:42", member: "Li Lei", type: "general", amount: 360, action: "自动分配" },
+    { time: "2026-09-12 09:42", member: "Li Lei", type: "sd25", amount: 200, action: "自动分配" },
+    { time: "2026-09-12 09:42", member: "Li Lei", type: "sd20", amount: 640, action: "自动分配" },
+    { time: "2026-09-11 13:20", member: "Felix", type: "general", amount: 80, action: "自动分配" },
+  ],
+  editingMemberId: null,
+  draftCredits: null,
+  shortage: null,
+  modal: null,
+};
+
+const numberFormat = new Intl.NumberFormat("zh-CN");
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+function format(value) {
+  return numberFormat.format(value);
+}
+
+function escapeHTML(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function sumCredits(credits) {
+  return creditTypes.reduce((sum, key) => sum + Number(credits[key] || 0), 0);
+}
+
+function memberTotal(member) {
+  return sumCredits(member.credits);
+}
+
+function consumedTotal(member) {
+  return sumCredits(member.consumed);
+}
+
+function assignedForType(type) {
+  return state.members.reduce((sum, member) => sum + member.credits[type], 0);
+}
+
+function assignedTotal() {
+  return creditTypes.reduce((sum, type) => sum + assignedForType(type), 0);
+}
+
+function availableTotal() {
+  return creditTypes.reduce((sum, type) => sum + state.pools[type].available, 0);
+}
+
+function remainingTotal() {
+  return assignedTotal() + availableTotal();
+}
+
+function avatarMarkup(member) {
+  return `<span class="avatar ${member.avatarClass}" aria-hidden="true">${escapeHTML(member.avatar)}</span>`;
+}
+
+function staticRoleMarkup(member) {
+  return `<div class="role-cell"><span>${escapeHTML(member.role)}</span></div>`;
+}
+
+function pointMarkup(value) {
+  return `<div class="point-value"><span class="point-gem" aria-hidden="true">✦</span><span>${format(value)}</span></div>`;
+}
+
+function renderMemberRows() {
+  const rows = state.members.map((member) => `
+    <div class="data-table member-table table-row" data-member-id="${member.id}">
+      <div class="user-cell">${avatarMarkup(member)}<span class="user-name">${escapeHTML(member.name)}</span></div>
+      ${staticRoleMarkup(member)}
+      ${pointMarkup(consumedTotal(member))}
+      ${pointMarkup(memberTotal(member))}
+      <div>${member.joined}</div>
+      <div>${member.locked ? '<span class="empty-action">—</span>' : `<button class="action-link danger" data-delete="${member.id}">删除</button>`}</div>
+    </div>
+  `).join("");
+  $("#memberRows").innerHTML = rows || emptyRows("暂无团队成员");
+}
+
+function renderPointCards() {
+  $("#pointsOverview").innerHTML = creditTypes.map((type) => {
+    const pool = state.pools[type];
+    const memberAmount = assignedForType(type);
+    const total = pool.available + memberAmount;
+    return `
+      <article class="point-card">
+        <div class="point-title">${pool.label}</div>
+        <div class="point-balance">${format(total)}</div>
+        <div class="allocation-stats point-meta" aria-label="${pool.label}分配情况">
+          <div class="allocation-stat"><span>已分配</span><strong>${format(memberAmount)}</strong></div>
+          <div class="allocation-stat unallocated" title="团队剩余可分配余额"><span>未分配</span><strong>${format(pool.available)}</strong></div>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+function creditEditorMarkup(member, type) {
+  const value = state.draftCredits[type];
+  const label = state.pools[type].label;
+  return `
+    <div class="credit-editor is-${type}" data-credit-editor="${type}">
+      <button type="button" data-draft-delta="-100" data-member="${member.id}" data-credit-type="${type}" aria-label="减少100${label}">−</button>
+      <input type="number" min="0" step="1" value="${value}" data-draft-input data-member="${member.id}" data-credit-type="${type}" aria-label="${member.name}${label}" />
+      <button type="button" data-draft-delta="100" data-member="${member.id}" data-credit-type="${type}" aria-label="增加100${label}">＋</button>
+    </div>
+  `;
+}
+
+function shortageTypes() {
+  return state.shortage ? Object.keys(state.shortage.amounts).filter((type) => state.shortage.amounts[type] > 0) : [];
+}
+
+function isRecoveryCandidate(member) {
+  return Boolean(
+    state.shortage &&
+    member.id !== state.editingMemberId &&
+    shortageTypes().some((type) => member.credits[type] > 0)
+  );
+}
+
+function readonlyCreditMarkup(member, type, candidate) {
+  const classes = ["credit-readonly"];
+  if (candidate && state.shortage.amounts[type] > 0 && member.credits[type] > 0) classes.push("candidate-credit");
+  return `<div class="${classes.join(" ")}">${format(member.credits[type])}</div>`;
+}
+
+function renderPointsRows() {
+  $("#pointsRows").innerHTML = state.members.map((member) => {
+    const editing = member.id === state.editingMemberId;
+    const candidate = isRecoveryCandidate(member);
+    const rowClasses = ["data-table", "points-table", "table-row"];
+    if (editing) rowClasses.push("is-editing");
+    if (candidate) rowClasses.push("is-recovery-candidate");
+    const creditCells = creditTypes.map((type) => editing
+      ? creditEditorMarkup(member, type)
+      : readonlyCreditMarkup(member, type, candidate)
+    ).join("");
+
+    let action = `<button class="allocation-button" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ""}>积分调配</button>`;
+    if (editing) {
+      action = '<div class="row-actions"><button class="allocation-button confirm-button" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>';
+    } else if (candidate) {
+      action = `<div class="row-actions"><button class="candidate-recover" data-recover-candidate="${member.id}">回收可用</button></div>`;
+    }
+
+    return `
+      <div class="${rowClasses.join(" ")}" data-member-id="${member.id}">
+        <div class="user-cell">${avatarMarkup(member)}<span class="user-name">${escapeHTML(member.name)}</span></div>
+        ${staticRoleMarkup(member)}
+        <div><button class="consumed-trigger" data-consumed-details="${member.id}">${format(consumedTotal(member))}<span>明细</span></button></div>
+        ${pointMarkup(memberTotal(member))}
+        ${creditCells}
+        <div class="points-operation">${action}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderShortageBanner() {
+  const banner = $("#shortageBanner");
+  if (!state.shortage) {
+    banner.hidden = true;
+    banner.innerHTML = "";
+    return;
+  }
+
+  const summary = shortageTypes().map((type) => `${state.pools[type].label}缺 ${format(state.shortage.amounts[type])}`).join("，");
+  const recoverable = state.members
+    .filter((member) => isRecoveryCandidate(member))
+    .reduce((total, member) => total + shortageTypes().reduce((sum, type) => sum + member.credits[type], 0), 0);
+  banner.innerHTML = `<span>团队待分配余额不足：<strong>${summary}</strong>。已高亮有可回收余额的成员。</span><span>可回收 ${format(recoverable)}</span>`;
+  banner.hidden = false;
+}
+
+function renderSummary() {
+  const assigned = assignedTotal();
+  const available = availableTotal();
+  const total = assigned + available;
+
+  $("#availableTotal").textContent = format(total);
+  $("#assignedTotal").textContent = format(assigned);
+  $("#unassignedTotal").textContent = format(available);
+  $("#seatUsed").textContent = String(state.seats.used);
+  $("#seatUsage").textContent = `已使用 ${state.seats.used}/${state.seats.total}`;
+}
+
+function renderInvites() {
+  const root = $("#invitePanelContent");
+  if (!state.pendingInvites.length) {
+    root.innerHTML = `
+      <div class="invite-state">
+        <div class="empty-illustration" aria-hidden="true">＋</div>
+        <h2>暂无待审批申请</h2>
+        <p>成员接受邀请后，将在这里等待团队管理员审批。</p>
+        <button class="secondary-button" data-action="invite">邀请成员</button>
+      </div>
+    `;
+    return;
+  }
+
+  root.innerHTML = `
+    <div class="approval-card">
+      <div class="approval-row is-head"><div>申请人</div><div>申请角色</div><div>申请时间</div><div>操作</div></div>
+      ${state.pendingInvites.map((invite) => `
+        <div class="approval-row">
+          <div>${escapeHTML(invite.email)}</div>
+          <div>${escapeHTML(invite.role)}</div>
+          <div>${invite.time}</div>
+          <div class="row-actions"><button class="action-link confirm-link" data-approve-invite="${invite.id}">同意</button><button class="action-link" data-reject-invite="${invite.id}">拒绝</button></div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderAll() {
+  renderMemberRows();
+  renderPointCards();
+  renderPointsRows();
+  renderShortageBanner();
+  renderSummary();
+  renderInvites();
+}
+
+function emptyRows(message) {
+  return `<div style="height:180px;display:grid;place-items:center;color:#8e8e96">${message}</div>`;
+}
+
+function switchTab(tabName) {
+  state.activeTab = tabName;
+  $$(".tab").forEach((tab) => {
+    const active = tab.dataset.tab === tabName;
+    tab.classList.toggle("is-active", active);
+    tab.setAttribute("aria-selected", String(active));
+  });
+  $$(".tab-panel").forEach((panel) => {
+    const active = panel.id === `panel-${tabName}`;
+    panel.hidden = !active;
+    panel.classList.toggle("is-active", active);
+  });
+  $("#pointsDetailButton").hidden = tabName !== "credits";
+}
+
+function beginCreditEdit(memberId) {
+  if (state.editingMemberId !== null) {
+    showToast("请先确认或取消当前成员的修改");
+    return;
+  }
+  const member = state.members.find((item) => item.id === Number(memberId));
+  if (!member) return;
+  state.editingMemberId = member.id;
+  state.draftCredits = { ...member.credits };
+  state.shortage = null;
+  renderPointsRows();
+  renderShortageBanner();
+  window.setTimeout(() => $("[data-draft-input]")?.select(), 20);
+}
+
+function cancelCreditEdit() {
+  state.editingMemberId = null;
+  state.draftCredits = null;
+  state.shortage = null;
+  renderPointsRows();
+  renderShortageBanner();
+}
+
+function calculateShortages(member, draft) {
+  return creditTypes.reduce((shortages, type) => {
+    const requested = Math.max(0, Math.round(Number(draft[type])));
+    const increase = requested - member.credits[type];
+    if (increase > state.pools[type].available) shortages[type] = increase - state.pools[type].available;
+    return shortages;
+  }, {});
+}
+
+function confirmCreditEdit() {
+  const member = state.members.find((item) => item.id === state.editingMemberId);
+  if (!member || !state.draftCredits) return;
+  const invalidType = creditTypes.find((type) => String(state.draftCredits[type]).trim() === "" || !Number.isSafeInteger(Number(state.draftCredits[type])) || Number(state.draftCredits[type]) < 0);
+  if (invalidType) {
+    showToast("积分请输入大于等于 0 的整数");
+    return;
+  }
+
+  creditTypes.forEach((type) => {
+    state.draftCredits[type] = Math.round(Number(state.draftCredits[type]));
+  });
+  const shortages = calculateShortages(member, state.draftCredits);
+  if (Object.keys(shortages).length) {
+    state.shortage = { targetMemberId: member.id, amounts: shortages };
+    renderPointsRows();
+    renderShortageBanner();
+    showToast("团队待分配余额不足，请先从高亮成员回收积分");
+    return;
+  }
+
+  const changes = [];
+  creditTypes.forEach((type) => {
+    const previous = member.credits[type];
+    const next = state.draftCredits[type];
+    const delta = next - previous;
+    if (!delta) return;
+    state.pools[type].available -= delta;
+    member.credits[type] = next;
+    changes.push({ type, delta });
+    recordTransaction(member.name, type, Math.abs(delta), delta > 0 ? "手动分配" : "手动回收");
+  });
+
+  state.editingMemberId = null;
+  state.draftCredits = null;
+  state.shortage = null;
+  renderAll();
+  showToast(changes.length ? `已确认 ${member.name} 的积分调整` : "积分未发生变化");
+}
+
+function recordTransaction(member, type, amount, action) {
+  const now = new Date();
+  const time = new Intl.DateTimeFormat("zh-CN", {
+    year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false,
+  }).format(now).replaceAll("/", "-");
+  state.transactions.unshift({ time, member, type, amount, action });
+}
+
+function openModal(config) {
+  state.modal = config;
+  $("#modalTitle").textContent = config.title;
+  $("#modalSubtitle").textContent = config.subtitle || "";
+  $("#modalBody").innerHTML = config.body || "";
+  $("#modalConfirm").textContent = config.confirmText || "确认";
+  $("#modalConfirm").classList.toggle("danger", config.danger === true);
+  $("#modalForm .modal-actions [data-close-modal]").hidden = config.readOnly === true;
+  $("#modalBackdrop").hidden = false;
+  document.body.style.overflow = "hidden";
+  window.setTimeout(() => $("#modalBody input, #modalBody select")?.focus(), 30);
+}
+
+function closeModal() {
+  state.modal = null;
+  $("#modalBackdrop").hidden = true;
+  document.body.style.overflow = "";
+  $("#modalForm").reset();
+  $("#modalForm .modal-actions [data-close-modal]").hidden = false;
+}
+
+function openDeleteModal(memberId) {
+  const member = state.members.find((item) => item.id === Number(memberId));
+  if (!member || member.locked) return;
+  openModal({
+    type: "delete",
+    memberId: member.id,
+    title: "删除成员",
+    subtitle: member.name,
+    body: '<div class="warning-box"><strong>!</strong><span>删除后，该成员将无法继续访问团队空间，三类未使用积分会自动回收到团队待分配余额。</span></div>',
+    confirmText: "确认删除",
+    danger: true,
+  });
+}
+
+function openInviteModal() {
+  openModal({
+    type: "invite",
+    title: "邀请成员",
+    subtitle: "成员接受邀请并通过审批后，系统按每席位额度自动发放积分",
+    body: `
+      <label class="form-field"><span>成员邮箱</span><input type="email" name="email" placeholder="name@example.com" required /></label>
+      <label class="form-field"><span>团队角色</span><select name="role"><option>协作者</option><option>管理员</option></select></label>
+      <div class="rule-note">每席位默认：通用积分 800、SD 2.5积分 400、SD 2.0积分 240；某类余额不足时，仅发放团队当时的剩余待分配积分。</div>
+    `,
+    confirmText: "发送邀请",
+  });
+}
+
+function openRenameModal() {
+  openModal({
+    type: "rename",
+    title: "修改团队名称",
+    subtitle: "团队名称对所有成员可见",
+    body: '<label class="form-field"><span>团队名称</span><input name="teamName" value="Team-12be3d2" maxlength="30" required /></label>',
+    confirmText: "保存",
+  });
+}
+
+function openConsumedDetails(memberId) {
+  const member = state.members.find((item) => item.id === Number(memberId));
+  if (!member) return;
+  openModal({
+    type: "read-only",
+    title: "已消耗积分明细",
+    subtitle: `${member.name} · 共消耗 ${format(consumedTotal(member))}`,
+    body: `
+      <div class="details-list">
+        <div class="details-row is-head"><div>积分类型</div><div>已消耗</div><div>剩余</div><div>状态</div></div>
+        ${creditTypes.map((type) => `<div class="details-row"><div>${state.pools[type].label}</div><div>${format(member.consumed[type])}</div><div>${format(member.credits[type])}</div><div>正常</div></div>`).join("")}
+      </div>
+      <div class="rule-note">主表保留“已消耗”汇总，点击后查看分类明细，既便于管理员核对积分去向，也避免主表信息过载。</div>
+    `,
+    confirmText: "关闭",
+    readOnly: true,
+  });
+}
+
+function openPointsDetails() {
+  openModal({
+    type: "read-only",
+    title: "积分明细",
+    subtitle: "最近的分配、回收与自动发放记录",
+    body: `
+      <div class="details-list">
+        <div class="details-row is-head"><div>时间 / 成员</div><div>类型</div><div>数量</div><div>动作</div></div>
+        ${state.transactions.slice(0, 8).map((item) => `<div class="details-row"><div>${item.time}<br>${escapeHTML(item.member)}</div><div>${state.pools[item.type].label}</div><div>${format(item.amount)}</div><div>${item.action}</div></div>`).join("") || '<div class="details-row"><div>暂无记录</div></div>'}
+      </div>
+    `,
+    confirmText: "关闭",
+    readOnly: true,
+  });
+}
+
+function openBuyModal() {
+  openModal({
+    type: "buy",
+    title: "购买充值积分",
+    subtitle: "购买完成后，积分进入团队对应类型的待分配余额",
+    body: `
+      <label class="form-field"><span>积分类型</span><select name="creditType">${creditTypes.map((type) => `<option value="${type}">${state.pools[type].label}</option>`).join("")}</select></label>
+      <label class="form-field"><span>购买数量</span><input type="number" name="amount" min="1" step="100" value="1000" required /></label>
+    `,
+    confirmText: "模拟购买",
+  });
+}
+
+function openRecoveryModal(memberId) {
+  const member = state.members.find((item) => item.id === Number(memberId));
+  if (!member || !state.shortage) return;
+  const candidates = shortageTypes().filter((type) => member.credits[type] > 0);
+  if (!candidates.length) return;
+  const firstType = candidates[0];
+  const max = Math.min(member.credits[firstType], state.shortage.amounts[firstType]);
+  openModal({
+    type: "recovery",
+    memberId: member.id,
+    title: "回收成员积分",
+    subtitle: `从 ${member.name} 的未使用积分转回团队待分配余额`,
+    body: `
+      <label class="form-field"><span>积分类型</span><select name="creditType" id="recoveryType">${candidates.map((type) => `<option value="${type}">${state.pools[type].label}</option>`).join("")}</select></label>
+      <label class="form-field"><span>回收数量</span><input name="amount" id="recoveryAmount" type="number" min="1" max="${max}" value="${max}" step="1" required /></label>
+      <div class="form-hint"><span>本次最多可回收</span><strong id="recoveryLimit">${format(max)}</strong></div>
+      <div class="rule-note">回收数量不会超过该成员对应类型的未使用余额，也不会超过当前分配缺口。</div>
+    `,
+    confirmText: "确认回收",
+  });
+}
+
+function recalculateShortage() {
+  const member = state.members.find((item) => item.id === state.editingMemberId);
+  if (!member || !state.draftCredits) {
+    state.shortage = null;
+    return;
+  }
+  const amounts = calculateShortages(member, state.draftCredits);
+  state.shortage = Object.keys(amounts).length ? { targetMemberId: member.id, amounts } : null;
+}
+
+function approveInvite(inviteId) {
+  const invite = state.pendingInvites.find((item) => item.id === Number(inviteId));
+  if (!invite) return;
+  if (state.seats.used >= state.seats.total) {
+    showToast("可用席位不足，请先增加席位");
+    return;
+  }
+
+  const credits = {};
+  creditTypes.forEach((type) => {
+    const amount = Math.min(state.perSeat[type], state.pools[type].available);
+    credits[type] = amount;
+    state.pools[type].available -= amount;
+    if (amount) recordTransaction(invite.email, type, amount, "自动分配");
+  });
+  const localName = invite.email.split("@")[0] || "新成员";
+  state.members.push({
+    id: Math.max(...state.members.map((member) => member.id), 0) + 1,
+    name: localName,
+    role: invite.role,
+    avatar: localName.slice(0, 1).toUpperCase(),
+    avatarClass: "collab",
+    consumed: { general: 0, sd25: 0, sd20: 0 },
+    joined: "2026-09-16 现在",
+    credits,
+  });
+  state.seats.used += 1;
+  state.pendingInvites = state.pendingInvites.filter((item) => item.id !== invite.id);
+  renderAll();
+  const partial = creditTypes.some((type) => credits[type] < state.perSeat[type]);
+  showToast(partial ? "已通过审批；部分积分因团队余额不足按剩余量发放" : "已通过审批并按每席位额度自动发放积分");
+}
+
+function updateRecoveryLimit() {
+  if (state.modal?.type !== "recovery") return;
+  const member = state.members.find((item) => item.id === state.modal.memberId);
+  const type = $("#recoveryType").value;
+  const max = Math.min(member.credits[type], state.shortage?.amounts[type] || 0);
+  $("#recoveryAmount").max = String(max);
+  $("#recoveryAmount").value = String(max);
+  $("#recoveryLimit").textContent = format(max);
+}
+
+function handleModalSubmit(event) {
+  event.preventDefault();
+  if (!state.modal) return;
+  if (state.modal.type === "read-only") {
+    closeModal();
+    return;
+  }
+  const data = new FormData(event.currentTarget);
+
+  if (state.modal.type === "delete") {
+    const member = state.members.find((item) => item.id === state.modal.memberId);
+    creditTypes.forEach((type) => {
+      state.pools[type].available += member.credits[type];
+      if (member.credits[type]) recordTransaction(member.name, type, member.credits[type], "删除回收");
+    });
+    state.members = state.members.filter((item) => item.id !== member.id);
+    state.seats.used = Math.max(0, state.seats.used - 1);
+    cancelCreditEdit();
+    renderAll();
+    closeModal();
+    showToast(`已删除 ${member.name}，未使用积分已回收`);
+    return;
+  }
+
+  if (state.modal.type === "invite") {
+    const email = String(data.get("email")).trim();
+    const role = String(data.get("role"));
+    state.pendingInvites.push({ id: Date.now(), email, role, time: "2026-09-16 现在" });
+    renderInvites();
+    closeModal();
+    showToast(`邀请已发送至 ${email}，接受后等待团队审批`);
+    return;
+  }
+
+  if (state.modal.type === "rename") {
+    const name = String(data.get("teamName")).trim();
+    if (!name) return;
+    $("#teamTitle").textContent = name;
+    closeModal();
+    showToast("团队名称已更新");
+    return;
+  }
+
+  if (state.modal.type === "buy") {
+    const type = String(data.get("creditType"));
+    const amount = Math.round(Number(data.get("amount")));
+    if (!Number.isFinite(amount) || amount < 1) {
+      showToast("请输入有效的购买数量");
+      return;
+    }
+    state.pools[type].total += amount;
+    state.pools[type].available += amount;
+    recordTransaction("团队积分池", type, amount, "购买入账");
+    recalculateShortage();
+    renderAll();
+    closeModal();
+    showToast(`${format(amount)} ${state.pools[type].label}已进入团队待分配余额`);
+    return;
+  }
+
+  if (state.modal.type === "recovery") {
+    const member = state.members.find((item) => item.id === state.modal.memberId);
+    const type = String(data.get("creditType"));
+    const amount = Math.round(Number(data.get("amount")));
+    const max = Math.min(member.credits[type], state.shortage?.amounts[type] || 0);
+    if (!Number.isFinite(amount) || amount < 1 || amount > max) {
+      showToast(`请输入 1–${format(max)} 之间的整数`);
+      return;
+    }
+    member.credits[type] -= amount;
+    state.pools[type].available += amount;
+    recordTransaction(member.name, type, amount, "余额回收");
+    recalculateShortage();
+    renderAll();
+    closeModal();
+    showToast(state.shortage ? "已回收积分，仍有分配缺口" : "团队余额已补足，可再次确认本次调配");
+  }
+}
+
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+  $("#toastRegion").appendChild(toast);
+  window.setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(-4px)";
+    window.setTimeout(() => toast.remove(), 180);
+  }, 2600);
+}
+
+async function copyText(value, successMessage) {
+  try {
+    await navigator.clipboard.writeText(value);
+    showToast(successMessage);
+  } catch {
+    const input = document.createElement("textarea");
+    input.value = value;
+    input.style.position = "fixed";
+    input.style.opacity = "0";
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand("copy");
+    input.remove();
+    showToast(successMessage);
+  }
+}
+
+document.addEventListener("click", (event) => {
+  const tab = event.target.closest("[data-tab]");
+  if (tab) {
+    switchTab(tab.dataset.tab);
+    return;
+  }
+
+  const deleteButton = event.target.closest("[data-delete]");
+  if (deleteButton) {
+    openDeleteModal(deleteButton.dataset.delete);
+    return;
+  }
+
+  const editButton = event.target.closest("[data-edit-credits]");
+  if (editButton) {
+    beginCreditEdit(editButton.dataset.editCredits);
+    return;
+  }
+
+  if (event.target.closest("[data-confirm-credits]")) {
+    confirmCreditEdit();
+    return;
+  }
+
+  if (event.target.closest("[data-cancel-credits]")) {
+    cancelCreditEdit();
+    return;
+  }
+
+  const deltaButton = event.target.closest("[data-draft-delta]");
+  if (deltaButton) {
+    const type = deltaButton.dataset.creditType;
+    const delta = Number(deltaButton.dataset.draftDelta);
+    state.draftCredits[type] = Math.max(0, Math.round(Number(state.draftCredits[type]) + delta));
+    state.shortage = null;
+    renderPointsRows();
+    renderShortageBanner();
+    return;
+  }
+
+  const recoveryButton = event.target.closest("[data-recover-candidate]");
+  if (recoveryButton) {
+    openRecoveryModal(recoveryButton.dataset.recoverCandidate);
+    return;
+  }
+
+  const consumedButton = event.target.closest("[data-consumed-details]");
+  if (consumedButton) {
+    openConsumedDetails(consumedButton.dataset.consumedDetails);
+    return;
+  }
+
+  const approveButton = event.target.closest("[data-approve-invite]");
+  if (approveButton) {
+    approveInvite(approveButton.dataset.approveInvite);
+    return;
+  }
+
+  const rejectButton = event.target.closest("[data-reject-invite]");
+  if (rejectButton) {
+    state.pendingInvites = state.pendingInvites.filter((item) => item.id !== Number(rejectButton.dataset.rejectInvite));
+    renderInvites();
+    showToast("已拒绝该成员申请");
+    return;
+  }
+
+  const copyButton = event.target.closest("[data-copy]");
+  if (copyButton) {
+    copyText(copyButton.dataset.copy, "团队 ID 已复制");
+    return;
+  }
+
+  if (event.target.closest("[data-close-modal]") || event.target === $("#modalBackdrop")) {
+    closeModal();
+    return;
+  }
+
+  const actionButton = event.target.closest("[data-action]");
+  if (!actionButton) return;
+  const action = actionButton.dataset.action;
+
+  if (action === "invite") openInviteModal();
+  else if (action === "rename") openRenameModal();
+  else if (action === "allocate-first") {
+    switchTab("credits");
+    beginCreditEdit(state.members[0].id);
+  } else if (action === "points-details" || action === "details") openPointsDetails();
+  else if (action === "buy") openBuyModal();
+  else if (action === "renew") showToast("续费流程已唤起（Demo）");
+  else if (action === "seats") showToast("席位购买流程已唤起（Demo）");
+  else if (action === "orders") showToast("订单管理已打开（Demo）");
+  else if (action === "help") showToast("如需帮助，请联系团队管理员");
+});
+
+document.addEventListener("input", (event) => {
+  const input = event.target.closest("[data-draft-input]");
+  if (!input || !state.draftCredits) return;
+  state.draftCredits[input.dataset.creditType] = input.value;
+  state.shortage = null;
+  renderShortageBanner();
+});
+
+$("#modalForm").addEventListener("submit", handleModalSubmit);
+$("#modalBody").addEventListener("change", (event) => {
+  if (event.target.id === "recoveryType") updateRecoveryLimit();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !$("#modalBackdrop").hidden) closeModal();
+  if (event.key === "Enter" && event.target.matches("[data-draft-input]")) {
+    event.preventDefault();
+    confirmCreditEdit();
+  }
+  if ((event.key === "ArrowLeft" || event.key === "ArrowRight") && document.activeElement?.dataset.tab) {
+    const tabs = $$("[data-tab]");
+    const index = tabs.indexOf(document.activeElement);
+    const next = event.key === "ArrowRight" ? (index + 1) % tabs.length : (index - 1 + tabs.length) % tabs.length;
+    tabs[next].focus();
+    switchTab(tabs[next].dataset.tab);
+  }
+});
+
+renderAll();
+switchTab("members");
+
+</script>
+  </body>
+</html>

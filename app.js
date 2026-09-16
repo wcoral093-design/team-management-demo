@@ -1,0 +1,797 @@
+const creditTypes = ["general", "sd25", "sd20"];
+
+const state = {
+  activeTab: "members",
+  pools: {
+    general: { label: "通用积分", total: 16760, available: 14760 },
+    sd25: { label: "SD 2.5积分", total: 8280, available: 7100 },
+    sd20: { label: "SD 2.0积分", total: 2036, available: 996 },
+  },
+  perSeat: { general: 800, sd25: 400, sd20: 240 },
+  seats: { used: 3, total: 5 },
+  members: [
+    {
+      id: 1,
+      name: "用户5382311869083",
+      role: "创建者",
+      avatar: "用",
+      avatarClass: "owner",
+      consumed: { general: 2, sd25: 0, sd20: 0 },
+      joined: "2026-09-08 21:14",
+      credits: { general: 800, sd25: 400, sd20: 240 },
+      locked: true,
+    },
+    {
+      id: 2,
+      name: "陈俊生",
+      role: "管理员",
+      avatar: "陈",
+      avatarClass: "admin",
+      consumed: { general: 0, sd25: 0, sd20: 0 },
+      joined: "2026-09-09 21:36",
+      credits: { general: 760, sd25: 500, sd20: 120 },
+    },
+    {
+      id: 3,
+      name: "Felix",
+      role: "协作者",
+      avatar: "F",
+      avatarClass: "collab",
+      consumed: { general: 0, sd25: 2, sd20: 0 },
+      joined: "2026-09-11 13:20",
+      credits: { general: 80, sd25: 80, sd20: 40 },
+    },
+    {
+      id: 4,
+      name: "Li Lei",
+      role: "协作者",
+      avatar: "L",
+      avatarClass: "designer",
+      consumed: { general: 0, sd25: 0, sd20: 0 },
+      joined: "2026-09-12 09:42",
+      credits: { general: 360, sd25: 200, sd20: 640 },
+    },
+  ],
+  pendingInvites: [],
+  transactions: [
+    { time: "2026-09-12 09:42", member: "Li Lei", type: "general", amount: 360, action: "自动分配" },
+    { time: "2026-09-12 09:42", member: "Li Lei", type: "sd25", amount: 200, action: "自动分配" },
+    { time: "2026-09-12 09:42", member: "Li Lei", type: "sd20", amount: 640, action: "自动分配" },
+    { time: "2026-09-11 13:20", member: "Felix", type: "general", amount: 80, action: "自动分配" },
+  ],
+  editingMemberId: null,
+  draftCredits: null,
+  shortage: null,
+  modal: null,
+};
+
+const numberFormat = new Intl.NumberFormat("zh-CN");
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+function format(value) {
+  return numberFormat.format(value);
+}
+
+function escapeHTML(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function sumCredits(credits) {
+  return creditTypes.reduce((sum, key) => sum + Number(credits[key] || 0), 0);
+}
+
+function memberTotal(member) {
+  return sumCredits(member.credits);
+}
+
+function consumedTotal(member) {
+  return sumCredits(member.consumed);
+}
+
+function assignedForType(type) {
+  return state.members.reduce((sum, member) => sum + member.credits[type], 0);
+}
+
+function assignedTotal() {
+  return creditTypes.reduce((sum, type) => sum + assignedForType(type), 0);
+}
+
+function availableTotal() {
+  return creditTypes.reduce((sum, type) => sum + state.pools[type].available, 0);
+}
+
+function remainingTotal() {
+  return assignedTotal() + availableTotal();
+}
+
+function avatarMarkup(member) {
+  return `<span class="avatar ${member.avatarClass}" aria-hidden="true">${escapeHTML(member.avatar)}</span>`;
+}
+
+function staticRoleMarkup(member) {
+  return `<div class="role-cell"><span>${escapeHTML(member.role)}</span></div>`;
+}
+
+function pointMarkup(value) {
+  return `<div class="point-value"><span class="point-gem" aria-hidden="true">✦</span><span>${format(value)}</span></div>`;
+}
+
+function renderMemberRows() {
+  const rows = state.members.map((member) => `
+    <div class="data-table member-table table-row" data-member-id="${member.id}">
+      <div class="user-cell">${avatarMarkup(member)}<span class="user-name">${escapeHTML(member.name)}</span></div>
+      ${staticRoleMarkup(member)}
+      ${pointMarkup(consumedTotal(member))}
+      ${pointMarkup(memberTotal(member))}
+      <div>${member.joined}</div>
+      <div>${member.locked ? '<span class="empty-action">—</span>' : `<button class="action-link danger" data-delete="${member.id}">删除</button>`}</div>
+    </div>
+  `).join("");
+  $("#memberRows").innerHTML = rows || emptyRows("暂无团队成员");
+}
+
+function renderPointCards() {
+  $("#pointsOverview").innerHTML = creditTypes.map((type) => {
+    const pool = state.pools[type];
+    const memberAmount = assignedForType(type);
+    const total = pool.available + memberAmount;
+    return `
+      <article class="point-card">
+        <div class="point-title">${pool.label}</div>
+        <div class="point-balance">${format(total)}</div>
+        <div class="allocation-stats point-meta" aria-label="${pool.label}分配情况">
+          <div class="allocation-stat"><span>已分配</span><strong>${format(memberAmount)}</strong></div>
+          <div class="allocation-stat unallocated" title="团队剩余可分配余额"><span>未分配</span><strong>${format(pool.available)}</strong></div>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+function creditEditorMarkup(member, type) {
+  const value = state.draftCredits[type];
+  const label = state.pools[type].label;
+  return `
+    <div class="credit-editor is-${type}" data-credit-editor="${type}">
+      <button type="button" data-draft-delta="-100" data-member="${member.id}" data-credit-type="${type}" aria-label="减少100${label}">−</button>
+      <input type="number" min="0" step="1" value="${value}" data-draft-input data-member="${member.id}" data-credit-type="${type}" aria-label="${member.name}${label}" />
+      <button type="button" data-draft-delta="100" data-member="${member.id}" data-credit-type="${type}" aria-label="增加100${label}">＋</button>
+    </div>
+  `;
+}
+
+function shortageTypes() {
+  return state.shortage ? Object.keys(state.shortage.amounts).filter((type) => state.shortage.amounts[type] > 0) : [];
+}
+
+function isRecoveryCandidate(member) {
+  return Boolean(
+    state.shortage &&
+    member.id !== state.editingMemberId &&
+    shortageTypes().some((type) => member.credits[type] > 0)
+  );
+}
+
+function readonlyCreditMarkup(member, type, candidate) {
+  const classes = ["credit-readonly"];
+  if (candidate && state.shortage.amounts[type] > 0 && member.credits[type] > 0) classes.push("candidate-credit");
+  return `<div class="${classes.join(" ")}">${format(member.credits[type])}</div>`;
+}
+
+function renderPointsRows() {
+  $("#pointsRows").innerHTML = state.members.map((member) => {
+    const editing = member.id === state.editingMemberId;
+    const candidate = isRecoveryCandidate(member);
+    const rowClasses = ["data-table", "points-table", "table-row"];
+    if (editing) rowClasses.push("is-editing");
+    if (candidate) rowClasses.push("is-recovery-candidate");
+    const creditCells = creditTypes.map((type) => editing
+      ? creditEditorMarkup(member, type)
+      : readonlyCreditMarkup(member, type, candidate)
+    ).join("");
+
+    let action = `<button class="allocation-button" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ""}>积分调配</button>`;
+    if (editing) {
+      action = '<div class="row-actions"><button class="allocation-button confirm-button" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>';
+    } else if (candidate) {
+      action = `<div class="row-actions"><button class="candidate-recover" data-recover-candidate="${member.id}">回收可用</button></div>`;
+    }
+
+    return `
+      <div class="${rowClasses.join(" ")}" data-member-id="${member.id}">
+        <div class="user-cell">${avatarMarkup(member)}<span class="user-name">${escapeHTML(member.name)}</span></div>
+        ${staticRoleMarkup(member)}
+        <div><button class="consumed-trigger" data-consumed-details="${member.id}">${format(consumedTotal(member))}<span>明细</span></button></div>
+        ${pointMarkup(memberTotal(member))}
+        ${creditCells}
+        <div class="points-operation">${action}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderShortageBanner() {
+  const banner = $("#shortageBanner");
+  if (!state.shortage) {
+    banner.hidden = true;
+    banner.innerHTML = "";
+    return;
+  }
+
+  const summary = shortageTypes().map((type) => `${state.pools[type].label}缺 ${format(state.shortage.amounts[type])}`).join("，");
+  const recoverable = state.members
+    .filter((member) => isRecoveryCandidate(member))
+    .reduce((total, member) => total + shortageTypes().reduce((sum, type) => sum + member.credits[type], 0), 0);
+  banner.innerHTML = `<span>团队待分配余额不足：<strong>${summary}</strong>。已高亮有可回收余额的成员。</span><span>可回收 ${format(recoverable)}</span>`;
+  banner.hidden = false;
+}
+
+function renderSummary() {
+  const assigned = assignedTotal();
+  const available = availableTotal();
+  const total = assigned + available;
+
+  $("#availableTotal").textContent = format(total);
+  $("#assignedTotal").textContent = format(assigned);
+  $("#unassignedTotal").textContent = format(available);
+  $("#seatUsed").textContent = String(state.seats.used);
+  $("#seatUsage").textContent = `已使用 ${state.seats.used}/${state.seats.total}`;
+}
+
+function renderInvites() {
+  const root = $("#invitePanelContent");
+  if (!state.pendingInvites.length) {
+    root.innerHTML = `
+      <div class="invite-state">
+        <div class="empty-illustration" aria-hidden="true">＋</div>
+        <h2>暂无待审批申请</h2>
+        <p>成员接受邀请后，将在这里等待团队管理员审批。</p>
+        <button class="secondary-button" data-action="invite">邀请成员</button>
+      </div>
+    `;
+    return;
+  }
+
+  root.innerHTML = `
+    <div class="approval-card">
+      <div class="approval-row is-head"><div>申请人</div><div>申请角色</div><div>申请时间</div><div>操作</div></div>
+      ${state.pendingInvites.map((invite) => `
+        <div class="approval-row">
+          <div>${escapeHTML(invite.email)}</div>
+          <div>${escapeHTML(invite.role)}</div>
+          <div>${invite.time}</div>
+          <div class="row-actions"><button class="action-link confirm-link" data-approve-invite="${invite.id}">同意</button><button class="action-link" data-reject-invite="${invite.id}">拒绝</button></div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderAll() {
+  renderMemberRows();
+  renderPointCards();
+  renderPointsRows();
+  renderShortageBanner();
+  renderSummary();
+  renderInvites();
+}
+
+function emptyRows(message) {
+  return `<div style="height:180px;display:grid;place-items:center;color:#8e8e96">${message}</div>`;
+}
+
+function switchTab(tabName) {
+  state.activeTab = tabName;
+  $$(".tab").forEach((tab) => {
+    const active = tab.dataset.tab === tabName;
+    tab.classList.toggle("is-active", active);
+    tab.setAttribute("aria-selected", String(active));
+  });
+  $$(".tab-panel").forEach((panel) => {
+    const active = panel.id === `panel-${tabName}`;
+    panel.hidden = !active;
+    panel.classList.toggle("is-active", active);
+  });
+  $("#pointsDetailButton").hidden = tabName !== "credits";
+}
+
+function beginCreditEdit(memberId) {
+  if (state.editingMemberId !== null) {
+    showToast("请先确认或取消当前成员的修改");
+    return;
+  }
+  const member = state.members.find((item) => item.id === Number(memberId));
+  if (!member) return;
+  state.editingMemberId = member.id;
+  state.draftCredits = { ...member.credits };
+  state.shortage = null;
+  renderPointsRows();
+  renderShortageBanner();
+  window.setTimeout(() => $("[data-draft-input]")?.select(), 20);
+}
+
+function cancelCreditEdit() {
+  state.editingMemberId = null;
+  state.draftCredits = null;
+  state.shortage = null;
+  renderPointsRows();
+  renderShortageBanner();
+}
+
+function calculateShortages(member, draft) {
+  return creditTypes.reduce((shortages, type) => {
+    const requested = Math.max(0, Math.round(Number(draft[type])));
+    const increase = requested - member.credits[type];
+    if (increase > state.pools[type].available) shortages[type] = increase - state.pools[type].available;
+    return shortages;
+  }, {});
+}
+
+function confirmCreditEdit() {
+  const member = state.members.find((item) => item.id === state.editingMemberId);
+  if (!member || !state.draftCredits) return;
+  const invalidType = creditTypes.find((type) => String(state.draftCredits[type]).trim() === "" || !Number.isSafeInteger(Number(state.draftCredits[type])) || Number(state.draftCredits[type]) < 0);
+  if (invalidType) {
+    showToast("积分请输入大于等于 0 的整数");
+    return;
+  }
+
+  creditTypes.forEach((type) => {
+    state.draftCredits[type] = Math.round(Number(state.draftCredits[type]));
+  });
+  const shortages = calculateShortages(member, state.draftCredits);
+  if (Object.keys(shortages).length) {
+    state.shortage = { targetMemberId: member.id, amounts: shortages };
+    renderPointsRows();
+    renderShortageBanner();
+    showToast("团队待分配余额不足，请先从高亮成员回收积分");
+    return;
+  }
+
+  const changes = [];
+  creditTypes.forEach((type) => {
+    const previous = member.credits[type];
+    const next = state.draftCredits[type];
+    const delta = next - previous;
+    if (!delta) return;
+    state.pools[type].available -= delta;
+    member.credits[type] = next;
+    changes.push({ type, delta });
+    recordTransaction(member.name, type, Math.abs(delta), delta > 0 ? "手动分配" : "手动回收");
+  });
+
+  state.editingMemberId = null;
+  state.draftCredits = null;
+  state.shortage = null;
+  renderAll();
+  showToast(changes.length ? `已确认 ${member.name} 的积分调整` : "积分未发生变化");
+}
+
+function recordTransaction(member, type, amount, action) {
+  const now = new Date();
+  const time = new Intl.DateTimeFormat("zh-CN", {
+    year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false,
+  }).format(now).replaceAll("/", "-");
+  state.transactions.unshift({ time, member, type, amount, action });
+}
+
+function openModal(config) {
+  state.modal = config;
+  $("#modalTitle").textContent = config.title;
+  $("#modalSubtitle").textContent = config.subtitle || "";
+  $("#modalBody").innerHTML = config.body || "";
+  $("#modalConfirm").textContent = config.confirmText || "确认";
+  $("#modalConfirm").classList.toggle("danger", config.danger === true);
+  $("#modalForm .modal-actions [data-close-modal]").hidden = config.readOnly === true;
+  $("#modalBackdrop").hidden = false;
+  document.body.style.overflow = "hidden";
+  window.setTimeout(() => $("#modalBody input, #modalBody select")?.focus(), 30);
+}
+
+function closeModal() {
+  state.modal = null;
+  $("#modalBackdrop").hidden = true;
+  document.body.style.overflow = "";
+  $("#modalForm").reset();
+  $("#modalForm .modal-actions [data-close-modal]").hidden = false;
+}
+
+function openDeleteModal(memberId) {
+  const member = state.members.find((item) => item.id === Number(memberId));
+  if (!member || member.locked) return;
+  openModal({
+    type: "delete",
+    memberId: member.id,
+    title: "删除成员",
+    subtitle: member.name,
+    body: '<div class="warning-box"><strong>!</strong><span>删除后，该成员将无法继续访问团队空间，三类未使用积分会自动回收到团队待分配余额。</span></div>',
+    confirmText: "确认删除",
+    danger: true,
+  });
+}
+
+function openInviteModal() {
+  openModal({
+    type: "invite",
+    title: "邀请成员",
+    subtitle: "成员接受邀请并通过审批后，系统按每席位额度自动发放积分",
+    body: `
+      <label class="form-field"><span>成员邮箱</span><input type="email" name="email" placeholder="name@example.com" required /></label>
+      <label class="form-field"><span>团队角色</span><select name="role"><option>协作者</option><option>管理员</option></select></label>
+      <div class="rule-note">每席位默认：通用积分 800、SD 2.5积分 400、SD 2.0积分 240；某类余额不足时，仅发放团队当时的剩余待分配积分。</div>
+    `,
+    confirmText: "发送邀请",
+  });
+}
+
+function openRenameModal() {
+  openModal({
+    type: "rename",
+    title: "修改团队名称",
+    subtitle: "团队名称对所有成员可见",
+    body: '<label class="form-field"><span>团队名称</span><input name="teamName" value="Team-12be3d2" maxlength="30" required /></label>',
+    confirmText: "保存",
+  });
+}
+
+function openConsumedDetails(memberId) {
+  const member = state.members.find((item) => item.id === Number(memberId));
+  if (!member) return;
+  openModal({
+    type: "read-only",
+    title: "已消耗积分明细",
+    subtitle: `${member.name} · 共消耗 ${format(consumedTotal(member))}`,
+    body: `
+      <div class="details-list">
+        <div class="details-row is-head"><div>积分类型</div><div>已消耗</div><div>剩余</div><div>状态</div></div>
+        ${creditTypes.map((type) => `<div class="details-row"><div>${state.pools[type].label}</div><div>${format(member.consumed[type])}</div><div>${format(member.credits[type])}</div><div>正常</div></div>`).join("")}
+      </div>
+      <div class="rule-note">主表保留“已消耗”汇总，点击后查看分类明细，既便于管理员核对积分去向，也避免主表信息过载。</div>
+    `,
+    confirmText: "关闭",
+    readOnly: true,
+  });
+}
+
+function openPointsDetails() {
+  openModal({
+    type: "read-only",
+    title: "积分明细",
+    subtitle: "最近的分配、回收与自动发放记录",
+    body: `
+      <div class="details-list">
+        <div class="details-row is-head"><div>时间 / 成员</div><div>类型</div><div>数量</div><div>动作</div></div>
+        ${state.transactions.slice(0, 8).map((item) => `<div class="details-row"><div>${item.time}<br>${escapeHTML(item.member)}</div><div>${state.pools[item.type].label}</div><div>${format(item.amount)}</div><div>${item.action}</div></div>`).join("") || '<div class="details-row"><div>暂无记录</div></div>'}
+      </div>
+    `,
+    confirmText: "关闭",
+    readOnly: true,
+  });
+}
+
+function openBuyModal() {
+  openModal({
+    type: "buy",
+    title: "购买充值积分",
+    subtitle: "购买完成后，积分进入团队对应类型的待分配余额",
+    body: `
+      <label class="form-field"><span>积分类型</span><select name="creditType">${creditTypes.map((type) => `<option value="${type}">${state.pools[type].label}</option>`).join("")}</select></label>
+      <label class="form-field"><span>购买数量</span><input type="number" name="amount" min="1" step="100" value="1000" required /></label>
+    `,
+    confirmText: "模拟购买",
+  });
+}
+
+function openRecoveryModal(memberId) {
+  const member = state.members.find((item) => item.id === Number(memberId));
+  if (!member || !state.shortage) return;
+  const candidates = shortageTypes().filter((type) => member.credits[type] > 0);
+  if (!candidates.length) return;
+  const firstType = candidates[0];
+  const max = Math.min(member.credits[firstType], state.shortage.amounts[firstType]);
+  openModal({
+    type: "recovery",
+    memberId: member.id,
+    title: "回收成员积分",
+    subtitle: `从 ${member.name} 的未使用积分转回团队待分配余额`,
+    body: `
+      <label class="form-field"><span>积分类型</span><select name="creditType" id="recoveryType">${candidates.map((type) => `<option value="${type}">${state.pools[type].label}</option>`).join("")}</select></label>
+      <label class="form-field"><span>回收数量</span><input name="amount" id="recoveryAmount" type="number" min="1" max="${max}" value="${max}" step="1" required /></label>
+      <div class="form-hint"><span>本次最多可回收</span><strong id="recoveryLimit">${format(max)}</strong></div>
+      <div class="rule-note">回收数量不会超过该成员对应类型的未使用余额，也不会超过当前分配缺口。</div>
+    `,
+    confirmText: "确认回收",
+  });
+}
+
+function recalculateShortage() {
+  const member = state.members.find((item) => item.id === state.editingMemberId);
+  if (!member || !state.draftCredits) {
+    state.shortage = null;
+    return;
+  }
+  const amounts = calculateShortages(member, state.draftCredits);
+  state.shortage = Object.keys(amounts).length ? { targetMemberId: member.id, amounts } : null;
+}
+
+function approveInvite(inviteId) {
+  const invite = state.pendingInvites.find((item) => item.id === Number(inviteId));
+  if (!invite) return;
+  if (state.seats.used >= state.seats.total) {
+    showToast("可用席位不足，请先增加席位");
+    return;
+  }
+
+  const credits = {};
+  creditTypes.forEach((type) => {
+    const amount = Math.min(state.perSeat[type], state.pools[type].available);
+    credits[type] = amount;
+    state.pools[type].available -= amount;
+    if (amount) recordTransaction(invite.email, type, amount, "自动分配");
+  });
+  const localName = invite.email.split("@")[0] || "新成员";
+  state.members.push({
+    id: Math.max(...state.members.map((member) => member.id), 0) + 1,
+    name: localName,
+    role: invite.role,
+    avatar: localName.slice(0, 1).toUpperCase(),
+    avatarClass: "collab",
+    consumed: { general: 0, sd25: 0, sd20: 0 },
+    joined: "2026-09-16 现在",
+    credits,
+  });
+  state.seats.used += 1;
+  state.pendingInvites = state.pendingInvites.filter((item) => item.id !== invite.id);
+  renderAll();
+  const partial = creditTypes.some((type) => credits[type] < state.perSeat[type]);
+  showToast(partial ? "已通过审批；部分积分因团队余额不足按剩余量发放" : "已通过审批并按每席位额度自动发放积分");
+}
+
+function updateRecoveryLimit() {
+  if (state.modal?.type !== "recovery") return;
+  const member = state.members.find((item) => item.id === state.modal.memberId);
+  const type = $("#recoveryType").value;
+  const max = Math.min(member.credits[type], state.shortage?.amounts[type] || 0);
+  $("#recoveryAmount").max = String(max);
+  $("#recoveryAmount").value = String(max);
+  $("#recoveryLimit").textContent = format(max);
+}
+
+function handleModalSubmit(event) {
+  event.preventDefault();
+  if (!state.modal) return;
+  if (state.modal.type === "read-only") {
+    closeModal();
+    return;
+  }
+  const data = new FormData(event.currentTarget);
+
+  if (state.modal.type === "delete") {
+    const member = state.members.find((item) => item.id === state.modal.memberId);
+    creditTypes.forEach((type) => {
+      state.pools[type].available += member.credits[type];
+      if (member.credits[type]) recordTransaction(member.name, type, member.credits[type], "删除回收");
+    });
+    state.members = state.members.filter((item) => item.id !== member.id);
+    state.seats.used = Math.max(0, state.seats.used - 1);
+    cancelCreditEdit();
+    renderAll();
+    closeModal();
+    showToast(`已删除 ${member.name}，未使用积分已回收`);
+    return;
+  }
+
+  if (state.modal.type === "invite") {
+    const email = String(data.get("email")).trim();
+    const role = String(data.get("role"));
+    state.pendingInvites.push({ id: Date.now(), email, role, time: "2026-09-16 现在" });
+    renderInvites();
+    closeModal();
+    showToast(`邀请已发送至 ${email}，接受后等待团队审批`);
+    return;
+  }
+
+  if (state.modal.type === "rename") {
+    const name = String(data.get("teamName")).trim();
+    if (!name) return;
+    $("#teamTitle").textContent = name;
+    closeModal();
+    showToast("团队名称已更新");
+    return;
+  }
+
+  if (state.modal.type === "buy") {
+    const type = String(data.get("creditType"));
+    const amount = Math.round(Number(data.get("amount")));
+    if (!Number.isFinite(amount) || amount < 1) {
+      showToast("请输入有效的购买数量");
+      return;
+    }
+    state.pools[type].total += amount;
+    state.pools[type].available += amount;
+    recordTransaction("团队积分池", type, amount, "购买入账");
+    recalculateShortage();
+    renderAll();
+    closeModal();
+    showToast(`${format(amount)} ${state.pools[type].label}已进入团队待分配余额`);
+    return;
+  }
+
+  if (state.modal.type === "recovery") {
+    const member = state.members.find((item) => item.id === state.modal.memberId);
+    const type = String(data.get("creditType"));
+    const amount = Math.round(Number(data.get("amount")));
+    const max = Math.min(member.credits[type], state.shortage?.amounts[type] || 0);
+    if (!Number.isFinite(amount) || amount < 1 || amount > max) {
+      showToast(`请输入 1–${format(max)} 之间的整数`);
+      return;
+    }
+    member.credits[type] -= amount;
+    state.pools[type].available += amount;
+    recordTransaction(member.name, type, amount, "余额回收");
+    recalculateShortage();
+    renderAll();
+    closeModal();
+    showToast(state.shortage ? "已回收积分，仍有分配缺口" : "团队余额已补足，可再次确认本次调配");
+  }
+}
+
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+  $("#toastRegion").appendChild(toast);
+  window.setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(-4px)";
+    window.setTimeout(() => toast.remove(), 180);
+  }, 2600);
+}
+
+async function copyText(value, successMessage) {
+  try {
+    await navigator.clipboard.writeText(value);
+    showToast(successMessage);
+  } catch {
+    const input = document.createElement("textarea");
+    input.value = value;
+    input.style.position = "fixed";
+    input.style.opacity = "0";
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand("copy");
+    input.remove();
+    showToast(successMessage);
+  }
+}
+
+document.addEventListener("click", (event) => {
+  const tab = event.target.closest("[data-tab]");
+  if (tab) {
+    switchTab(tab.dataset.tab);
+    return;
+  }
+
+  const deleteButton = event.target.closest("[data-delete]");
+  if (deleteButton) {
+    openDeleteModal(deleteButton.dataset.delete);
+    return;
+  }
+
+  const editButton = event.target.closest("[data-edit-credits]");
+  if (editButton) {
+    beginCreditEdit(editButton.dataset.editCredits);
+    return;
+  }
+
+  if (event.target.closest("[data-confirm-credits]")) {
+    confirmCreditEdit();
+    return;
+  }
+
+  if (event.target.closest("[data-cancel-credits]")) {
+    cancelCreditEdit();
+    return;
+  }
+
+  const deltaButton = event.target.closest("[data-draft-delta]");
+  if (deltaButton) {
+    const type = deltaButton.dataset.creditType;
+    const delta = Number(deltaButton.dataset.draftDelta);
+    state.draftCredits[type] = Math.max(0, Math.round(Number(state.draftCredits[type]) + delta));
+    state.shortage = null;
+    renderPointsRows();
+    renderShortageBanner();
+    return;
+  }
+
+  const recoveryButton = event.target.closest("[data-recover-candidate]");
+  if (recoveryButton) {
+    openRecoveryModal(recoveryButton.dataset.recoverCandidate);
+    return;
+  }
+
+  const consumedButton = event.target.closest("[data-consumed-details]");
+  if (consumedButton) {
+    openConsumedDetails(consumedButton.dataset.consumedDetails);
+    return;
+  }
+
+  const approveButton = event.target.closest("[data-approve-invite]");
+  if (approveButton) {
+    approveInvite(approveButton.dataset.approveInvite);
+    return;
+  }
+
+  const rejectButton = event.target.closest("[data-reject-invite]");
+  if (rejectButton) {
+    state.pendingInvites = state.pendingInvites.filter((item) => item.id !== Number(rejectButton.dataset.rejectInvite));
+    renderInvites();
+    showToast("已拒绝该成员申请");
+    return;
+  }
+
+  const copyButton = event.target.closest("[data-copy]");
+  if (copyButton) {
+    copyText(copyButton.dataset.copy, "团队 ID 已复制");
+    return;
+  }
+
+  if (event.target.closest("[data-close-modal]") || event.target === $("#modalBackdrop")) {
+    closeModal();
+    return;
+  }
+
+  const actionButton = event.target.closest("[data-action]");
+  if (!actionButton) return;
+  const action = actionButton.dataset.action;
+
+  if (action === "invite") openInviteModal();
+  else if (action === "rename") openRenameModal();
+  else if (action === "allocate-first") {
+    switchTab("credits");
+    beginCreditEdit(state.members[0].id);
+  } else if (action === "points-details" || action === "details") openPointsDetails();
+  else if (action === "buy") openBuyModal();
+  else if (action === "renew") showToast("续费流程已唤起（Demo）");
+  else if (action === "seats") showToast("席位购买流程已唤起（Demo）");
+  else if (action === "orders") showToast("订单管理已打开（Demo）");
+  else if (action === "help") showToast("如需帮助，请联系团队管理员");
+});
+
+document.addEventListener("input", (event) => {
+  const input = event.target.closest("[data-draft-input]");
+  if (!input || !state.draftCredits) return;
+  state.draftCredits[input.dataset.creditType] = input.value;
+  state.shortage = null;
+  renderShortageBanner();
+});
+
+$("#modalForm").addEventListener("submit", handleModalSubmit);
+$("#modalBody").addEventListener("change", (event) => {
+  if (event.target.id === "recoveryType") updateRecoveryLimit();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !$("#modalBackdrop").hidden) closeModal();
+  if (event.key === "Enter" && event.target.matches("[data-draft-input]")) {
+    event.preventDefault();
+    confirmCreditEdit();
+  }
+  if ((event.key === "ArrowLeft" || event.key === "ArrowRight") && document.activeElement?.dataset.tab) {
+    const tabs = $$("[data-tab]");
+    const index = tabs.indexOf(document.activeElement);
+    const next = event.key === "ArrowRight" ? (index + 1) % tabs.length : (index - 1 + tabs.length) % tabs.length;
+    tabs[next].focus();
+    switchTab(tabs[next].dataset.tab);
+  }
+});
+
+renderAll();
+switchTab("members");
