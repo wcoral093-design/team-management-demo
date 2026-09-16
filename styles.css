@@ -1929,11 +1929,11 @@ body.is-points-detail .simulation-switch {
 }
 
 /* Credit tabs control both the balance and member allocation list. */
-#creditTypeTabs { display: flex; gap: 28px; padding: 0 4px; margin-bottom: 20px; border-bottom: 1px solid var(--line); }
-.credit-subtab { position: relative; border: 0; background: transparent; padding: 14px 2px 16px; color: var(--text-secondary); font: inherit; font-size: 14px; cursor: pointer; }
-.credit-subtab.is-active { color: var(--text); font-weight: 600; }
-.credit-subtab.is-active::after { content: ''; position: absolute; height: 3px; bottom: -1px; left: 0; right: 0; background: #9254ff; border-radius: 3px; }
-.credit-subtab:focus-visible { outline: 2px solid #9254ff; outline-offset: -4px; border-radius: 4px; }
+#creditTypeTabs { display: flex; align-items: center; height: 36px; gap: 24px; padding: 0 0 0 8px; margin-bottom: 20px; }
+.credit-subtab { position: relative; display: inline-flex; align-items: center; justify-content: center; height: 36px; border: 0; border-bottom: 2px solid transparent; background: transparent; padding: 0; color: rgba(0, 0, 0, 0.6); font: inherit; font-family: "PingFang SC", sans-serif; font-size: 14px; font-weight: 500; line-height: 1.4; letter-spacing: 0.0938px; white-space: nowrap; cursor: pointer; }
+.credit-subtab.is-active { color: #000; border-bottom-color: #000; }
+.credit-subtab:hover { color: #000; }
+.credit-subtab:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; border-radius: 2px; }
 #pointsOverview { display: block; padding: 24px 28px; }
 .unallocated-summary { display: flex; flex-direction: column; gap: 8px; }
 .unallocated-summary > span { color: var(--text-secondary); font-size: 14px; }
