@@ -1951,7 +1951,8 @@ body.is-points-detail .simulation-switch {
 .append-editor label { display:flex; align-items:center; gap:10px; font-size:13px; }
 .append-editor input { width:110px; border:1px solid var(--line-strong); border-radius:7px; padding:8px; background:#fff; font:inherit; }
 .append-editor small { display:block; margin-top:5px; color:var(--text-secondary); font-size:12px; }
-.cycle-toolbar { display:flex; justify-content:flex-end; margin-bottom:4px; }
+.simulation-divider { width: 1px; height: 12px; background: var(--line-strong); margin: 0 5px; }
+.simulation-cycle { color: #8545eb; }
 .points-table.table-row.is-recovery-candidate { background:#f0e8ff; box-shadow:inset 3px 0 #9254ff; }
 
 </style>
@@ -1994,10 +1995,12 @@ body.is-points-detail .simulation-switch {
     </aside>
 
     <header class="topbar">
-      <div class="simulation-switch" role="group" aria-label="模拟数据模式">
+      <div class="simulation-switch" role="group" aria-label="模拟工具">
         <span class="simulation-switch-label">模拟</span>
         <button type="button" class="simulation-option is-active" data-simulation-mode="all" aria-pressed="true">全积分</button>
         <button type="button" class="simulation-option" data-simulation-mode="general" aria-pressed="false">仅通用</button>
+        <span class="simulation-divider" aria-hidden="true"></span>
+        <button type="button" class="simulation-option simulation-cycle" data-action="new-cycle">新周期发放</button>
       </div>
       <button class="credit-pill" data-action="buy">
         <span class="credit-gem" aria-hidden="true">✦</span>
@@ -2100,7 +2103,6 @@ body.is-points-detail .simulation-switch {
         </section>
 
         <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
-          <div class="cycle-toolbar"><button class="link-button" data-action="new-cycle">模拟新周期发放</button></div>
           <div class="credit-subtabs" id="creditTypeTabs" role="tablist" aria-label="积分类型"></div>
           <section id="creditTypeContent" role="tabpanel" aria-labelledby="credit-tab-general">
           <div class="points-overview" id="pointsOverview"></div>
