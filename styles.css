@@ -1782,8 +1782,7 @@ body.is-points-detail .simulation-switch {
   background: var(--danger);
 }
 
-.shortage-modal-intro,
-.shortage-modal-note {
+.shortage-modal-intro {
   margin: 0;
   color: var(--text-secondary);
   font-size: 12px;
@@ -1794,30 +1793,53 @@ body.is-points-detail .simulation-switch {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 14px;
+}
+
+.shortage-modal-list-title {
+  color: #44444a;
+  font-size: 12px;
+  font-weight: 650;
 }
 
 .shortage-modal-row {
-  display: grid;
+  display: flex;
   min-height: 44px;
-  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 14px;
+  justify-content: space-between;
+  gap: 16px;
   padding: 0 12px;
   border-radius: 10px;
   background: #f6f6f7;
   font-size: 12px;
 }
 
-.shortage-modal-row strong {
+.shortage-modal-source {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shortage-modal-source strong {
+  color: var(--text);
   font-size: 13px;
 }
 
-.shortage-modal-row span:last-child {
-  color: var(--text-secondary);
+.shortage-modal-amount {
+  flex: none;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
 }
 
-.shortage-modal-note {
+.shortage-modal-empty {
+  padding: 12px;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  background: #f6f6f7;
+  font-size: 12px;
+}
+
+.shortage-modal-intro {
   margin-top: 14px;
 }
 

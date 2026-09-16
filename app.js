@@ -678,32 +678,46 @@ function openRecoveryModal(memberId) {
   });
 }
 
-function recoverableForType(type, targetMemberId) {
-  return state.members
-    .filter((member) => member.id !== targetMemberId)
-    .reduce((total, member) => total + member.credits[type], 0);
+function buildShortageRecoveryPlan(targetMemberId) {
+  const plan = [];
+  const unresolved = {};
+  shortageTypes().forEach((type) => {
+    let remaining = state.shortage.amounts[type];
+    state.members
+      .filter((member) => member.id !== targetMemberId && member.credits[type] > 0)
+      .forEach((member) => {
+        if (remaining <= 0) return;
+        const amount = Math.min(member.credits[type], remaining);
+        plan.push({ memberId: member.id, memberName: member.name, type, amount });
+        remaining -= amount;
+      });
+    if (remaining > 0) unresolved[type] = remaining;
+  });
+  return { plan, unresolved };
 }
 
 function openShortageModal(member) {
-  const types = shortageTypes();
-  const canResolve = types.every((type) => recoverableForType(type, member.id) >= state.shortage.amounts[type]);
-  const rows = types.map((type) => `
+  const { plan, unresolved } = buildShortageRecoveryPlan(member.id);
+  const canResolve = Object.keys(unresolved).length === 0;
+  const rows = plan.map((item) => `
     <div class="shortage-modal-row">
-      <strong>${state.pools[type].label}</strong>
-      <span>缺口 ${format(state.shortage.amounts[type])}</span>
-      <span>可回收 ${format(recoverableForType(type, member.id))}</span>
+      <span class="shortage-modal-source">从 <strong>${escapeHTML(item.memberName)}</strong> 回收</span>
+      <strong class="shortage-modal-amount">${format(item.amount)} ${state.pools[item.type].label}</strong>
     </div>
   `).join("");
 
   openModal({
     type: canResolve ? "shortage-auto" : "read-only",
     memberId: member.id,
+    recoveryPlan: plan,
     title: "待分配积分不足",
     subtitle: `为 ${member.name} 完成本次积分调配`,
     body: `
-      <p class="shortage-modal-intro">团队待分配余额不足，可从其他成员的可用余额中回收后继续分配。</p>
-      <div class="shortage-modal-list">${rows}</div>
-      <p class="shortage-modal-note">${canResolve ? "确认后将按缺口自动回收，并立即完成本次分配。" : "当前成员可回收余额不足，暂时无法完成本次分配。"}</p>
+      <div class="shortage-modal-list">
+        <div class="shortage-modal-list-title">回收明细</div>
+        ${rows || '<div class="shortage-modal-empty">暂无可回收积分</div>'}
+      </div>
+      <p class="shortage-modal-intro">${canResolve ? "团队待分配余额不足，将按以上明细从其他成员的可用余额中回收后继续分配。" : "团队待分配余额不足，其他成员的可回收余额仍无法补足全部缺口。"}</p>
     `,
     confirmText: canResolve ? "一键回收并分配" : "知道了",
     readOnly: !canResolve,
@@ -713,8 +727,17 @@ function openShortageModal(member) {
 function autoRecoverAndAssign() {
   const targetMember = state.members.find((member) => member.id === state.modal?.memberId);
   if (!targetMember || !state.shortage || !state.draftCredits) return;
-  const types = shortageTypes();
-  const canResolve = types.every((type) => recoverableForType(type, targetMember.id) >= state.shortage.amounts[type]);
+  const recoveryPlan = state.modal.recoveryPlan || [];
+  const recoveredByType = recoveryPlan.reduce((totals, item) => {
+    totals[item.type] = (totals[item.type] || 0) + item.amount;
+    return totals;
+  }, {});
+  const canResolve = shortageTypes().every((type) =>
+    (recoveredByType[type] || 0) >= state.shortage.amounts[type] &&
+    recoveryPlan
+      .filter((item) => item.type === type)
+      .every((item) => state.members.find((member) => member.id === item.memberId)?.credits[type] >= item.amount)
+  );
   if (!canResolve) {
     closeModal();
     showToast("可回收积分不足，暂无法完成分配");
@@ -722,19 +745,12 @@ function autoRecoverAndAssign() {
   }
 
   let recoveredTotal = 0;
-  types.forEach((type) => {
-    let remaining = state.shortage.amounts[type];
-    state.members
-      .filter((member) => member.id !== targetMember.id && member.credits[type] > 0)
-      .forEach((member) => {
-        if (remaining <= 0) return;
-        const amount = Math.min(member.credits[type], remaining);
-        member.credits[type] -= amount;
-        state.pools[type].available += amount;
-        remaining -= amount;
-        recoveredTotal += amount;
-        recordTransaction(member.name, type, amount, "一键回收");
-      });
+  recoveryPlan.forEach((item) => {
+    const member = state.members.find((candidate) => candidate.id === item.memberId);
+    member.credits[item.type] -= item.amount;
+    state.pools[item.type].available += item.amount;
+    recoveredTotal += item.amount;
+    recordTransaction(member.name, item.type, item.amount, "一键回收");
   });
 
   recalculateShortage();
