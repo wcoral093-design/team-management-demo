@@ -631,10 +631,6 @@ select:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-.allocation-stat.unallocated strong {
-  color: var(--brand-dark);
-}
-
 .credits-card {
   padding-top: 18px;
   padding-bottom: 18px;
@@ -926,10 +922,10 @@ select:focus-visible {
 }
 
 .point-card-total .point-balance {
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 640;
-  letter-spacing: -1px;
-  line-height: 38px;
+  letter-spacing: -0.8px;
+  line-height: 35px;
 }
 
 .point-card .point-caption {

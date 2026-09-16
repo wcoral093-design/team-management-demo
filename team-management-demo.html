@@ -639,10 +639,6 @@ select:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-.allocation-stat.unallocated strong {
-  color: var(--brand-dark);
-}
-
 .credits-card {
   padding-top: 18px;
   padding-bottom: 18px;
@@ -934,10 +930,10 @@ select:focus-visible {
 }
 
 .point-card-total .point-balance {
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 640;
-  letter-spacing: -1px;
-  line-height: 38px;
+  letter-spacing: -0.8px;
+  line-height: 35px;
 }
 
 .point-card .point-caption {
@@ -2326,7 +2322,7 @@ function renderPointCards() {
     const pool = state.pools[type];
     return `
       <article class="point-card" aria-label="${pool.label}待分配积分 ${format(pool.available)}">
-        <div class="point-title">${pool.label}待分配</div>
+        <div class="point-title">${pool.label}</div>
         <div class="point-balance" title="待分配积分">${format(pool.available)}</div>
       </article>
     `;

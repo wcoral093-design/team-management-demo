@@ -168,7 +168,7 @@ function renderPointCards() {
     const pool = state.pools[type];
     return `
       <article class="point-card" aria-label="${pool.label}待分配积分 ${format(pool.available)}">
-        <div class="point-title">${pool.label}待分配</div>
+        <div class="point-title">${pool.label}</div>
         <div class="point-balance" title="待分配积分">${format(pool.available)}</div>
       </article>
     `;
