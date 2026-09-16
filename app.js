@@ -74,6 +74,7 @@ const initialSimulation = cloneSimulationPreset("all");
 const state = {
   activeView: "team",
   activeTab: "members",
+  activeCreditType: "general",
   detailAnalysisTab: "model",
   detailLedgerTab: "acquired",
   simulationMode: "all",
@@ -149,24 +150,42 @@ function pointMarkup(value) {
 }
 
 function renderPointCards() {
-  const total = availableTotal();
-  const typeCards = creditTypes.map((type) => {
-    const pool = state.pools[type];
-    return `
-      <article class="point-card" aria-label="${pool.label}待分配积分 ${format(pool.available)}">
-        <div class="point-title">${pool.label}</div>
-        <div class="point-balance" title="待分配积分">${format(pool.available)}</div>
-      </article>
-    `;
-  }).join("");
+  const type = state.activeCreditType;
+  const pool = state.pools[type];
+  const assigned = assignedForType(type);
+  const total = assigned + pool.available;
+  const assignedPercent = total ? assigned / total * 100 : 0;
+  const availablePercent = total ? pool.available / total * 100 : 0;
+  const percent = (value) => `${value.toFixed(1)}%`;
   $("#pointsOverview").innerHTML = `
-    <article class="point-card point-card-total" aria-label="待分配总积分 ${format(total)}，团队当前可继续分配">
-      <div class="point-title">待分配总积分</div>
-      <div class="point-balance" id="pointsAvailableTotal">${format(total)}</div>
-      <div class="point-caption">团队当前可继续分配</div>
-    </article>
-    ${typeCards}
-  `;
+    <div class="credit-subtabs" role="tablist" aria-label="积分类型">
+      ${creditTypes.map((key) => `<button type="button" class="credit-subtab${key === type ? ' is-active' : ''}" id="credit-tab-${key}" role="tab" aria-selected="${key === type}" aria-controls="credit-dashboard" tabindex="${key === type ? 0 : -1}" data-credit-tab="${key}">${key === 'general' ? '通用积分' : key === 'sd25' ? 'SD 2.5' : 'SD 2.0'}</button>`).join('')}
+    </div>
+    <section class="credit-dashboard" id="credit-dashboard" role="tabpanel" aria-labelledby="credit-tab-${type}" tabindex="0">
+      <div class="credit-chart-block">
+        <div class="credit-donut" style="--assigned-angle: ${assignedPercent * 3.6}deg;${total ? '' : 'background: var(--line);'}" role="img" aria-label="${pool.label}剩余 ${format(total)}，已分配 ${format(assigned)}，待分配 ${format(pool.available)}">
+          <div class="credit-donut-center"><span>剩余${pool.label}</span><strong>${format(total)}</strong></div>
+        </div>
+        <div class="credit-chart-legend"><span><i class="assigned-swatch"></i>已分配</span><span><i class="available-swatch"></i>待分配</span></div>
+      </div>
+      <div class="credit-dashboard-metrics">
+        <article class="credit-metric">
+          <div class="credit-metric-heading"><span><i class="assigned-swatch"></i>已分配</span><span class="credit-metric-share">占剩余积分 ${percent(assignedPercent)}</span></div>
+          <strong>${format(assigned)}</strong><p>已分配给成员的未使用积分</p>
+        </article>
+        <article class="credit-metric">
+          <div class="credit-metric-heading"><span><i class="available-swatch"></i>待分配</span><span class="credit-metric-share">占剩余积分 ${percent(availablePercent)}</span></div>
+          <strong>${format(pool.available)}</strong><p>${total ? '可继续分配给团队成员' : '当前暂无该类积分'}</p>
+        </article>
+      </div>
+    </section>`;
+}
+
+function selectCreditTab(type, focus = false) {
+  if (!creditTypes.includes(type)) return;
+  state.activeCreditType = type;
+  renderPointCards();
+  if (focus) $("#credit-tab-" + type).focus();
 }
 
 function renderSimulationSwitch() {
@@ -259,7 +278,6 @@ function renderSummary() {
     const type = creditTypes[index];
     $("#" + id).textContent = format(state.pools[type].available + assignedForType(type));
   });
-  $("#pointsAvailableTotal").textContent = format(available);
   $("#seatUsed").textContent = String(state.seats.used);
   $("#seatTotal").textContent = String(state.seats.total);
 }
@@ -920,6 +938,11 @@ async function copyText(value, successMessage) {
 }
 
 document.addEventListener("click", (event) => {
+  const creditTab = event.target.closest("[data-credit-tab]");
+  if (creditTab) {
+    selectCreditTab(creditTab.dataset.creditTab, true);
+    return;
+  }
   const simulationButton = event.target.closest("[data-simulation-mode]");
   if (simulationButton) {
     applySimulationMode(simulationButton.dataset.simulationMode);
@@ -1040,6 +1063,14 @@ $("#modalBody").addEventListener("change", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
+  const creditType = document.activeElement?.dataset.creditTab;
+  if (creditType && ["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+    event.preventDefault();
+    const index = creditTypes.indexOf(creditType);
+    const next = event.key === "Home" ? 0 : event.key === "End" ? 2 : (index + (event.key === "ArrowRight" ? 1 : 2)) % 3;
+    selectCreditTab(creditTypes[next], true);
+    return;
+  }
   if (event.key === "Escape" && !$("#modalBackdrop").hidden) closeModal();
   else if (event.key === "Escape" && state.activeView === "points-detail") showTeamManagementPage();
   if (event.key === "Enter" && event.target.matches("[data-draft-input]")) {
