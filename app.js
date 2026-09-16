@@ -165,16 +165,10 @@ function renderMemberRows() {
 function renderPointCards() {
   $("#pointsOverview").innerHTML = creditTypes.map((type) => {
     const pool = state.pools[type];
-    const memberAmount = assignedForType(type);
-    const total = pool.available + memberAmount;
     return `
-      <article class="point-card">
+      <article class="point-card" aria-label="${pool.label}待分配积分 ${format(pool.available)}">
         <div class="point-title">${pool.label}</div>
-        <div class="point-balance">${format(total)}</div>
-        <div class="allocation-stats point-meta" aria-label="${pool.label}分配情况">
-          <div class="allocation-stat"><span>已分配</span><strong>${format(memberAmount)}</strong></div>
-          <div class="allocation-stat unallocated" title="团队剩余可分配余额"><span>未分配</span><strong>${format(pool.available)}</strong></div>
-        </div>
+        <div class="point-balance" title="待分配积分">${format(pool.available)}</div>
       </article>
     `;
   }).join("");
@@ -276,7 +270,6 @@ function renderSummary() {
   $("#unassignedTotal").textContent = format(available);
   $("#seatUsed").textContent = String(state.seats.used);
   $("#seatTotal").textContent = String(state.seats.total);
-  $("#seatUsage").textContent = `已使用 ${state.seats.used}/${state.seats.total}`;
 }
 
 function renderInvites() {

@@ -448,7 +448,7 @@ select:focus-visible {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: 1fr 1.08fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -659,17 +659,6 @@ select:focus-visible {
   letter-spacing: -0.3px;
 }
 
-.seat-footer {
-  margin-top: 25px;
-}
-
-.seat-footer i {
-  width: 3px;
-  height: 12px;
-  border-radius: 2px;
-  background: var(--brand);
-}
-
 .workspace {
   margin-top: 30px;
 }
@@ -870,42 +859,33 @@ select:focus-visible {
 .points-overview {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  align-items: start;
   gap: 10px;
   margin-bottom: 22px;
 }
 
 .point-card {
   min-width: 0;
-  height: 116px;
-  padding: 16px 20px;
-  border: 1px solid rgba(22, 22, 27, 0.045);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.56);
+  min-height: 78px;
+  padding: 14px 18px;
+  border: 1px solid rgba(22, 22, 27, 0.028);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.34);
 }
 
 .point-card .point-title {
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   font-size: 12px;
 }
 
 .point-card .point-balance {
-  margin-top: 3px;
-  font-size: 22px;
-  font-weight: 580;
-  letter-spacing: -0.5px;
-}
-
-.point-meta {
-  gap: 18px;
-  margin-top: 13px;
-}
-
-.point-meta .allocation-stat + .allocation-stat {
-  padding-left: 18px;
-}
-
-.point-meta .allocation-stat strong {
-  font-size: 15px;
+  margin-top: 4px;
+  color: #2b2b30;
+  font-size: 20px;
+  font-weight: 560;
+  letter-spacing: -0.4px;
+  line-height: 27px;
+  font-variant-numeric: tabular-nums;
 }
 
 .invite-state h2 {
