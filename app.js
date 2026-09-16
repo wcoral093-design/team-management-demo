@@ -149,6 +149,20 @@ function pointMarkup(value) {
   return `<div class="point-value"><span class="point-gem" aria-hidden="true">✦</span><span>${format(value)}</span></div>`;
 }
 
+function renderMemberRows() {
+  const rows = state.members.map((member) => `
+    <div class="data-table member-table table-row" data-member-id="${member.id}">
+      <div class="user-cell">${avatarMarkup(member)}<span class="user-name">${escapeHTML(member.name)}</span></div>
+      ${staticRoleMarkup(member)}
+      ${pointMarkup(consumedTotal(member))}
+      ${pointMarkup(memberTotal(member))}
+      <div>${member.joined}</div>
+      <div>${member.locked ? '<span class="empty-action">—</span>' : `<button class="action-link danger" data-delete="${member.id}">删除</button>`}</div>
+    </div>
+  `).join("");
+  $("#memberRows").innerHTML = rows || emptyRows("暂无团队成员");
+}
+
 function renderPointCards() {
   const type = state.activeCreditType;
   const pool = state.pools[type];
@@ -243,10 +257,6 @@ function renderPointsRows() {
       action = '<div class="row-actions"><button class="action-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>';
     } else if (candidate) {
       action = `<div class="row-actions"><button class="action-link" data-recover-candidate="${member.id}">回收可用</button></div>`;
-    }
-
-    if (!editing && !candidate && !member.locked) {
-      action += `<button class="action-link danger" data-delete="${member.id}"${state.editingMemberId !== null ? " disabled" : ""}>删除</button>`;
     }
 
     return `
@@ -419,6 +429,7 @@ function renderPointsDetail() {
 
 function renderAll() {
   renderSimulationSwitch();
+  renderMemberRows();
   renderPointCards();
   renderPointsRows();
   renderShortageBanner();

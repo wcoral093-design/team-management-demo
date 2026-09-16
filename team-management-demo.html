@@ -2082,7 +2082,8 @@ body.is-points-detail .simulation-switch {
       <section class="workspace" aria-label="团队管理工作区">
         <div class="toolbar">
           <div class="tabs" role="tablist" aria-label="团队管理分类">
-            <button class="tab is-active" id="tab-members" role="tab" aria-selected="true" aria-controls="panel-members" data-tab="members">成员与积分</button>
+            <button class="tab is-active" id="tab-members" role="tab" aria-selected="true" aria-controls="panel-members" data-tab="members">成员管理</button>
+            <button class="tab" id="tab-credits" role="tab" aria-selected="false" aria-controls="panel-credits" data-tab="credits">积分管理</button>
             <button class="tab" id="tab-invites" role="tab" aria-selected="false" aria-controls="panel-invites" data-tab="invites">团队审批</button>
           </div>
           <div class="toolbar-actions">
@@ -2091,6 +2092,25 @@ body.is-points-detail .simulation-switch {
         </div>
 
         <section class="tab-panel is-active" id="panel-members" role="tabpanel" aria-labelledby="tab-members">
+          <div class="table-card">
+            <div class="data-table member-table table-head">
+              <div>用户</div>
+              <div>团队角色</div>
+              <div>已消耗</div>
+              <div>剩余积分</div>
+              <div>加入时间</div>
+              <div>操作 <span class="info-dot" title="创建者不可删除">i</span></div>
+            </div>
+            <div id="memberRows"></div>
+          </div>
+          <div class="pagination" aria-label="分页">
+            <button disabled aria-label="上一页">‹</button>
+            <button class="current" aria-current="page">1</button>
+            <button disabled aria-label="下一页">›</button>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
           <div class="points-overview" id="pointsOverview"></div>
           <div class="shortage-banner" id="shortageBanner" hidden></div>
           <div class="table-card points-table-card">
@@ -2404,6 +2424,20 @@ function pointMarkup(value) {
   return `<div class="point-value"><span class="point-gem" aria-hidden="true">✦</span><span>${format(value)}</span></div>`;
 }
 
+function renderMemberRows() {
+  const rows = state.members.map((member) => `
+    <div class="data-table member-table table-row" data-member-id="${member.id}">
+      <div class="user-cell">${avatarMarkup(member)}<span class="user-name">${escapeHTML(member.name)}</span></div>
+      ${staticRoleMarkup(member)}
+      ${pointMarkup(consumedTotal(member))}
+      ${pointMarkup(memberTotal(member))}
+      <div>${member.joined}</div>
+      <div>${member.locked ? '<span class="empty-action">—</span>' : `<button class="action-link danger" data-delete="${member.id}">删除</button>`}</div>
+    </div>
+  `).join("");
+  $("#memberRows").innerHTML = rows || emptyRows("暂无团队成员");
+}
+
 function renderPointCards() {
   const type = state.activeCreditType;
   const pool = state.pools[type];
@@ -2498,10 +2532,6 @@ function renderPointsRows() {
       action = '<div class="row-actions"><button class="action-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>';
     } else if (candidate) {
       action = `<div class="row-actions"><button class="action-link" data-recover-candidate="${member.id}">回收可用</button></div>`;
-    }
-
-    if (!editing && !candidate && !member.locked) {
-      action += `<button class="action-link danger" data-delete="${member.id}"${state.editingMemberId !== null ? " disabled" : ""}>删除</button>`;
     }
 
     return `
@@ -2674,6 +2704,7 @@ function renderPointsDetail() {
 
 function renderAll() {
   renderSimulationSwitch();
+  renderMemberRows();
   renderPointCards();
   renderPointsRows();
   renderShortageBanner();
