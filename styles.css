@@ -886,6 +886,18 @@ select:focus-visible {
   margin-bottom: 22px;
 }
 
+.points-section-title {
+  margin: 0 0 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.points-section-title span {
+  font-variant-numeric: tabular-nums;
+}
+
 .point-card {
   min-width: 0;
   min-height: 82px;

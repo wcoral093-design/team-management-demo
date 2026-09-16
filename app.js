@@ -268,6 +268,7 @@ function renderSummary() {
   $("#availableTotal").textContent = format(total);
   $("#assignedTotal").textContent = format(assigned);
   $("#unassignedTotal").textContent = format(available);
+  $("#pointsAvailableTotal").textContent = format(available);
   $("#seatUsed").textContent = String(state.seats.used);
   $("#seatTotal").textContent = String(state.seats.total);
 }

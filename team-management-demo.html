@@ -894,6 +894,18 @@ select:focus-visible {
   margin-bottom: 22px;
 }
 
+.points-section-title {
+  margin: 0 0 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.points-section-title span {
+  font-variant-numeric: tabular-nums;
+}
+
 .point-card {
   min-width: 0;
   min-height: 82px;
@@ -1966,6 +1978,7 @@ body.is-points-detail .simulation-switch {
         </section>
 
         <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
+          <h2 class="points-section-title">待分配积分：<span id="pointsAvailableTotal">21,442</span></h2>
           <div class="points-overview" id="pointsOverview"></div>
           <div class="shortage-banner" id="shortageBanner" hidden></div>
           <div class="table-card points-table-card">
@@ -2398,6 +2411,7 @@ function renderSummary() {
   $("#availableTotal").textContent = format(total);
   $("#assignedTotal").textContent = format(assigned);
   $("#unassignedTotal").textContent = format(available);
+  $("#pointsAvailableTotal").textContent = format(available);
   $("#seatUsed").textContent = String(state.seats.used);
   $("#seatTotal").textContent = String(state.seats.total);
 }
