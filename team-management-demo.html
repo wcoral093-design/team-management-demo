@@ -1385,7 +1385,6 @@ select:focus-visible {
             </div>
             <div class="card-actions">
               <button class="link-button" data-action="details">明细</button>
-              <button class="link-button" data-action="allocate-first">分配</button>
               <button class="link-button" data-action="buy">购买</button>
             </div>
           </div>
@@ -2275,10 +2274,7 @@ document.addEventListener("click", (event) => {
 
   if (action === "invite") openInviteModal();
   else if (action === "rename") openRenameModal();
-  else if (action === "allocate-first") {
-    switchTab("credits");
-    beginCreditEdit(state.members[0].id);
-  } else if (action === "details") openPointsDetails();
+  else if (action === "details") openPointsDetails();
   else if (action === "buy") openBuyModal();
   else if (action === "renew") showToast("续费流程已唤起（Demo）");
   else if (action === "seats") showToast("席位购买流程已唤起（Demo）");

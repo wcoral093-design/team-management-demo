@@ -782,10 +782,7 @@ document.addEventListener("click", (event) => {
 
   if (action === "invite") openInviteModal();
   else if (action === "rename") openRenameModal();
-  else if (action === "allocate-first") {
-    switchTab("credits");
-    beginCreditEdit(state.members[0].id);
-  } else if (action === "details") openPointsDetails();
+  else if (action === "details") openPointsDetails();
   else if (action === "buy") openBuyModal();
   else if (action === "renew") showToast("续费流程已唤起（Demo）");
   else if (action === "seats") showToast("席位购买流程已唤起（Demo）");
