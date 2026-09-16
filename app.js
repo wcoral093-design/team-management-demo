@@ -88,6 +88,7 @@ const state = {
   giftCredits: 0,
   editingMemberId: null,
   draftCredits: null,
+  appendAmount: 0,
   shortage: null,
   modal: null,
 };
@@ -194,15 +195,8 @@ function renderSimulationSwitch() {
 }
 
 function creditEditorMarkup(member, type) {
-  const value = state.draftCredits[type];
-  const label = state.pools[type].label;
-  return `
-    <div class="credit-editor is-${type}" data-credit-editor="${type}">
-      <button type="button" data-draft-delta="-100" data-member="${member.id}" data-credit-type="${type}" aria-label="减少100${label}">−</button>
-      <input type="number" min="0" step="1" value="${value}" data-draft-input data-member="${member.id}" data-credit-type="${type}" aria-label="${member.name}${label}" />
-      <button type="button" data-draft-delta="100" data-member="${member.id}" data-credit-type="${type}" aria-label="增加100${label}">＋</button>
-    </div>
-  `;
+  const max = state.pools[type].available;
+  return `<div class="append-editor"><label>追加数量<input type="number" min="0" max="${max}" step="1" value="${escapeHTML(state.appendAmount)}" data-draft-input data-member="${member.id}" data-credit-type="${type}" aria-label="追加${state.pools[type].label}" /></label><small>最多可追加 ${format(max)}</small></div>`;
 }
 
 function shortageTypes() {
@@ -233,7 +227,7 @@ function renderPointsRows() {
     if (candidate) rowClasses.push("is-recovery-candidate");
     const creditCells = editing ? creditEditorMarkup(member, type) : readonlyCreditMarkup(member, type, candidate);
 
-    let action = `<button class="action-link" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ""}>积分调配</button>`;
+    let action = `<button class="action-link" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ""}>追加</button><button class="action-link" data-recover-candidate="${member.id}"${state.editingMemberId !== null || !member.credits[type] ? " disabled" : ""}>回收</button>`;
     if (editing) {
       action = '<div class="row-actions"><button class="action-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>';
     } else if (candidate) {
@@ -254,8 +248,8 @@ function renderPointsRows() {
 
 function renderShortageBanner() {
   const banner = $("#shortageBanner");
-  banner.hidden = true;
-  banner.innerHTML = "";
+  banner.hidden = !state.shortage;
+  banner.innerHTML = state.shortage ? '团队待分配积分不足。有余额的成员已高亮，可先回收，再确认追加。' : "";
 }
 
 function renderSummary() {
@@ -506,7 +500,9 @@ function beginCreditEdit(memberId) {
   if (!member) return;
   state.editingMemberId = member.id;
   state.draftCredits = { ...member.credits };
-  state.shortage = null;
+  state.appendAmount = state.pools[state.activeCreditType].available;
+  state.draftCredits[state.activeCreditType] += state.appendAmount;
+  state.shortage = state.appendAmount === 0 ? { targetMemberId: member.id, amounts: { [state.activeCreditType]: 1 } } : null;
   renderPointsRows();
   renderShortageBanner();
   window.setTimeout(() => $("[data-draft-input]")?.select(), 20);
@@ -532,21 +528,19 @@ function calculateShortages(member, draft) {
 function confirmCreditEdit() {
   const member = state.members.find((item) => item.id === state.editingMemberId);
   if (!member || !state.draftCredits) return;
-  const invalidType = creditTypes.find((type) => String(state.draftCredits[type]).trim() === "" || !Number.isSafeInteger(Number(state.draftCredits[type])) || Number(state.draftCredits[type]) < 0);
-  if (invalidType) {
-    showToast("积分请输入大于等于 0 的整数");
+  const type = state.activeCreditType;
+  const amount = Number(state.appendAmount);
+  if (String(state.appendAmount).trim() === "" || !Number.isSafeInteger(amount) || amount <= 0) {
+    showToast("追加数量请输入大于 0 的整数");
     return;
   }
-
-  creditTypes.forEach((type) => {
-    state.draftCredits[type] = Math.round(Number(state.draftCredits[type]));
-  });
+  state.draftCredits = { ...member.credits, [type]: member.credits[type] + amount };
   const shortages = calculateShortages(member, state.draftCredits);
   if (Object.keys(shortages).length) {
     state.shortage = { targetMemberId: member.id, amounts: shortages };
     renderPointsRows();
     renderShortageBanner();
-    openShortageModal(member);
+    showToast("待分配余额不足，请先回收高亮成员的可用积分");
     return;
   }
 
@@ -658,11 +652,11 @@ function openBuyModal() {
 
 function openRecoveryModal(memberId) {
   const member = state.members.find((item) => item.id === Number(memberId));
-  if (!member || !state.shortage) return;
-  const candidates = shortageTypes().filter((type) => member.credits[type] > 0);
+  if (!member) return;
+  const candidates = [state.activeCreditType].filter((type) => member.credits[type] > 0);
   if (!candidates.length) return;
   const firstType = candidates[0];
-  const max = Math.min(member.credits[firstType], state.shortage.amounts[firstType]);
+  const max = member.credits[firstType];
   openModal({
     type: "recovery",
     memberId: member.id,
@@ -672,7 +666,7 @@ function openRecoveryModal(memberId) {
       <label class="form-field"><span>积分类型</span><select name="creditType" id="recoveryType">${candidates.map((type) => `<option value="${type}">${state.pools[type].label}</option>`).join("")}</select></label>
       <label class="form-field"><span>回收数量</span><input name="amount" id="recoveryAmount" type="number" min="1" max="${max}" value="${max}" step="1" required /></label>
       <div class="form-hint"><span>本次最多可回收</span><strong id="recoveryLimit">${format(max)}</strong></div>
-      <div class="rule-note">回收数量不会超过该成员对应类型的未使用余额，也不会超过当前分配缺口。</div>
+      <div class="rule-note">回收数量不得超过该成员对应类型的未使用余额；回收后进入团队待分配余额。</div>
     `,
     confirmText: "确认回收",
   });
@@ -773,6 +767,25 @@ function recalculateShortage() {
   state.shortage = Object.keys(amounts).length ? { targetMemberId: member.id, amounts } : null;
 }
 
+function automaticCredits(name, action = "自动分配") {
+  const credits = {};
+  creditTypes.forEach(type => {
+    const amount = Math.min(state.perSeat[type], state.pools[type].available);
+    credits[type] = amount;
+    state.pools[type].available -= amount;
+    if (amount) recordTransaction(name, type, amount, action);
+  });
+  return credits;
+}
+
+function startNewCycle() {
+  if (state.editingMemberId !== null) {
+    showToast("请先确认或取消当前积分调整");
+    return;
+  }
+  openModal({ type: "new-cycle", title: "模拟新周期发放", subtitle: "按购买商品的每席位积分量发放", body: `<div class="rule-note">每席位：${creditTypes.map(type => `${state.pools[type].label} ${format(state.perSeat[type])}`).join('、')}。按成员列表顺序发放，余额不足时发放该类型剩余积分。</div>`, confirmText: "模拟发放" });
+}
+
 function approveInvite(inviteId) {
   const invite = state.pendingInvites.find((item) => item.id === Number(inviteId));
   if (!invite) return;
@@ -781,13 +794,7 @@ function approveInvite(inviteId) {
     return;
   }
 
-  const credits = {};
-  creditTypes.forEach((type) => {
-    const amount = Math.min(state.perSeat[type], state.pools[type].available);
-    credits[type] = amount;
-    state.pools[type].available -= amount;
-    if (amount) recordTransaction(invite.email, type, amount, "自动分配");
-  });
+  const credits = automaticCredits(invite.email);
   const localName = invite.email.split("@")[0] || "新成员";
   state.members.push({
     id: Math.max(...state.members.map((member) => member.id), 0) + 1,
@@ -810,7 +817,7 @@ function updateRecoveryLimit() {
   if (state.modal?.type !== "recovery") return;
   const member = state.members.find((item) => item.id === state.modal.memberId);
   const type = $("#recoveryType").value;
-  const max = Math.min(member.credits[type], state.shortage?.amounts[type] || 0);
+  const max = member.credits[type];
   $("#recoveryAmount").max = String(max);
   $("#recoveryAmount").value = String(max);
   $("#recoveryLimit").textContent = format(max);
@@ -825,6 +832,16 @@ function handleModalSubmit(event) {
   }
   if (state.modal.type === "shortage-auto") {
     autoRecoverAndAssign();
+    return;
+  }
+  if (state.modal.type === "new-cycle") {
+    state.members.forEach(member => {
+      const credits = automaticCredits(member.name, "周期自动分配");
+      creditTypes.forEach(type => member.credits[type] += credits[type]);
+    });
+    renderAll();
+    closeModal();
+    showToast("新周期积分已按每席位额度发放；余额不足的类型按剩余量发放");
     return;
   }
   const data = new FormData(event.currentTarget);
@@ -865,8 +882,8 @@ function handleModalSubmit(event) {
 
   if (state.modal.type === "buy") {
     const type = String(data.get("creditType"));
-    const amount = Math.round(Number(data.get("amount")));
-    if (!Number.isFinite(amount) || amount < 1) {
+    const amount = Number(data.get("amount"));
+    if (!Number.isSafeInteger(amount) || amount < 1) {
       showToast("请输入有效的购买数量");
       return;
     }
@@ -884,9 +901,9 @@ function handleModalSubmit(event) {
   if (state.modal.type === "recovery") {
     const member = state.members.find((item) => item.id === state.modal.memberId);
     const type = String(data.get("creditType"));
-    const amount = Math.round(Number(data.get("amount")));
-    const max = Math.min(member.credits[type], state.shortage?.amounts[type] || 0);
-    if (!Number.isFinite(amount) || amount < 1 || amount > max) {
+    const amount = Number(data.get("amount"));
+    const max = member.credits[type];
+    if (!Number.isSafeInteger(amount) || amount < 1 || amount > max) {
       showToast(`请输入 1–${format(max)} 之间的整数`);
       return;
     }
@@ -896,7 +913,7 @@ function handleModalSubmit(event) {
     recalculateShortage();
     renderAll();
     closeModal();
-    showToast(state.shortage ? "已回收积分，仍有分配缺口" : "团队余额已补足，可再次确认本次调配");
+    showToast(state.shortage ? "已回收积分，仍有分配缺口" : state.editingMemberId !== null ? "团队余额已补足，可确认追加" : "积分已回收到团队待分配余额");
   }
 }
 
@@ -1028,7 +1045,8 @@ document.addEventListener("click", (event) => {
   if (!actionButton) return;
   const action = actionButton.dataset.action;
 
-  if (action === "invite") openInviteModal();
+  if (action === "new-cycle") startNewCycle();
+  else if (action === "invite") openInviteModal();
   else if (action === "rename") openRenameModal();
   else if (action === "details") showPointsDetailPage("details");
   else if (action === "buy") showPointsDetailPage("purchase");
@@ -1043,8 +1061,15 @@ document.addEventListener("click", (event) => {
 document.addEventListener("input", (event) => {
   const input = event.target.closest("[data-draft-input]");
   if (!input || !state.draftCredits) return;
-  state.draftCredits[input.dataset.creditType] = input.value;
-  state.shortage = null;
+  state.appendAmount = input.value;
+  const member = state.members.find(item => item.id === state.editingMemberId);
+  const type = input.dataset.creditType;
+  state.draftCredits[type] = member.credits[type] + Number(input.value);
+  recalculateShortage();
+  $$("#pointsRows .table-row").forEach(row => {
+    const candidate = state.members.find(item => item.id === Number(row.dataset.memberId));
+    row.classList.toggle("is-recovery-candidate", isRecoveryCandidate(candidate));
+  });
   renderShortageBanner();
 });
 

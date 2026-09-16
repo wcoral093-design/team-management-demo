@@ -1939,3 +1939,9 @@ body.is-points-detail .simulation-switch {
 .unallocated-summary > span { color: var(--text-secondary); font-size: 14px; }
 .unallocated-summary > strong { font-size: 30px; line-height: 1.2; font-weight: 600; font-variant-numeric: tabular-nums; }
 .points-table { min-width: 740px; grid-template-columns: minmax(220px, 1.6fr) minmax(110px, 1fr) minmax(100px, 1fr) minmax(160px, 1.2fr) 122px; }
+
+.append-editor label { display:flex; align-items:center; gap:10px; font-size:13px; }
+.append-editor input { width:110px; border:1px solid var(--line-strong); border-radius:7px; padding:8px; background:#fff; font:inherit; }
+.append-editor small { display:block; margin-top:5px; color:var(--text-secondary); font-size:12px; }
+.cycle-toolbar { display:flex; justify-content:flex-end; margin-bottom:4px; }
+.points-table.table-row.is-recovery-candidate { background:#f0e8ff; box-shadow:inset 3px 0 #9254ff; }
