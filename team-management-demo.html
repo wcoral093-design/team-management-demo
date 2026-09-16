@@ -888,47 +888,63 @@ select:focus-visible {
 
 .points-overview {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  align-items: start;
-  gap: 10px;
+  overflow: hidden;
+  grid-template-columns: minmax(220px, 1.08fr) repeat(3, minmax(0, 1fr));
+  align-items: stretch;
   margin-bottom: 22px;
-}
-
-.points-section-title {
-  margin: 0 0 12px;
-  color: var(--text);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 20px;
-}
-
-.points-section-title span {
-  font-variant-numeric: tabular-nums;
+  padding: 24px 0;
+  border: 1px solid rgba(22, 22, 27, 0.05);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 1px 3px rgba(18, 18, 22, 0.018);
 }
 
 .point-card {
+  position: relative;
+  display: flex;
   min-width: 0;
-  min-height: 82px;
-  padding: 15px 18px;
-  border: 1px solid rgba(22, 22, 27, 0.05);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.68);
-  box-shadow: 0 1px 2px rgba(18, 18, 22, 0.018);
+  min-height: 78px;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 30px;
+}
+
+.point-card + .point-card::before {
+  position: absolute;
+  inset: 5px auto 5px 0;
+  width: 1px;
+  background: rgba(22, 22, 27, 0.09);
+  content: "";
 }
 
 .point-card .point-title {
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 20px;
 }
 
 .point-card .point-balance {
-  margin-top: 4px;
+  margin-top: 7px;
   color: #16161b;
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 620;
-  letter-spacing: -0.5px;
-  line-height: 29px;
+  letter-spacing: -0.6px;
+  line-height: 32px;
   font-variant-numeric: tabular-nums;
+}
+
+.point-card-total .point-balance {
+  font-size: 34px;
+  font-weight: 640;
+  letter-spacing: -1px;
+  line-height: 38px;
+}
+
+.point-card .point-caption {
+  margin-top: 4px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .invite-state h2 {
@@ -1978,7 +1994,6 @@ body.is-points-detail .simulation-switch {
         </section>
 
         <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
-          <h2 class="points-section-title">待分配积分：<span id="pointsAvailableTotal">21,442</span></h2>
           <div class="points-overview" id="pointsOverview"></div>
           <div class="shortage-banner" id="shortageBanner" hidden></div>
           <div class="table-card points-table-card">
@@ -2306,15 +2321,24 @@ function renderMemberRows() {
 }
 
 function renderPointCards() {
-  $("#pointsOverview").innerHTML = creditTypes.map((type) => {
+  const total = availableTotal();
+  const typeCards = creditTypes.map((type) => {
     const pool = state.pools[type];
     return `
       <article class="point-card" aria-label="${pool.label}待分配积分 ${format(pool.available)}">
-        <div class="point-title">${pool.label}</div>
+        <div class="point-title">${pool.label}待分配</div>
         <div class="point-balance" title="待分配积分">${format(pool.available)}</div>
       </article>
     `;
   }).join("");
+  $("#pointsOverview").innerHTML = `
+    <article class="point-card point-card-total" aria-label="待分配总积分 ${format(total)}，团队当前可继续分配">
+      <div class="point-title">待分配总积分</div>
+      <div class="point-balance" id="pointsAvailableTotal">${format(total)}</div>
+      <div class="point-caption">团队当前可继续分配</div>
+    </article>
+    ${typeCards}
+  `;
 }
 
 function renderSimulationSwitch() {

@@ -163,15 +163,24 @@ function renderMemberRows() {
 }
 
 function renderPointCards() {
-  $("#pointsOverview").innerHTML = creditTypes.map((type) => {
+  const total = availableTotal();
+  const typeCards = creditTypes.map((type) => {
     const pool = state.pools[type];
     return `
       <article class="point-card" aria-label="${pool.label}待分配积分 ${format(pool.available)}">
-        <div class="point-title">${pool.label}</div>
+        <div class="point-title">${pool.label}待分配</div>
         <div class="point-balance" title="待分配积分">${format(pool.available)}</div>
       </article>
     `;
   }).join("");
+  $("#pointsOverview").innerHTML = `
+    <article class="point-card point-card-total" aria-label="待分配总积分 ${format(total)}，团队当前可继续分配">
+      <div class="point-title">待分配总积分</div>
+      <div class="point-balance" id="pointsAvailableTotal">${format(total)}</div>
+      <div class="point-caption">团队当前可继续分配</div>
+    </article>
+    ${typeCards}
+  `;
 }
 
 function renderSimulationSwitch() {
