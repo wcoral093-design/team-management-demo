@@ -88,7 +88,6 @@ const state = {
   giftCredits: 0,
   editingMemberId: null,
   draftCredits: null,
-  appendAmount: 0,
   shortage: null,
   modal: null,
 };
@@ -195,8 +194,8 @@ function renderSimulationSwitch() {
 }
 
 function creditEditorMarkup(member, type) {
-  const max = state.pools[type].available;
-  return `<div class="append-editor"><label>追加数量<input type="number" min="0" max="${max}" step="1" value="${escapeHTML(state.appendAmount)}" data-draft-input data-member="${member.id}" data-credit-type="${type}" aria-label="追加${state.pools[type].label}" /></label><small>最多可追加 ${format(max)}</small></div>`;
+  const max = member.credits[type] + state.pools[type].available;
+  return `<div class="append-editor"><input type="number" min="0" max="${max}" step="1" value="${escapeHTML(state.draftCredits[type])}" data-draft-input data-member="${member.id}" data-credit-type="${type}" aria-label="剩余${state.pools[type].label}" /><small>当前最多可设为 ${format(max)}</small></div>`;
 }
 
 function shortageTypes() {
@@ -227,9 +226,7 @@ function renderPointsRows() {
     if (candidate) rowClasses.push("is-recovery-candidate");
     const creditCells = editing ? creditEditorMarkup(member, type) : readonlyCreditMarkup(member, type, candidate);
 
-    let action = state.editingMemberId !== null
-      ? '<button class="action-link" disabled title="请先确认或取消当前成员的修改">积分调配</button>'
-      : `<details class="allocation-menu"><summary class="action-link">积分调配</summary><div class="allocation-menu-options"><button type="button" data-edit-credits="${member.id}">追加积分</button><button type="button" data-recover-candidate="${member.id}"${!member.credits[type] ? ' disabled' : ''}>回收积分</button></div></details>`;
+    let action = `<button class="action-link" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ''}>积分调配</button>`;
     if (editing) {
       action = '<div class="row-actions"><button class="action-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>';
     } else if (candidate) {
@@ -502,9 +499,7 @@ function beginCreditEdit(memberId) {
   if (!member) return;
   state.editingMemberId = member.id;
   state.draftCredits = { ...member.credits };
-  state.appendAmount = state.pools[state.activeCreditType].available;
-  state.draftCredits[state.activeCreditType] += state.appendAmount;
-  state.shortage = state.appendAmount === 0 ? { targetMemberId: member.id, amounts: { [state.activeCreditType]: 1 } } : null;
+  state.shortage = null;
   renderPointsRows();
   renderShortageBanner();
   window.setTimeout(() => $("[data-draft-input]")?.select(), 20);
@@ -531,12 +526,12 @@ function confirmCreditEdit() {
   const member = state.members.find((item) => item.id === state.editingMemberId);
   if (!member || !state.draftCredits) return;
   const type = state.activeCreditType;
-  const amount = Number(state.appendAmount);
-  if (String(state.appendAmount).trim() === "" || !Number.isSafeInteger(amount) || amount <= 0) {
-    showToast("追加数量请输入大于 0 的整数");
+  const amount = Number(state.draftCredits[type]);
+  if (String(state.draftCredits[type]).trim() === "" || !Number.isSafeInteger(amount) || amount < 0) {
+    showToast("剩余积分请输入大于等于 0 的整数");
     return;
   }
-  state.draftCredits = { ...member.credits, [type]: member.credits[type] + amount };
+  state.draftCredits = { ...member.credits, [type]: amount };
   const shortages = calculateShortages(member, state.draftCredits);
   if (Object.keys(shortages).length) {
     state.shortage = { targetMemberId: member.id, amounts: shortages };
@@ -1063,10 +1058,9 @@ document.addEventListener("click", (event) => {
 document.addEventListener("input", (event) => {
   const input = event.target.closest("[data-draft-input]");
   if (!input || !state.draftCredits) return;
-  state.appendAmount = input.value;
   const member = state.members.find(item => item.id === state.editingMemberId);
   const type = input.dataset.creditType;
-  state.draftCredits[type] = member.credits[type] + Number(input.value);
+  state.draftCredits[type] = input.value;
   recalculateShortage();
   $$("#pointsRows .table-row").forEach(row => {
     const candidate = state.members.find(item => item.id === Number(row.dataset.memberId));
