@@ -14,7 +14,7 @@ if ([...source.matchAll(styleReference)].length !== 1 || [...source.matchAll(scr
 const html = source
   .replace(styleReference, () => `<style>\n${css}\n</style>`)
   .replace(scriptReference, () => `<script>\n${script.replaceAll('</script', '<\\/script')}\n</script>`);
-await mkdir(new URL('public/', root), { recursive: true });
-await writeFile(new URL('public/index.html', root), html);
+await mkdir(new URL('out/', root), { recursive: true });
+await writeFile(new URL('out/index.html', root), html);
 await writeFile(new URL('team-management-demo.html', root), html);
-console.log('Built public/index.html and synchronized the offline demo.');
+console.log('Built out/index.html and synchronized the offline demo.');

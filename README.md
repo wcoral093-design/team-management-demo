@@ -34,6 +34,6 @@ python3 -m http.server 4173 --directory team-management-demo
 该站点使用 Sites 在线托管，目标访问范围为任何持有链接的人，不依赖本机或局域网。
 后续修改 `index.html`、`styles.css`、`app.js` 后，执行 `node build.mjs`，再通过 Sites 发布到 `.openai/hosting.json` 记录的同一站点。发布成功后，访问原链接或刷新即可看到最新版本，无需更换链接。
 
-`build.mjs` 会同步生成 `public/index.html` 和离线单文件，避免在线、离线版本不一致。在线版本只托管 `public/`，不包含本地工作区。
+`build.mjs` 会同步生成 `out/index.html` 和离线单文件，避免在线、离线版本不一致。在线版本只托管 `out/`，不包含本地工作区。
 
 这是前端交互演示：各浏览器的成员和积分操作独立模拟，刷新后恢复初始数据，不连接真实团队账户。
