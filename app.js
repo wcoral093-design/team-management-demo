@@ -195,7 +195,8 @@ function renderSimulationSwitch() {
 
 function creditEditorMarkup(member, type) {
   const max = member.credits[type] + state.pools[type].available;
-  return `<div class="append-editor"><input type="number" min="0" max="${max}" step="1" value="${escapeHTML(state.draftCredits[type])}" data-draft-input data-member="${member.id}" data-credit-type="${type}" aria-label="剩余${state.pools[type].label}" /><small>当前最多可设为 ${format(max)}</small></div>`;
+  const value = state.draftCredits[type];
+  return `<div class="append-editor"><div class="balance-stepper"><button type="button" data-draft-delta="-100" data-credit-type="${type}" aria-label="减少100积分"${Number(value) <= 0 ? ' disabled' : ''}>−</button><input type="number" min="0" max="${max}" step="1" value="${escapeHTML(value)}" data-draft-input data-member="${member.id}" data-credit-type="${type}" aria-label="剩余${state.pools[type].label}" /><button type="button" data-draft-delta="100" data-credit-type="${type}" aria-label="增加100积分">＋</button></div><small>每次加减 100 · 当前最多 ${format(max)}</small></div>`;
 }
 
 function shortageTypes() {
@@ -1001,7 +1002,7 @@ document.addEventListener("click", (event) => {
     const type = deltaButton.dataset.creditType;
     const delta = Number(deltaButton.dataset.draftDelta);
     state.draftCredits[type] = Math.max(0, Math.round(Number(state.draftCredits[type]) + delta));
-    state.shortage = null;
+    recalculateShortage();
     renderPointsRows();
     renderShortageBanner();
     return;

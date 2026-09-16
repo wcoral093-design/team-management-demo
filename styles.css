@@ -1969,3 +1969,12 @@ body.is-points-detail .simulation-switch {
   .credit-workspace-toolbar { flex-wrap: wrap; gap: 12px; }
   .credit-workspace-toolbar #pointsOverview { margin-left: auto; }
 }
+
+.balance-stepper { display: inline-flex; height: 36px; align-items: center; padding: 0 4px; border-radius: 999px; background: #f1f1f2; }
+.balance-stepper button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #17171b; font-size: 23px; line-height: 1; cursor: pointer; }
+.balance-stepper button:hover { background: #e5e5e7; }
+.balance-stepper button:disabled { opacity: .3; cursor: default; }
+.append-editor .balance-stepper input { width: 76px; min-width: 0; padding: 0 2px; border: 0; border-radius: 0; background: transparent; text-align: center; font-size: 16px; font-weight: 500; appearance: textfield; -moz-appearance: textfield; }
+.balance-stepper input::-webkit-inner-spin-button, .balance-stepper input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.balance-stepper:focus-within { outline: 2px solid #9254ff; outline-offset: 2px; }
+.balance-stepper input:focus { outline: none; }
