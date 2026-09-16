@@ -66,7 +66,29 @@ select:focus-visible {
   width: 72px;
   flex-direction: column;
   align-items: flex-start;
-  background: #ececec;
+  background: #fff;
+}
+
+.sidebar-product {
+  display: grid;
+  width: 72px;
+  height: 68px;
+  flex: 0 0 68px;
+  place-items: center;
+}
+
+.sidebar-product-clip {
+  display: block;
+  overflow: hidden;
+  width: 32px;
+  height: 28px;
+}
+
+.sidebar-product-clip img {
+  display: block;
+  width: 79px;
+  height: 28px;
+  margin-left: 2px;
 }
 
 .side-nav {
@@ -77,7 +99,7 @@ select:focus-visible {
   flex-direction: column;
   align-items: flex-start;
   gap: 6px;
-  padding: 32px 12px 16px;
+  padding: 16px 12px 16px;
 }
 
 .side-item {
@@ -177,7 +199,7 @@ select:focus-visible {
   flex: 0 0 154px;
   flex-direction: column;
   gap: 6px;
-  padding-top: 22px;
+  padding-top: 30px;
 }
 
 .side-bottom {
