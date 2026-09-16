@@ -699,27 +699,35 @@ select:focus-visible {
 }
 
 .tabs {
-  gap: 4px;
+  gap: 0;
+  height: 36px;
+  padding: 2px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .tab {
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 10px;
-  color: #4e4e55;
-  font-size: 13px;
-  font-weight: 600;
+  height: 32px;
+  width: 80px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: #000;
+  font-family: "PingFang SC", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.0938px;
+  white-space: nowrap;
   transition: 150ms ease;
 }
 
-.tab:hover {
-  color: var(--text);
-  background: rgba(0, 0, 0, 0.025);
-}
-
+.tab:hover { background: rgba(255, 255, 255, 0.5); }
 .tab.is-active {
-  color: var(--text);
-  background: #eaeaeb;
+  color: rgba(0, 0, 0, 0.8);
+  background: #fff;
+  border-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .invite-button {
