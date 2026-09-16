@@ -168,7 +168,7 @@ function renderPointCards() {
   const pool = state.pools[type];
   $("#creditTypeTabs").innerHTML = creditTypes.map((key) => `<button type="button" class="credit-subtab${key === type ? ' is-active' : ''}" id="credit-tab-${key}" role="tab" aria-selected="${key === type}" aria-controls="creditTypeContent" tabindex="${key === type ? 0 : -1}" data-credit-tab="${key}">${key === 'general' ? '通用积分' : key === 'sd25' ? 'SD 2.5' : 'SD 2.0'}</button>`).join('');
   $("#creditTypeContent").setAttribute("aria-labelledby", "credit-tab-" + type);
-  $("#pointsOverview").innerHTML = `<div class="unallocated-summary"><span>待分配总积分</span><strong>${format(pool.available)}</strong></div><p class="allocation-guidance">成员积分可灵活调配，支持追加或回收未使用积分。</p>`;
+  $("#pointsOverview").innerHTML = `<div class="unallocated-summary"><span>待分配总积分</span><strong>${format(pool.available)}</strong></div><p class="allocation-guidance">成员积分可灵活调配，支持追加或回收未使用积分</p>`;
   $("#creditBalanceHeader").textContent = "剩余" + pool.label;
 }
 
