@@ -2003,7 +2003,7 @@ body.is-points-detail .simulation-switch {
 .summary-grid { grid-template-columns: minmax(0, 1fr) 200px; }
 .credits-card { padding: 20px; }
 .credit-summary-actions { position: absolute; top: 18px; right: 20px; z-index: 1; display: flex; align-items: center; }
-.credit-summary-modules { display: grid; grid-template-columns: 1.35fr 1fr 1fr; align-items: stretch; }
+.credit-summary-modules { display: grid; grid-template-columns: 1.35fr 1fr; align-items: stretch; }
 .credit-summary-module { min-width: 0; padding: 6px 20px 4px; }
 .credit-summary-module:first-child { padding-left: 4px; }
 .credit-summary-module:last-child { padding-right: 4px; }
@@ -2020,11 +2020,6 @@ body.is-points-detail .simulation-switch {
 .legend-unallocated { background: #d8c7f8; }
 .credit-summary-module .large-number { margin-top: 0; font-size: 25px; line-height: 30px; }
 .credit-summary-primary .large-number { font-size: 34px; line-height: 38px; font-weight: 600; }
-.credit-type-bar { display: flex; width: 100%; height: 6px; overflow: hidden; margin-top: 10px; border-radius: 999px; background: #ececef; }
-.credit-type-bar i { display: block; min-width: 0; transition: width .25s ease; }
-.credit-type-bar i:nth-child(1) { background: #1ca4bd; }
-.credit-type-bar i:nth-child(2) { background: #6857ed; }
-.credit-type-bar i:nth-child(3) { background: #ee43a0; }
 .credit-summary-module .summary-credit-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 10px; margin-top: 8px; }
 .credit-summary-module .allocation-stat { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: 2px; }
 .credit-summary-module .allocation-stat span { overflow: hidden; max-width: 100%; color: var(--text-secondary); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
@@ -2034,7 +2029,7 @@ body.is-points-detail .simulation-switch {
   .team-plan { margin-left: 0; }
 }
 @media (max-width: 1080px) {
-  .credit-summary-modules { grid-template-columns: 1.25fr 1fr 1fr; }
+  .credit-summary-modules { grid-template-columns: 1.25fr 1fr; }
   .credit-summary-module { padding-left: 14px; padding-right: 14px; }
   .credit-summary-primary { padding-left: 10px; padding-right: 18px; }
 }

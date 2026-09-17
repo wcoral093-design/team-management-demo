@@ -2011,7 +2011,7 @@ body.is-points-detail .simulation-switch {
 .summary-grid { grid-template-columns: minmax(0, 1fr) 200px; }
 .credits-card { padding: 20px; }
 .credit-summary-actions { position: absolute; top: 18px; right: 20px; z-index: 1; display: flex; align-items: center; }
-.credit-summary-modules { display: grid; grid-template-columns: 1.35fr 1fr 1fr; align-items: stretch; }
+.credit-summary-modules { display: grid; grid-template-columns: 1.35fr 1fr; align-items: stretch; }
 .credit-summary-module { min-width: 0; padding: 6px 20px 4px; }
 .credit-summary-module:first-child { padding-left: 4px; }
 .credit-summary-module:last-child { padding-right: 4px; }
@@ -2028,11 +2028,6 @@ body.is-points-detail .simulation-switch {
 .legend-unallocated { background: #d8c7f8; }
 .credit-summary-module .large-number { margin-top: 0; font-size: 25px; line-height: 30px; }
 .credit-summary-primary .large-number { font-size: 34px; line-height: 38px; font-weight: 600; }
-.credit-type-bar { display: flex; width: 100%; height: 6px; overflow: hidden; margin-top: 10px; border-radius: 999px; background: #ececef; }
-.credit-type-bar i { display: block; min-width: 0; transition: width .25s ease; }
-.credit-type-bar i:nth-child(1) { background: #1ca4bd; }
-.credit-type-bar i:nth-child(2) { background: #6857ed; }
-.credit-type-bar i:nth-child(3) { background: #ee43a0; }
 .credit-summary-module .summary-credit-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 10px; margin-top: 8px; }
 .credit-summary-module .allocation-stat { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: 2px; }
 .credit-summary-module .allocation-stat span { overflow: hidden; max-width: 100%; color: var(--text-secondary); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
@@ -2042,7 +2037,7 @@ body.is-points-detail .simulation-switch {
   .team-plan { margin-left: 0; }
 }
 @media (max-width: 1080px) {
-  .credit-summary-modules { grid-template-columns: 1.25fr 1fr 1fr; }
+  .credit-summary-modules { grid-template-columns: 1.25fr 1fr; }
   .credit-summary-module { padding-left: 14px; padding-right: 14px; }
   .credit-summary-primary { padding-left: 10px; padding-right: 18px; }
 }
@@ -2132,17 +2127,10 @@ body.is-points-detail .simulation-switch {
           <div class="credit-summary-modules">
             <section class="credit-summary-module credit-summary-primary" aria-label="剩余总积分">
               <div class="credit-primary-overview"><div class="credit-donut" id="allocationDonut" role="img" aria-label="已分配与待分配积分占比"></div><div><div class="card-label">剩余总积分</div><div class="large-number" id="availableTotal">0</div><div class="donut-legend"><span><i class="legend-assigned"></i>已分配</span><span><i class="legend-unallocated"></i>待分配</span></div></div></div>
-              <div class="credit-type-bar" id="remainingTypeBar" role="img" aria-label="剩余积分类型构成"><i></i><i></i><i></i></div>
               <div class="summary-credit-meta"><div class="allocation-stat"><span>通用积分</span><strong id="remainingGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5积分</span><strong id="remainingSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0积分</span><strong id="remainingSd20">0</strong></div></div>
-            </section>
-            <section class="credit-summary-module" aria-label="已分配积分">
-              <div class="credit-module-heading"><div><div class="card-label">已分配积分</div><div class="large-number" id="assignedSummaryTotal">0</div></div></div>
-              <div class="credit-type-bar" id="assignedTypeBar" role="img" aria-label="已分配积分类型构成"><i></i><i></i><i></i></div>
-              <div class="summary-credit-meta"><div class="allocation-stat"><span>通用</span><strong id="assignedGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5</span><strong id="assignedSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0</span><strong id="assignedSd20">0</strong></div></div>
             </section>
             <section class="credit-summary-module" aria-label="待分配积分">
               <div class="credit-module-heading"><div><div class="card-label">待分配积分</div><div class="large-number" id="unallocatedSummaryTotal">0</div></div></div>
-              <div class="credit-type-bar" id="unallocatedTypeBar" role="img" aria-label="待分配积分类型构成"><i></i><i></i><i></i></div>
               <div class="summary-credit-meta"><div class="allocation-stat"><span>通用</span><strong id="unallocatedGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5</span><strong id="unallocatedSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0</span><strong id="unallocatedSd20">0</strong></div></div>
             </section>
           </div>
@@ -2617,35 +2605,17 @@ function renderSummary() {
   const assigned = assignedTotal();
   const available = availableTotal();
   const total = assigned + available;
-  const assignedByType = creditTypes.map((type) => assignedForType(type));
-  const unallocatedByType = creditTypes.map((type) => state.pools[type].available);
-  const remainingByType = creditTypes.map((type, index) => assignedByType[index] + unallocatedByType[index]);
-
-  const setTypeBar = (id, values) => {
-    const bar = $("#" + id);
-    const sum = values.reduce((result, value) => result + value, 0) || 1;
-    [...bar.children].forEach((segment, index) => {
-      segment.style.width = `${(values[index] / sum) * 100}%`;
-    });
-    bar.setAttribute("aria-label", `通用积分 ${format(values[0])}，SD 2.5积分 ${format(values[1])}，SD 2.0积分 ${format(values[2])}`);
-  };
-
   $("#availableTotal").textContent = format(total);
   ["remainingGeneral", "remainingSd25", "remainingSd20"].forEach((id, index) => {
     const type = creditTypes[index];
     $("#" + id).textContent = format(state.pools[type].available + assignedForType(type));
   });
-  $("#assignedSummaryTotal").textContent = format(assigned);
   $("#unallocatedSummaryTotal").textContent = format(available);
   const assignedAngle = total ? (assigned / total) * 360 : 0;
   $("#allocationDonut").style.setProperty("--assigned-angle", `${assignedAngle}deg`);
   $("#allocationDonut").setAttribute("aria-label", `已分配 ${format(assigned)}，待分配 ${format(available)}`);
-  setTypeBar("remainingTypeBar", remainingByType);
-  setTypeBar("assignedTypeBar", assignedByType);
-  setTypeBar("unallocatedTypeBar", unallocatedByType);
   ["General", "Sd25", "Sd20"].forEach((suffix, index) => {
     const type = creditTypes[index];
-    $("#assigned" + suffix).textContent = format(assignedForType(type));
     $("#unallocated" + suffix).textContent = format(state.pools[type].available);
   });
   $("#seatUsed").textContent = String(state.seats.used);
