@@ -477,8 +477,8 @@ select:focus-visible {
 .summary-card {
   position: relative;
   min-width: 0;
-  height: 128px;
-  padding: 22px 24px;
+  height: auto;
+  padding: 20px 24px;
   border: 1px solid rgba(0, 0, 0, 0.035);
   border-radius: 22px;
   background: var(--surface);
@@ -582,7 +582,7 @@ select:focus-visible {
 .membership-row > .link-button,
 .seats-card .summary-topline > .link-button {
   position: absolute;
-  top: 22px;
+  top: 20px;
   right: 24px;
   display: inline-flex;
   height: 18px;
@@ -593,7 +593,7 @@ select:focus-visible {
 
 .credits-card .card-actions {
   position: absolute;
-  top: 18px;
+  top: 20px;
   right: 24px;
   height: 18px;
   align-items: center;
@@ -631,10 +631,7 @@ select:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-.credits-card {
-  padding-top: 18px;
-  padding-bottom: 18px;
-}
+
 
 .legend-row {
   gap: 16px;
@@ -1920,7 +1917,7 @@ body.is-points-detail .simulation-switch {
 }
 
 /* Unified member and credit workspace. */
-.summary-card { height: auto; min-height: 142px; }
+
 .summary-credit-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .summary-credit-meta .allocation-stat { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .summary-credit-meta .allocation-stat + .allocation-stat { padding-left: 10px; }
@@ -1932,7 +1929,6 @@ body.is-points-detail .simulation-switch {
 .points-table { grid-template-columns: minmax(190px, 1.5fr) minmax(76px, .65fr) minmax(72px, .6fr) minmax(90px, .75fr) repeat(3, minmax(112px, .95fr)) 122px; }
 @media (max-width: 900px) {
   .summary-grid { grid-template-columns: 1fr; }
-  .summary-card { min-height: 128px; }
   .points-overview { overflow-x: auto; }
 }
 
