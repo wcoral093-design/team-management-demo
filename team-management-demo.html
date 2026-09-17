@@ -2009,21 +2009,38 @@ body.is-points-detail .simulation-switch {
 .team-name-row { flex-wrap: wrap; }
 .team-plan { display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; font-size: 12px; font-weight: 500; }
 .summary-grid { grid-template-columns: minmax(0, 1fr) 200px; }
-.credit-summary-actions { display: flex; justify-content: flex-end; margin-bottom: 12px; }
-.credit-summary-modules { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.credit-summary-module { min-width: 0; padding: 0 24px; }
-.credit-summary-module:first-child { padding-left: 0; }
-.credit-summary-module:last-child { padding-right: 0; }
+.credits-card { padding: 20px; }
+.credit-summary-actions { position: absolute; top: 18px; right: 20px; z-index: 1; display: flex; align-items: center; }
+.credit-summary-modules { display: grid; grid-template-columns: 1.35fr 1fr 1fr; align-items: stretch; }
+.credit-summary-module { min-width: 0; padding: 6px 20px 4px; }
+.credit-summary-module:first-child { padding-left: 4px; }
+.credit-summary-module:last-child { padding-right: 4px; }
 .credit-summary-module + .credit-summary-module { border-left: 1px solid var(--line-strong); }
-.credit-summary-module .summary-credit-meta { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-top: 16px; }
-.credit-summary-module .allocation-stat { justify-content: space-between; }
+.credit-summary-primary { margin: -6px 0 -4px -4px; padding: 12px 28px 10px 12px; border-radius: 16px; background: linear-gradient(135deg, rgba(146, 84, 255, .09), rgba(146, 84, 255, .025)); }
+.credit-module-heading { display: flex; align-items: center; gap: 10px; }
+.credit-module-icon { display: inline-grid; width: 28px; height: 28px; flex: 0 0 28px; place-items: center; border-radius: 9px; color: #7b3ff2; background: rgba(146, 84, 255, .10); font-size: 17px; font-weight: 500; }
+.credit-summary-primary .credit-module-icon { width: 34px; height: 34px; flex-basis: 34px; color: #fff; background: #8d50f8; }
+.credit-module-icon svg { width: 19px; height: 19px; fill: currentColor; }
+.credit-module-icon svg path + path { opacity: .55; }
+.credit-summary-module .large-number { margin-top: 0; font-size: 25px; line-height: 30px; }
+.credit-summary-primary .large-number { font-size: 34px; line-height: 38px; font-weight: 600; }
+.credit-summary-module .summary-credit-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 10px; margin-top: 14px; }
+.credit-summary-module .allocation-stat { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: 2px; }
+.credit-summary-module .allocation-stat span { overflow: hidden; max-width: 100%; color: var(--text-secondary); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.credit-summary-module .allocation-stat strong { font-size: 13px; line-height: 18px; }
 @media (max-width: 900px) {
   .summary-grid { grid-template-columns: 1fr; }
   .team-plan { margin-left: 0; }
 }
+@media (max-width: 1080px) {
+  .credit-summary-modules { grid-template-columns: 1.25fr 1fr 1fr; }
+  .credit-summary-module { padding-left: 14px; padding-right: 14px; }
+  .credit-summary-primary { padding-left: 10px; padding-right: 18px; }
+}
 @media (max-width: 600px) {
   .credit-summary-modules { grid-template-columns: 1fr; gap: 20px; }
   .credit-summary-module { padding: 0; }
+  .credit-summary-primary { margin: 0; padding: 12px; }
   .credit-summary-module + .credit-summary-module { border-left: 0; border-top: 1px solid var(--line-strong); padding-top: 20px; }
 }
 
@@ -2103,7 +2120,20 @@ body.is-points-detail .simulation-switch {
       <section class="summary-grid" aria-label="团队概览">
         <article class="summary-card credits-card">
           <div class="credit-summary-actions"><button class="link-button" data-action="details">明细</button><button class="link-button" data-action="buy">购买</button></div>
-          <div class="credit-summary-modules"><section class="credit-summary-module" aria-label="剩余总积分"><div class="card-label">剩余总积分</div><div class="large-number" id="availableTotal">0</div><div class="summary-credit-meta"><div class="allocation-stat"><span>通用积分</span><strong id="remainingGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5积分</span><strong id="remainingSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0积分</span><strong id="remainingSd20">0</strong></div></div></section><section class="credit-summary-module" aria-label="已分配积分"><div class="card-label">已分配积分</div><div class="large-number" id="assignedSummaryTotal">0</div><div class="summary-credit-meta"><div class="allocation-stat"><span>通用积分</span><strong id="assignedGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5积分</span><strong id="assignedSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0积分</span><strong id="assignedSd20">0</strong></div></div></section><section class="credit-summary-module" aria-label="待分配积分"><div class="card-label">待分配积分</div><div class="large-number" id="unallocatedSummaryTotal">0</div><div class="summary-credit-meta"><div class="allocation-stat"><span>通用积分</span><strong id="unallocatedGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5积分</span><strong id="unallocatedSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0积分</span><strong id="unallocatedSd20">0</strong></div></div></section></div>
+          <div class="credit-summary-modules">
+            <section class="credit-summary-module credit-summary-primary" aria-label="剩余总积分">
+              <div class="credit-module-heading"><span class="credit-module-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M10 2.5a7.5 7.5 0 1 0 7.5 7.5H10V2.5Z"/><path d="M12 2.8v5.3h5.3A7.5 7.5 0 0 0 12 2.8Z"/></svg></span><div><div class="card-label">剩余总积分</div><div class="large-number" id="availableTotal">0</div></div></div>
+              <div class="summary-credit-meta"><div class="allocation-stat"><span>通用积分</span><strong id="remainingGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5积分</span><strong id="remainingSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0积分</span><strong id="remainingSd20">0</strong></div></div>
+            </section>
+            <section class="credit-summary-module" aria-label="已分配积分">
+              <div class="credit-module-heading"><span class="credit-module-icon" aria-hidden="true">↗</span><div><div class="card-label">已分配积分</div><div class="large-number" id="assignedSummaryTotal">0</div></div></div>
+              <div class="summary-credit-meta"><div class="allocation-stat"><span>通用</span><strong id="assignedGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5</span><strong id="assignedSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0</span><strong id="assignedSd20">0</strong></div></div>
+            </section>
+            <section class="credit-summary-module" aria-label="待分配积分">
+              <div class="credit-module-heading"><span class="credit-module-icon" aria-hidden="true">＋</span><div><div class="card-label">待分配积分</div><div class="large-number" id="unallocatedSummaryTotal">0</div></div></div>
+              <div class="summary-credit-meta"><div class="allocation-stat"><span>通用</span><strong id="unallocatedGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5</span><strong id="unallocatedSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0</span><strong id="unallocatedSd20">0</strong></div></div>
+            </section>
+          </div>
         </article>
 
         <article class="summary-card seats-card">
