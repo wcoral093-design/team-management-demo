@@ -2005,6 +2005,28 @@ body.is-points-detail .simulation-switch {
 .toolbar > .tabs { align-items: center; }
 .toolbar > .tabs > .tab { height: calc(var(--toolbar-control-height) - 4px); }
 
+/* Team plan is part of the identity; balances share one expanded overview. */
+.team-name-row { flex-wrap: wrap; }
+.team-plan { display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; font-size: 12px; font-weight: 500; }
+.summary-grid { grid-template-columns: minmax(0, 1fr) 200px; }
+.credit-summary-actions { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.credit-summary-modules { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.credit-summary-module { min-width: 0; padding: 0 24px; }
+.credit-summary-module:first-child { padding-left: 0; }
+.credit-summary-module:last-child { padding-right: 0; }
+.credit-summary-module + .credit-summary-module { border-left: 1px solid var(--line-strong); }
+.credit-summary-module .summary-credit-meta { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-top: 16px; }
+.credit-summary-module .allocation-stat { justify-content: space-between; }
+@media (max-width: 900px) {
+  .summary-grid { grid-template-columns: 1fr; }
+  .team-plan { margin-left: 0; }
+}
+@media (max-width: 600px) {
+  .credit-summary-modules { grid-template-columns: 1fr; gap: 20px; }
+  .credit-summary-module { padding: 0; }
+  .credit-summary-module + .credit-summary-module { border-left: 0; border-top: 1px solid var(--line-strong); padding-top: 20px; }
+}
+
 </style>
   </head>
   <body>
@@ -2069,6 +2091,8 @@ body.is-points-detail .simulation-switch {
             <div class="team-name-row">
               <h1 id="teamTitle">Team-12be3d2</h1>
               <button class="icon-button edit-button" data-action="rename" aria-label="修改团队名称">⌕</button>
+              <span class="team-plan" title="会员有效期：2026-10-08">高级团队会员 <span class="status-tag">生效中</span></span>
+              <button class="link-button" data-action="renew">续费</button>
             </div>
             <p>团队 ID：7682691865522607422 <button class="copy-button" data-copy="7682691865522607422">复制</button></p>
           </div>
@@ -2077,37 +2101,9 @@ body.is-points-detail .simulation-switch {
       </section>
 
       <section class="summary-grid" aria-label="团队概览">
-        <article class="summary-card membership-card">
-          <div class="card-label">当前套餐</div>
-          <div class="membership-row">
-            <div class="title-with-tag">
-              <strong>高级团队会员</strong>
-              <span class="status-tag">生效中</span>
-            </div>
-            <button class="link-button" data-action="renew">立即续费</button>
-          </div>
-          <div class="card-footer-line">
-            <span>会员有效期：2026-10-08</span>
-            <span class="info-dot" title="到期前可随时续费">i</span>
-          </div>
-        </article>
-
         <article class="summary-card credits-card">
-          <div class="summary-topline">
-            <div>
-              <div class="card-label">剩余总积分</div>
-              <div class="large-number"><span id="availableTotal">36,842</span></div>
-            </div>
-            <div class="card-actions">
-              <button class="link-button" data-action="details">明细</button>
-              <button class="link-button" data-action="buy">购买</button>
-            </div>
-          </div>
-          <div class="allocation-stats summary-credit-meta" aria-label="各类积分余量">
-            <div class="allocation-stat"><span>通用积分</span><strong id="remainingGeneral">23,100</strong></div>
-            <div class="allocation-stat"><span>SD 2.5积分</span><strong id="remainingSd25">8,280</strong></div>
-            <div class="allocation-stat"><span>SD 2.0积分</span><strong id="remainingSd20">5,462</strong></div>
-          </div>
+          <div class="credit-summary-actions"><button class="link-button" data-action="details">明细</button><button class="link-button" data-action="buy">购买</button></div>
+          <div class="credit-summary-modules"><section class="credit-summary-module" aria-label="剩余总积分"><div class="card-label">剩余总积分</div><div class="large-number" id="availableTotal">0</div><div class="summary-credit-meta"><div class="allocation-stat"><span>通用积分</span><strong id="remainingGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5积分</span><strong id="remainingSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0积分</span><strong id="remainingSd20">0</strong></div></div></section><section class="credit-summary-module" aria-label="已分配积分"><div class="card-label">已分配积分</div><div class="large-number" id="assignedSummaryTotal">0</div><div class="summary-credit-meta"><div class="allocation-stat"><span>通用积分</span><strong id="assignedGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5积分</span><strong id="assignedSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0积分</span><strong id="assignedSd20">0</strong></div></div></section><section class="credit-summary-module" aria-label="待分配积分"><div class="card-label">待分配积分</div><div class="large-number" id="unallocatedSummaryTotal">0</div><div class="summary-credit-meta"><div class="allocation-stat"><span>通用积分</span><strong id="unallocatedGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5积分</span><strong id="unallocatedSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0积分</span><strong id="unallocatedSd20">0</strong></div></div></section></div>
         </article>
 
         <article class="summary-card seats-card">
@@ -2584,6 +2580,13 @@ function renderSummary() {
   ["remainingGeneral", "remainingSd25", "remainingSd20"].forEach((id, index) => {
     const type = creditTypes[index];
     $("#" + id).textContent = format(state.pools[type].available + assignedForType(type));
+  });
+  $("#assignedSummaryTotal").textContent = format(assigned);
+  $("#unallocatedSummaryTotal").textContent = format(available);
+  ["General", "Sd25", "Sd20"].forEach((suffix, index) => {
+    const type = creditTypes[index];
+    $("#assigned" + suffix).textContent = format(assignedForType(type));
+    $("#unallocated" + suffix).textContent = format(state.pools[type].available);
   });
   $("#seatUsed").textContent = String(state.seats.used);
   $("#seatTotal").textContent = String(state.seats.total);

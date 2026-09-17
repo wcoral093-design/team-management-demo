@@ -266,6 +266,13 @@ function renderSummary() {
     const type = creditTypes[index];
     $("#" + id).textContent = format(state.pools[type].available + assignedForType(type));
   });
+  $("#assignedSummaryTotal").textContent = format(assigned);
+  $("#unallocatedSummaryTotal").textContent = format(available);
+  ["General", "Sd25", "Sd20"].forEach((suffix, index) => {
+    const type = creditTypes[index];
+    $("#assigned" + suffix).textContent = format(assignedForType(type));
+    $("#unallocated" + suffix).textContent = format(state.pools[type].available);
+  });
   $("#seatUsed").textContent = String(state.seats.used);
   $("#seatTotal").textContent = String(state.seats.total);
 }

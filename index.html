@@ -69,6 +69,8 @@
             <div class="team-name-row">
               <h1 id="teamTitle">Team-12be3d2</h1>
               <button class="icon-button edit-button" data-action="rename" aria-label="修改团队名称">⌕</button>
+              <span class="team-plan" title="会员有效期：2026-10-08">高级团队会员 <span class="status-tag">生效中</span></span>
+              <button class="link-button" data-action="renew">续费</button>
             </div>
             <p>团队 ID：7682691865522607422 <button class="copy-button" data-copy="7682691865522607422">复制</button></p>
           </div>
@@ -77,37 +79,9 @@
       </section>
 
       <section class="summary-grid" aria-label="团队概览">
-        <article class="summary-card membership-card">
-          <div class="card-label">当前套餐</div>
-          <div class="membership-row">
-            <div class="title-with-tag">
-              <strong>高级团队会员</strong>
-              <span class="status-tag">生效中</span>
-            </div>
-            <button class="link-button" data-action="renew">立即续费</button>
-          </div>
-          <div class="card-footer-line">
-            <span>会员有效期：2026-10-08</span>
-            <span class="info-dot" title="到期前可随时续费">i</span>
-          </div>
-        </article>
-
         <article class="summary-card credits-card">
-          <div class="summary-topline">
-            <div>
-              <div class="card-label">剩余总积分</div>
-              <div class="large-number"><span id="availableTotal">36,842</span></div>
-            </div>
-            <div class="card-actions">
-              <button class="link-button" data-action="details">明细</button>
-              <button class="link-button" data-action="buy">购买</button>
-            </div>
-          </div>
-          <div class="allocation-stats summary-credit-meta" aria-label="各类积分余量">
-            <div class="allocation-stat"><span>通用积分</span><strong id="remainingGeneral">23,100</strong></div>
-            <div class="allocation-stat"><span>SD 2.5积分</span><strong id="remainingSd25">8,280</strong></div>
-            <div class="allocation-stat"><span>SD 2.0积分</span><strong id="remainingSd20">5,462</strong></div>
-          </div>
+          <div class="credit-summary-actions"><button class="link-button" data-action="details">明细</button><button class="link-button" data-action="buy">购买</button></div>
+          <div class="credit-summary-modules"><section class="credit-summary-module" aria-label="剩余总积分"><div class="card-label">剩余总积分</div><div class="large-number" id="availableTotal">0</div><div class="summary-credit-meta"><div class="allocation-stat"><span>通用积分</span><strong id="remainingGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5积分</span><strong id="remainingSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0积分</span><strong id="remainingSd20">0</strong></div></div></section><section class="credit-summary-module" aria-label="已分配积分"><div class="card-label">已分配积分</div><div class="large-number" id="assignedSummaryTotal">0</div><div class="summary-credit-meta"><div class="allocation-stat"><span>通用积分</span><strong id="assignedGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5积分</span><strong id="assignedSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0积分</span><strong id="assignedSd20">0</strong></div></div></section><section class="credit-summary-module" aria-label="待分配积分"><div class="card-label">待分配积分</div><div class="large-number" id="unallocatedSummaryTotal">0</div><div class="summary-credit-meta"><div class="allocation-stat"><span>通用积分</span><strong id="unallocatedGeneral">0</strong></div><div class="allocation-stat"><span>SD 2.5积分</span><strong id="unallocatedSd25">0</strong></div><div class="allocation-stat"><span>SD 2.0积分</span><strong id="unallocatedSd20">0</strong></div></div></section></div>
         </article>
 
         <article class="summary-card seats-card">

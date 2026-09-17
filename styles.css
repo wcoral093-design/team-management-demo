@@ -1996,3 +1996,25 @@ body.is-points-detail .simulation-switch {
 .toolbar > .tabs, .toolbar .invite-button { box-sizing: border-box; height: var(--toolbar-control-height); min-height: var(--toolbar-control-height); }
 .toolbar > .tabs { align-items: center; }
 .toolbar > .tabs > .tab { height: calc(var(--toolbar-control-height) - 4px); }
+
+/* Team plan is part of the identity; balances share one expanded overview. */
+.team-name-row { flex-wrap: wrap; }
+.team-plan { display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; font-size: 12px; font-weight: 500; }
+.summary-grid { grid-template-columns: minmax(0, 1fr) 200px; }
+.credit-summary-actions { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.credit-summary-modules { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.credit-summary-module { min-width: 0; padding: 0 24px; }
+.credit-summary-module:first-child { padding-left: 0; }
+.credit-summary-module:last-child { padding-right: 0; }
+.credit-summary-module + .credit-summary-module { border-left: 1px solid var(--line-strong); }
+.credit-summary-module .summary-credit-meta { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-top: 16px; }
+.credit-summary-module .allocation-stat { justify-content: space-between; }
+@media (max-width: 900px) {
+  .summary-grid { grid-template-columns: 1fr; }
+  .team-plan { margin-left: 0; }
+}
+@media (max-width: 600px) {
+  .credit-summary-modules { grid-template-columns: 1fr; gap: 20px; }
+  .credit-summary-module { padding: 0; }
+  .credit-summary-module + .credit-summary-module { border-left: 0; border-top: 1px solid var(--line-strong); padding-top: 20px; }
+}
