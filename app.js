@@ -260,6 +260,18 @@ function renderSummary() {
   const assigned = assignedTotal();
   const available = availableTotal();
   const total = assigned + available;
+  const assignedByType = creditTypes.map((type) => assignedForType(type));
+  const unallocatedByType = creditTypes.map((type) => state.pools[type].available);
+  const remainingByType = creditTypes.map((type, index) => assignedByType[index] + unallocatedByType[index]);
+
+  const setTypeBar = (id, values) => {
+    const bar = $("#" + id);
+    const sum = values.reduce((result, value) => result + value, 0) || 1;
+    [...bar.children].forEach((segment, index) => {
+      segment.style.width = `${(values[index] / sum) * 100}%`;
+    });
+    bar.setAttribute("aria-label", `通用积分 ${format(values[0])}，SD 2.5积分 ${format(values[1])}，SD 2.0积分 ${format(values[2])}`);
+  };
 
   $("#availableTotal").textContent = format(total);
   ["remainingGeneral", "remainingSd25", "remainingSd20"].forEach((id, index) => {
@@ -268,6 +280,12 @@ function renderSummary() {
   });
   $("#assignedSummaryTotal").textContent = format(assigned);
   $("#unallocatedSummaryTotal").textContent = format(available);
+  const assignedAngle = total ? (assigned / total) * 360 : 0;
+  $("#allocationDonut").style.setProperty("--assigned-angle", `${assignedAngle}deg`);
+  $("#allocationDonut").setAttribute("aria-label", `已分配 ${format(assigned)}，待分配 ${format(available)}`);
+  setTypeBar("remainingTypeBar", remainingByType);
+  setTypeBar("assignedTypeBar", assignedByType);
+  setTypeBar("unallocatedTypeBar", unallocatedByType);
   ["General", "Sd25", "Sd20"].forEach((suffix, index) => {
     const type = creditTypes[index];
     $("#assigned" + suffix).textContent = format(assignedForType(type));
