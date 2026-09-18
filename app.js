@@ -209,16 +209,10 @@ function allocationStepperMarkup(member, type, field) {
 }
 
 function creditEditorMarkup(member) {
-  const types = visibleCreditTypes();
-  return `<div class="allocation-editor" role="group" aria-label="${escapeHTML(member.name)}积分调配">
-    <div class="allocation-editor-head"><span>积分类型</span><span>调前</span><span>调后</span><span>调整额</span></div>
-    ${types.map((type) => `<div class="allocation-editor-line" data-allocation-type="${type}">
-      <strong>${state.pools[type].label}</strong>
-      <span class="allocation-before">${format(member.credits[type])}</span>
-      ${allocationStepperMarkup(member, type, "after")}
-      ${allocationStepperMarkup(member, type, "delta")}
-    </div>`).join("")}
-    <div class="allocation-editor-footer"><span>支持输入或按 ±100 调整，两列会自动同步</span><div class="row-actions"><button class="action-link confirm-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div></div>
+  const type = state.activeCreditType;
+  return `<div class="allocation-editor-line" data-allocation-type="${type}" role="group" aria-label="${escapeHTML(member.name)}${state.pools[type].label}调配">
+    ${allocationStepperMarkup(member, type, "after")}
+    ${allocationStepperMarkup(member, type, "delta")}
   </div>`;
 }
 
@@ -242,6 +236,10 @@ function readonlyCreditMarkup(member, type, candidate) {
 
 function renderPointsRows() {
   const type = state.activeCreditType;
+  const isEditing = state.editingMemberId !== null;
+  $("#creditConsumedHeader").textContent = isEditing ? "调前" : "已消耗";
+  $("#creditBalanceHeader").textContent = isEditing ? "调后" : "剩余" + state.pools[type].label;
+  $("#creditActionHeader").textContent = isEditing ? "调整额" : "操作";
   $("#pointsRows").innerHTML = state.members.map((member) => {
     const editing = member.id === state.editingMemberId;
     const candidate = isRecoveryCandidate(member);
@@ -250,8 +248,11 @@ function renderPointsRows() {
     if (candidate) rowClasses.push("is-recovery-candidate");
     if (editing) {
       return `<div class="allocation-editor-row" data-member-id="${member.id}">
-        <div class="allocation-editor-user">${avatarMarkup(member)}<span><strong>${escapeHTML(member.name)}</strong><small>${escapeHTML(member.role)}</small></span></div>
+        <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span></span></div>
+        ${staticRoleMarkup(member)}
+        <span class="allocation-before">${format(member.credits[type])}</span>
         ${creditEditorMarkup(member)}
+        <div class="allocation-editor-footer"><span>输入或按 ±100 调整，两列自动同步</span><div class="row-actions"><button class="action-link confirm-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div></div>
       </div>`;
     }
     const creditCells = readonlyCreditMarkup(member, type, candidate);

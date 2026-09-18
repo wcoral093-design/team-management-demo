@@ -1985,24 +1985,17 @@ body.is-points-detail .simulation-switch {
 
 .allocation-editor-row {
   display: grid;
-  grid-template-columns: minmax(190px, .72fr) minmax(620px, 2.5fr);
-  gap: 24px;
-  padding: 20px 22px 18px;
+  min-width: 740px;
+  grid-template-columns: minmax(220px, 1.6fr) minmax(110px, 1fr) minmax(100px, 1fr) minmax(160px, 1.2fr) 122px;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 20px 14px;
   border-top: 1px solid var(--line);
   background: rgba(255, 255, 255, .72);
 }
-.allocation-editor-user { display: flex; align-items: flex-start; gap: 10px; padding-top: 36px; }
-.allocation-editor-user > span { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
-.allocation-editor-user strong { overflow: hidden; font-size: 14px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
-.allocation-editor-user small { color: var(--text-secondary); font-size: 12px; }
-.allocation-editor { min-width: 0; }
-.allocation-editor-head,
-.allocation-editor-line { display: grid; grid-template-columns: minmax(110px, 1fr) minmax(80px, .75fr) minmax(170px, 1.2fr) minmax(170px, 1.2fr); align-items: center; gap: 18px; }
-.allocation-editor-head { min-height: 28px; padding: 0 4px 8px; border-bottom: 1px solid var(--line); color: var(--text-secondary); font-size: 12px; }
-.allocation-editor-line { min-height: 58px; padding: 8px 4px; border-bottom: 1px solid rgba(22, 22, 27, .06); }
-.allocation-editor-line strong { font-size: 13px; font-weight: 500; }
+.allocation-editor-line { display: contents; }
 .allocation-before { color: #2f2f35; font-size: 14px; font-variant-numeric: tabular-nums; }
-.allocation-stepper { display: grid; overflow: hidden; width: 154px; height: 36px; grid-template-columns: 36px 1fr 36px; align-items: center; border-radius: 999px; background: #f1f1f2; }
+.allocation-stepper { display: grid; overflow: hidden; width: min(154px, 100%); height: 36px; grid-template-columns: 34px 1fr 34px; align-items: center; border-radius: 999px; background: #f1f1f2; }
 .allocation-stepper:focus-within { outline: 2px solid #9254ff; outline-offset: 2px; }
 .allocation-stepper button { display: grid; height: 100%; place-items: center; padding: 0; border: 0; color: #17171b; background: transparent; cursor: pointer; font-size: 22px; }
 .allocation-stepper button:hover { background: #e5e5e7; }
@@ -2010,14 +2003,10 @@ body.is-points-detail .simulation-switch {
 .allocation-stepper input { width: 100%; min-width: 0; height: 100%; padding: 0 2px; border: 0; outline: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 500; text-align: center; appearance: textfield; -moz-appearance: textfield; }
 .allocation-stepper input::-webkit-inner-spin-button,
 .allocation-stepper input::-webkit-outer-spin-button { margin: 0; -webkit-appearance: none; }
-.allocation-editor-footer { display: flex; min-height: 44px; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 10px 4px 0; }
+.allocation-editor-footer { display: flex; min-height: 34px; grid-column: 3 / -1; align-items: flex-end; justify-content: space-between; gap: 20px; padding-top: 4px; }
 .allocation-editor-footer > span { color: var(--text-secondary); font-size: 12px; }
 @media (max-width: 980px) {
-  .allocation-editor-row { overflow-x: auto; grid-template-columns: 150px minmax(620px, 1fr); }
-}
-@media (max-width: 700px) {
-  .allocation-editor-row { grid-template-columns: minmax(740px, 1fr); }
-  .allocation-editor-user { padding-top: 0; }
+  .allocation-editor-row { overflow-x: auto; }
 }
 
 .allocation-guidance { margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.5; }
@@ -2226,9 +2215,9 @@ body.is-points-detail .simulation-switch {
             <div class="data-table points-table table-head">
               <div>用户</div>
               <div>团队角色</div>
-              <div>已消耗</div>
+              <div id="creditConsumedHeader">已消耗</div>
               <div id="creditBalanceHeader">剩余通用积分</div>
-              <div>操作</div>
+              <div id="creditActionHeader">操作</div>
             </div>
             <div id="pointsRows"></div>
           </div>
@@ -2591,16 +2580,10 @@ function allocationStepperMarkup(member, type, field) {
 }
 
 function creditEditorMarkup(member) {
-  const types = visibleCreditTypes();
-  return `<div class="allocation-editor" role="group" aria-label="${escapeHTML(member.name)}积分调配">
-    <div class="allocation-editor-head"><span>积分类型</span><span>调前</span><span>调后</span><span>调整额</span></div>
-    ${types.map((type) => `<div class="allocation-editor-line" data-allocation-type="${type}">
-      <strong>${state.pools[type].label}</strong>
-      <span class="allocation-before">${format(member.credits[type])}</span>
-      ${allocationStepperMarkup(member, type, "after")}
-      ${allocationStepperMarkup(member, type, "delta")}
-    </div>`).join("")}
-    <div class="allocation-editor-footer"><span>支持输入或按 ±100 调整，两列会自动同步</span><div class="row-actions"><button class="action-link confirm-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div></div>
+  const type = state.activeCreditType;
+  return `<div class="allocation-editor-line" data-allocation-type="${type}" role="group" aria-label="${escapeHTML(member.name)}${state.pools[type].label}调配">
+    ${allocationStepperMarkup(member, type, "after")}
+    ${allocationStepperMarkup(member, type, "delta")}
   </div>`;
 }
 
@@ -2624,6 +2607,10 @@ function readonlyCreditMarkup(member, type, candidate) {
 
 function renderPointsRows() {
   const type = state.activeCreditType;
+  const isEditing = state.editingMemberId !== null;
+  $("#creditConsumedHeader").textContent = isEditing ? "调前" : "已消耗";
+  $("#creditBalanceHeader").textContent = isEditing ? "调后" : "剩余" + state.pools[type].label;
+  $("#creditActionHeader").textContent = isEditing ? "调整额" : "操作";
   $("#pointsRows").innerHTML = state.members.map((member) => {
     const editing = member.id === state.editingMemberId;
     const candidate = isRecoveryCandidate(member);
@@ -2632,8 +2619,11 @@ function renderPointsRows() {
     if (candidate) rowClasses.push("is-recovery-candidate");
     if (editing) {
       return `<div class="allocation-editor-row" data-member-id="${member.id}">
-        <div class="allocation-editor-user">${avatarMarkup(member)}<span><strong>${escapeHTML(member.name)}</strong><small>${escapeHTML(member.role)}</small></span></div>
+        <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span></span></div>
+        ${staticRoleMarkup(member)}
+        <span class="allocation-before">${format(member.credits[type])}</span>
         ${creditEditorMarkup(member)}
+        <div class="allocation-editor-footer"><span>输入或按 ±100 调整，两列自动同步</span><div class="row-actions"><button class="action-link confirm-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div></div>
       </div>`;
     }
     const creditCells = readonlyCreditMarkup(member, type, candidate);
