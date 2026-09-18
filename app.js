@@ -208,10 +208,16 @@ function allocationStepperMarkup(member, type, field) {
   return `<div class="allocation-stepper"><button type="button" data-draft-delta="-100" data-draft-field="${field}" data-credit-type="${type}" aria-label="${state.pools[type].label}${fieldLabel}减少100"${value <= min ? " disabled" : ""}>−</button><input type="number" min="${min}" max="${max}" step="1" value="${escapeHTML(value)}" data-draft-input data-draft-field="${field}" data-member="${member.id}" data-credit-type="${type}" aria-label="${state.pools[type].label}${fieldLabel}" /><button type="button" data-draft-delta="100" data-draft-field="${field}" data-credit-type="${type}" aria-label="${state.pools[type].label}${fieldLabel}增加100"${value >= max ? " disabled" : ""}>＋</button></div>`;
 }
 
+function allocationInputMarkup(member, type) {
+  const before = member.credits[type];
+  const max = before + state.pools[type].available;
+  return `<div class="allocation-input"><input type="number" min="0" max="${max}" step="1" value="${escapeHTML(Number(state.draftCredits[type]))}" data-draft-input data-draft-field="after" data-member="${member.id}" data-credit-type="${type}" aria-label="${state.pools[type].label}调后" /></div>`;
+}
+
 function creditEditorMarkup(member) {
   const type = state.activeCreditType;
   return `<div class="allocation-editor-line" data-allocation-type="${type}" role="group" aria-label="${escapeHTML(member.name)}${state.pools[type].label}调配">
-    ${allocationStepperMarkup(member, type, "after")}
+    ${allocationInputMarkup(member, type)}
     ${allocationStepperMarkup(member, type, "delta")}
   </div>`;
 }
@@ -240,6 +246,8 @@ function renderPointsRows() {
   $("#creditConsumedHeader").textContent = isEditing ? "调前" : "已消耗";
   $("#creditBalanceHeader").textContent = isEditing ? "调后" : "剩余" + state.pools[type].label;
   $("#creditActionHeader").textContent = isEditing ? "调整额" : "操作";
+  $("#creditEditOperationHeader").hidden = !isEditing;
+  $("#pointsTableHead").classList.toggle("is-credit-editing", isEditing);
   $("#pointsRows").innerHTML = state.members.map((member) => {
     const editing = member.id === state.editingMemberId;
     const candidate = isRecoveryCandidate(member);
@@ -252,7 +260,8 @@ function renderPointsRows() {
         ${staticRoleMarkup(member)}
         <span class="allocation-before">${format(member.credits[type])}</span>
         ${creditEditorMarkup(member)}
-        <div class="allocation-editor-footer"><span>输入或按 ±100 调整，两列自动同步</span><div class="row-actions"><button class="action-link confirm-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div></div>
+        <div class="row-actions allocation-editor-actions"><button class="action-link confirm-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>
+        <div class="allocation-editor-footer"><span>输入调后积分，或按 ±100 调整额度，两列自动同步</span></div>
       </div>`;
     }
     const creditCells = readonlyCreditMarkup(member, type, candidate);
@@ -263,11 +272,12 @@ function renderPointsRows() {
     }
 
     return `
-      <div class="${rowClasses.join(" ")}" data-member-id="${member.id}">
+      <div class="${rowClasses.join(" ")}${isEditing ? " is-credit-editing" : ""}" data-member-id="${member.id}">
         <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span></span></div>
         ${staticRoleMarkup(member)}
         <div>${format(member.consumed[type])}</div>
         ${creditCells}
+        ${isEditing ? '<div class="editing-adjustment-placeholder"></div>' : ""}
         <div class="points-operation">${action}</div>
       </div>
     `;
