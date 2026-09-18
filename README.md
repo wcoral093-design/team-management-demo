@@ -38,3 +38,13 @@ python3 -m http.server 4173 --directory team-management-demo
 `build.mjs` 会同步生成 `out/index.html` 和离线单文件，避免在线、离线版本不一致。在线版本只托管 `out/`，不包含本地工作区。
 
 这是前端交互演示：各浏览器的成员和积分操作独立模拟，刷新后恢复初始数据，不连接真实团队账户。
+
+## 多人协作
+
+- `main` 始终保持可发布状态，功能开发从短期分支发起 Pull Request。
+- 分支建议使用 `feature/功能名`、`fix/问题名`、`docs/主题`。
+- 提交前运行 `npm run build`，确认在线版本与离线单文件同步更新。
+- 功能需求、缺陷和设计调整统一通过 GitHub Issues 跟踪，并关联到 GitHub Project。
+- Pull Request 至少由一名协作者审阅后合并；涉及交互或视觉的修改需附截图或录屏。
+
+完整流程见 [CONTRIBUTING.md](CONTRIBUTING.md)。

@@ -1,0 +1,31 @@
+name: 功能需求
+description: 提交新功能、交互或视觉优化
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: 目标
+      description: 需要解决什么问题？
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: 期望方案
+      description: 描述期望的界面、交互和验收结果。
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: 参考资料
+      description: 可附设计链接、截图或相关 Issue。
+  - type: checkboxes
+    id: acceptance
+    attributes:
+      label: 验收确认
+      options:
+        - label: 已说明桌面端和窄屏下的预期表现
+        - label: 已补充可验证的验收标准
