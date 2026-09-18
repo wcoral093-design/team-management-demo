@@ -197,10 +197,29 @@ function renderSimulationSwitch() {
   });
 }
 
-function creditEditorMarkup(member, type) {
-  const max = member.credits[type] + state.pools[type].available;
-  const value = state.draftCredits[type];
-  return `<div class="append-editor"><div class="balance-stepper"><button type="button" data-draft-delta="-100" data-credit-type="${type}" aria-label="减少100积分"${Number(value) <= 0 ? ' disabled' : ''}>−</button><input type="number" min="0" max="${max}" step="1" value="${escapeHTML(value)}" data-draft-input data-member="${member.id}" data-credit-type="${type}" aria-label="剩余${state.pools[type].label}" /><button type="button" data-draft-delta="100" data-credit-type="${type}" aria-label="增加100积分">＋</button></div><small>每次加减 100 · 当前最多 ${format(max)}</small></div>`;
+function allocationStepperMarkup(member, type, field) {
+  const before = member.credits[type];
+  const after = Number(state.draftCredits[type]);
+  const maxAfter = before + state.pools[type].available;
+  const value = field === "after" ? after : after - before;
+  const min = field === "after" ? 0 : -before;
+  const max = field === "after" ? maxAfter : state.pools[type].available;
+  const fieldLabel = field === "after" ? "调后" : "调整额";
+  return `<div class="allocation-stepper"><button type="button" data-draft-delta="-100" data-draft-field="${field}" data-credit-type="${type}" aria-label="${state.pools[type].label}${fieldLabel}减少100"${value <= min ? " disabled" : ""}>−</button><input type="number" min="${min}" max="${max}" step="1" value="${escapeHTML(value)}" data-draft-input data-draft-field="${field}" data-member="${member.id}" data-credit-type="${type}" aria-label="${state.pools[type].label}${fieldLabel}" /><button type="button" data-draft-delta="100" data-draft-field="${field}" data-credit-type="${type}" aria-label="${state.pools[type].label}${fieldLabel}增加100"${value >= max ? " disabled" : ""}>＋</button></div>`;
+}
+
+function creditEditorMarkup(member) {
+  const types = visibleCreditTypes();
+  return `<div class="allocation-editor" role="group" aria-label="${escapeHTML(member.name)}积分调配">
+    <div class="allocation-editor-head"><span>积分类型</span><span>调前</span><span>调后</span><span>调整额</span></div>
+    ${types.map((type) => `<div class="allocation-editor-line" data-allocation-type="${type}">
+      <strong>${state.pools[type].label}</strong>
+      <span class="allocation-before">${format(member.credits[type])}</span>
+      ${allocationStepperMarkup(member, type, "after")}
+      ${allocationStepperMarkup(member, type, "delta")}
+    </div>`).join("")}
+    <div class="allocation-editor-footer"><span>支持输入或按 ±100 调整，两列会自动同步</span><div class="row-actions"><button class="action-link confirm-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div></div>
+  </div>`;
 }
 
 function shortageTypes() {
@@ -229,12 +248,16 @@ function renderPointsRows() {
     const rowClasses = ["data-table", "points-table", "table-row"];
     if (editing) rowClasses.push("is-editing");
     if (candidate) rowClasses.push("is-recovery-candidate");
-    const creditCells = editing ? creditEditorMarkup(member, type) : readonlyCreditMarkup(member, type, candidate);
+    if (editing) {
+      return `<div class="allocation-editor-row" data-member-id="${member.id}">
+        <div class="allocation-editor-user">${avatarMarkup(member)}<span><strong>${escapeHTML(member.name)}</strong><small>${escapeHTML(member.role)}</small></span></div>
+        ${creditEditorMarkup(member)}
+      </div>`;
+    }
+    const creditCells = readonlyCreditMarkup(member, type, candidate);
 
     let action = `<button class="action-link" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ''}>积分调配</button>`;
-    if (editing) {
-      action = '<div class="row-actions"><button class="action-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>';
-    } else if (candidate) {
+    if (candidate) {
       action = `<div class="row-actions"><button class="action-link" data-recover-candidate="${member.id}">回收可用</button></div>`;
     }
 
@@ -538,13 +561,15 @@ function calculateShortages(member, draft) {
 function confirmCreditEdit() {
   const member = state.members.find((item) => item.id === state.editingMemberId);
   if (!member || !state.draftCredits) return;
-  const type = state.activeCreditType;
-  const amount = Number(state.draftCredits[type]);
-  if (String(state.draftCredits[type]).trim() === "" || !Number.isSafeInteger(amount) || amount < 0) {
+  const invalid = visibleCreditTypes().some((type) => {
+    const amount = Number(state.draftCredits[type]);
+    return String(state.draftCredits[type]).trim() === "" || !Number.isSafeInteger(amount) || amount < 0;
+  });
+  if (invalid) {
     showToast("剩余积分请输入大于等于 0 的整数");
     return;
   }
-  state.draftCredits = { ...member.credits, [type]: amount };
+  state.draftCredits = creditTypes.reduce((draft, type) => ({ ...draft, [type]: Math.round(Number(state.draftCredits[type])) }), {});
   const shortages = calculateShortages(member, state.draftCredits);
   if (Object.keys(shortages).length) {
     state.shortage = { targetMemberId: member.id, amounts: shortages };
@@ -1012,8 +1037,14 @@ document.addEventListener("click", (event) => {
   const deltaButton = event.target.closest("[data-draft-delta]");
   if (deltaButton) {
     const type = deltaButton.dataset.creditType;
+    const field = deltaButton.dataset.draftField || "after";
     const delta = Number(deltaButton.dataset.draftDelta);
-    state.draftCredits[type] = Math.max(0, Math.round(Number(state.draftCredits[type]) + delta));
+    const member = state.members.find(item => item.id === state.editingMemberId);
+    const before = member.credits[type];
+    const maxAfter = before + state.pools[type].available;
+    const current = field === "delta" ? Number(state.draftCredits[type]) - before : Number(state.draftCredits[type]);
+    const next = current + delta;
+    state.draftCredits[type] = Math.max(0, Math.min(maxAfter, Math.round(field === "delta" ? before + next : next)));
     recalculateShortage();
     renderPointsRows();
     renderShortageBanner();
@@ -1073,7 +1104,13 @@ document.addEventListener("input", (event) => {
   if (!input || !state.draftCredits) return;
   const member = state.members.find(item => item.id === state.editingMemberId);
   const type = input.dataset.creditType;
-  state.draftCredits[type] = input.value;
+  const field = input.dataset.draftField || "after";
+  const before = member.credits[type];
+  const numeric = Number(input.value);
+  state.draftCredits[type] = input.value === "" ? "" : field === "delta" ? before + numeric : numeric;
+  const line = input.closest("[data-allocation-type]");
+  const counterpart = line?.querySelector(`[data-draft-input][data-draft-field="${field === "delta" ? "after" : "delta"}"]`);
+  if (counterpart && input.value !== "") counterpart.value = field === "delta" ? state.draftCredits[type] : numeric - before;
   recalculateShortage();
   $$("#pointsRows .table-row").forEach(row => {
     const candidate = state.members.find(item => item.id === Number(row.dataset.memberId));

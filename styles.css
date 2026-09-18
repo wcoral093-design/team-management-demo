@@ -1975,6 +1975,43 @@ body.is-points-detail .simulation-switch {
 .balance-stepper:focus-within { outline: 2px solid #9254ff; outline-offset: 2px; }
 .balance-stepper input:focus { outline: none; }
 
+.allocation-editor-row {
+  display: grid;
+  grid-template-columns: minmax(190px, .72fr) minmax(620px, 2.5fr);
+  gap: 24px;
+  padding: 20px 22px 18px;
+  border-top: 1px solid var(--line);
+  background: rgba(255, 255, 255, .72);
+}
+.allocation-editor-user { display: flex; align-items: flex-start; gap: 10px; padding-top: 36px; }
+.allocation-editor-user > span { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.allocation-editor-user strong { overflow: hidden; font-size: 14px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.allocation-editor-user small { color: var(--text-secondary); font-size: 12px; }
+.allocation-editor { min-width: 0; }
+.allocation-editor-head,
+.allocation-editor-line { display: grid; grid-template-columns: minmax(110px, 1fr) minmax(80px, .75fr) minmax(170px, 1.2fr) minmax(170px, 1.2fr); align-items: center; gap: 18px; }
+.allocation-editor-head { min-height: 28px; padding: 0 4px 8px; border-bottom: 1px solid var(--line); color: var(--text-secondary); font-size: 12px; }
+.allocation-editor-line { min-height: 58px; padding: 8px 4px; border-bottom: 1px solid rgba(22, 22, 27, .06); }
+.allocation-editor-line strong { font-size: 13px; font-weight: 500; }
+.allocation-before { color: #2f2f35; font-size: 14px; font-variant-numeric: tabular-nums; }
+.allocation-stepper { display: grid; overflow: hidden; width: 154px; height: 36px; grid-template-columns: 36px 1fr 36px; align-items: center; border-radius: 999px; background: #f1f1f2; }
+.allocation-stepper:focus-within { outline: 2px solid #9254ff; outline-offset: 2px; }
+.allocation-stepper button { display: grid; height: 100%; place-items: center; padding: 0; border: 0; color: #17171b; background: transparent; cursor: pointer; font-size: 22px; }
+.allocation-stepper button:hover { background: #e5e5e7; }
+.allocation-stepper button:disabled { opacity: .3; cursor: default; }
+.allocation-stepper input { width: 100%; min-width: 0; height: 100%; padding: 0 2px; border: 0; outline: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 500; text-align: center; appearance: textfield; -moz-appearance: textfield; }
+.allocation-stepper input::-webkit-inner-spin-button,
+.allocation-stepper input::-webkit-outer-spin-button { margin: 0; -webkit-appearance: none; }
+.allocation-editor-footer { display: flex; min-height: 44px; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 10px 4px 0; }
+.allocation-editor-footer > span { color: var(--text-secondary); font-size: 12px; }
+@media (max-width: 980px) {
+  .allocation-editor-row { overflow-x: auto; grid-template-columns: 150px minmax(620px, 1fr); }
+}
+@media (max-width: 700px) {
+  .allocation-editor-row { grid-template-columns: minmax(740px, 1fr); }
+  .allocation-editor-user { padding-top: 0; }
+}
+
 .allocation-guidance { margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.5; }
 @media (max-width: 700px) { #pointsOverview { align-items: flex-start; flex-direction: column; gap: 12px; padding: 20px; } }
 
