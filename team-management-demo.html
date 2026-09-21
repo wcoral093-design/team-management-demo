@@ -1996,12 +1996,12 @@ body.is-points-detail .simulation-switch {
 }
 .allocation-editor-line { display: contents; }
 .allocation-before { color: #2f2f35; font-size: 14px; font-variant-numeric: tabular-nums; }
-.allocation-stepper { display: grid; overflow: hidden; width: min(154px, 100%); height: 36px; grid-template-columns: 34px 1fr 34px; align-items: center; border-radius: 999px; background: #f1f1f2; }
-.allocation-stepper:focus-within { outline: 2px solid #9254ff; outline-offset: 2px; }
-.allocation-stepper button { display: grid; height: 100%; place-items: center; padding: 0; border: 0; color: #17171b; background: transparent; cursor: pointer; font-size: 22px; }
+.allocation-stepper { display: grid; overflow: hidden; width: min(142px, 100%); height: 42px; grid-template-columns: 40px 1fr 40px; align-items: center; border-radius: 11px; background: #f1f1f2; }
+.allocation-stepper:focus-within { box-shadow: inset 0 0 0 1px rgba(23, 23, 27, .08); }
+.allocation-stepper button { display: grid; height: 100%; place-items: center; padding: 0; border: 0; color: #17171b; background: transparent; cursor: pointer; font-size: 24px; font-weight: 400; }
 .allocation-stepper button:hover { background: #e5e5e7; }
 .allocation-stepper button:disabled { opacity: .3; cursor: default; }
-.allocation-stepper input { width: 100%; min-width: 0; height: 100%; padding: 0 2px; border: 0; outline: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 500; text-align: center; appearance: textfield; -moz-appearance: textfield; }
+.allocation-stepper input { width: 100%; min-width: 0; height: 100%; padding: 0; border: 0; outline: 0; background: transparent; color: #292a30; font: inherit; font-size: 15px; font-weight: 500; text-align: center; appearance: textfield; -moz-appearance: textfield; }
 .allocation-stepper input::-webkit-inner-spin-button,
 .allocation-stepper input::-webkit-outer-spin-button { margin: 0; -webkit-appearance: none; }
 .allocation-input { width: min(132px, 100%); height: 36px; border-radius: 10px; background: #f1f1f2; }
@@ -2082,9 +2082,9 @@ body.is-points-detail .simulation-switch {
 }
 
 /* Two design proposals for the credit-management workspace. */
-.credit-scheme-switch-row { display: flex; justify-content: flex-end; margin: -2px 0 14px; }
-.credit-scheme-switch { display: inline-flex; gap: 3px; padding: 3px; border-radius: 10px; background: #ececee; }
-.credit-scheme-tag { min-width: 68px; height: 32px; padding: 0 14px; border: 0; border-radius: 8px; color: #62636b; background: transparent; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+.credit-scheme-switch-row { display: flex; justify-content: center; margin: 28px 0 4px; }
+.credit-scheme-switch { display: inline-flex; gap: 4px; padding: 4px; border-radius: 14px; background: #ededf0; }
+.credit-scheme-tag { min-width: 98px; height: 42px; padding: 0 20px; border: 0; border-radius: 12px; color: #696a73; background: transparent; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
 .credit-scheme-tag:hover { color: #111319; }
 .credit-scheme-tag.is-active { color: #111319; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
 .credit-scheme-tag:focus-visible { outline: 2px solid #1598e5; outline-offset: 2px; }
@@ -2105,7 +2105,6 @@ body.is-points-detail .simulation-switch {
 .scheme-one-table.is-editing, .scheme-two-table.is-editing { background: rgba(255, 255, 255, .72); }
 .sr-only { position: absolute; overflow: hidden; width: 1px; height: 1px; padding: 0; border: 0; margin: -1px; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 @media (max-width: 700px) {
-  .credit-scheme-switch-row { justify-content: flex-start; }
   #pointsOverview.is-all-types { min-width: 620px; grid-template-columns: repeat(3, minmax(180px, 1fr)); }
   #panel-credits.is-scheme-overview #creditTypeContent { overflow-x: auto; }
 }
@@ -2249,12 +2248,6 @@ body.is-points-detail .simulation-switch {
         </section>
 
         <section class="tab-panel" id="panel-credits" role="tabpanel" aria-labelledby="tab-credits" hidden>
-          <div class="credit-scheme-switch-row">
-            <div class="credit-scheme-switch" role="tablist" aria-label="积分管理方案">
-              <button type="button" class="credit-scheme-tag is-active" role="tab" aria-selected="true" data-credit-scheme="overview">方案一</button>
-              <button type="button" class="credit-scheme-tag" role="tab" aria-selected="false" data-credit-scheme="tabs">方案二</button>
-            </div>
-          </div>
           <div class="credit-workspace-toolbar">
             <div class="credit-subtabs" id="creditTypeTabs" role="tablist" aria-label="积分类型"></div>
           </div>
@@ -2266,6 +2259,12 @@ body.is-points-detail .simulation-switch {
             <div id="pointsRows"></div>
           </div>
           </section>
+          <div class="credit-scheme-switch-row">
+            <div class="credit-scheme-switch" role="tablist" aria-label="积分管理方案">
+              <button type="button" class="credit-scheme-tag is-active" role="tab" aria-selected="true" data-credit-scheme="overview">方案一</button>
+              <button type="button" class="credit-scheme-tag" role="tab" aria-selected="false" data-credit-scheme="tabs">方案二</button>
+            </div>
+          </div>
         </section>
 
         <section class="tab-panel" id="panel-invites" role="tabpanel" aria-labelledby="tab-invites" hidden>
@@ -2491,6 +2490,7 @@ const state = {
   activeTab: "members",
   creditScheme: "overview",
   activeCreditType: "general",
+  memberCreditTypes: Object.fromEntries(initialSimulation.members.map((member) => [member.id, "general"])),
   detailAnalysisTab: "model",
   detailLedgerTab: "acquired",
   simulationMode: "all",
@@ -2654,8 +2654,13 @@ function allocationInputMarkup(member, type) {
   return `<div class="allocation-input"><input type="number" min="0" max="${max}" step="1" value="${escapeHTML(Number(state.draftCredits[type]))}" data-draft-input data-draft-field="after" data-member="${member.id}" data-credit-type="${type}" aria-label="${state.pools[type].label}调后" /></div>`;
 }
 
-function schemeCreditTypeSelector() {
-  return `<label class="scheme-credit-select"><span class="sr-only">积分类型</span><select data-scheme-credit-type aria-label="积分类型">${visibleCreditTypes().map((type) => `<option value="${type}"${type === state.activeCreditType ? " selected" : ""}>${escapeHTML(state.pools[type].label)}</option>`).join("")}</select><span class="scheme-credit-chevron" aria-hidden="true">⌄</span></label>`;
+function selectedMemberCreditType(memberId) {
+  const selected = state.memberCreditTypes[memberId] || "general";
+  return visibleCreditTypes().includes(selected) ? selected : "general";
+}
+
+function schemeCreditTypeSelector(member, selectedType) {
+  return `<label class="scheme-credit-select"><span class="sr-only">${escapeHTML(member.name)}的积分类型</span><select data-scheme-credit-type data-member-id="${member.id}" aria-label="${escapeHTML(member.name)}的积分类型">${visibleCreditTypes().map((type) => `<option value="${type}"${type === selectedType ? " selected" : ""}>${escapeHTML(state.pools[type].label)}</option>`).join("")}</select><span class="scheme-credit-chevron" aria-hidden="true">⌄</span></label>`;
 }
 
 function shortageTypes() {
@@ -2698,12 +2703,13 @@ function renderPointsRows() {
     }
 
     if (overviewScheme) {
+      const rowType = editing ? type : selectedMemberCreditType(member.id);
       return `<div class="${rowClasses.join(" ")}" data-member-id="${member.id}">
         <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span></span></div>
         ${staticRoleMarkup(member)}
-        ${pointMarkup(editing ? member.consumed[type] : consumedTotal(member))}
-        ${editing ? schemeCreditTypeSelector() : '<span class="credit-type-empty">—</span>'}
-        ${editing ? allocationStepperMarkup(member, type, "after") : pointMarkup(memberTotal(member))}
+        ${pointMarkup(member.consumed[rowType])}
+        ${schemeCreditTypeSelector(member, rowType)}
+        ${editing ? allocationStepperMarkup(member, type, "after") : pointMarkup(member.credits[rowType])}
         <div class="points-operation">${action}</div>
       </div>`;
     }
@@ -2956,6 +2962,7 @@ function applySimulationMode(mode) {
   state.pools = preset.pools;
   state.seats = preset.seats;
   state.members = preset.members;
+  state.memberCreditTypes = Object.fromEntries(preset.members.map((member) => [member.id, "general"]));
   state.pendingInvites = [];
   state.transactions = [];
   state.rechargeCredits = 0;
@@ -2974,12 +2981,13 @@ function beginCreditEdit(memberId) {
   }
   const member = state.members.find((item) => item.id === Number(memberId));
   if (!member) return;
+  if (state.creditScheme === "overview") state.activeCreditType = selectedMemberCreditType(member.id);
   state.editingMemberId = member.id;
   state.draftCredits = { ...member.credits };
   state.shortage = null;
   renderPointsRows();
   renderShortageBanner();
-  window.setTimeout(() => $("[data-draft-input]")?.select(), 20);
+  window.setTimeout(() => $("[data-draft-input]")?.focus(), 20);
 }
 
 function cancelCreditEdit() {
@@ -3572,13 +3580,20 @@ $("#modalBody").addEventListener("change", (event) => {
 
 document.addEventListener("change", (event) => {
   const selector = event.target.closest("[data-scheme-credit-type]");
-  if (!selector || state.editingMemberId === null) return;
+  if (!selector) return;
+  const memberId = Number(selector.dataset.memberId);
+  state.memberCreditTypes[memberId] = selector.value;
+  if (state.editingMemberId === null) {
+    renderPointsRows();
+    return;
+  }
+  if (memberId !== state.editingMemberId) return;
   state.activeCreditType = selector.value;
   state.shortage = null;
   renderPointCards();
   renderPointsRows();
   renderShortageBanner();
-  window.setTimeout(() => $("[data-draft-input]")?.select(), 20);
+  window.setTimeout(() => $("[data-draft-input]")?.focus(), 20);
 });
 
 document.addEventListener("keydown", (event) => {

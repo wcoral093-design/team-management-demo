@@ -1988,12 +1988,12 @@ body.is-points-detail .simulation-switch {
 }
 .allocation-editor-line { display: contents; }
 .allocation-before { color: #2f2f35; font-size: 14px; font-variant-numeric: tabular-nums; }
-.allocation-stepper { display: grid; overflow: hidden; width: min(154px, 100%); height: 36px; grid-template-columns: 34px 1fr 34px; align-items: center; border-radius: 999px; background: #f1f1f2; }
-.allocation-stepper:focus-within { outline: 2px solid #9254ff; outline-offset: 2px; }
-.allocation-stepper button { display: grid; height: 100%; place-items: center; padding: 0; border: 0; color: #17171b; background: transparent; cursor: pointer; font-size: 22px; }
+.allocation-stepper { display: grid; overflow: hidden; width: min(142px, 100%); height: 42px; grid-template-columns: 40px 1fr 40px; align-items: center; border-radius: 11px; background: #f1f1f2; }
+.allocation-stepper:focus-within { box-shadow: inset 0 0 0 1px rgba(23, 23, 27, .08); }
+.allocation-stepper button { display: grid; height: 100%; place-items: center; padding: 0; border: 0; color: #17171b; background: transparent; cursor: pointer; font-size: 24px; font-weight: 400; }
 .allocation-stepper button:hover { background: #e5e5e7; }
 .allocation-stepper button:disabled { opacity: .3; cursor: default; }
-.allocation-stepper input { width: 100%; min-width: 0; height: 100%; padding: 0 2px; border: 0; outline: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 500; text-align: center; appearance: textfield; -moz-appearance: textfield; }
+.allocation-stepper input { width: 100%; min-width: 0; height: 100%; padding: 0; border: 0; outline: 0; background: transparent; color: #292a30; font: inherit; font-size: 15px; font-weight: 500; text-align: center; appearance: textfield; -moz-appearance: textfield; }
 .allocation-stepper input::-webkit-inner-spin-button,
 .allocation-stepper input::-webkit-outer-spin-button { margin: 0; -webkit-appearance: none; }
 .allocation-input { width: min(132px, 100%); height: 36px; border-radius: 10px; background: #f1f1f2; }
@@ -2074,9 +2074,9 @@ body.is-points-detail .simulation-switch {
 }
 
 /* Two design proposals for the credit-management workspace. */
-.credit-scheme-switch-row { display: flex; justify-content: flex-end; margin: -2px 0 14px; }
-.credit-scheme-switch { display: inline-flex; gap: 3px; padding: 3px; border-radius: 10px; background: #ececee; }
-.credit-scheme-tag { min-width: 68px; height: 32px; padding: 0 14px; border: 0; border-radius: 8px; color: #62636b; background: transparent; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+.credit-scheme-switch-row { display: flex; justify-content: center; margin: 28px 0 4px; }
+.credit-scheme-switch { display: inline-flex; gap: 4px; padding: 4px; border-radius: 14px; background: #ededf0; }
+.credit-scheme-tag { min-width: 98px; height: 42px; padding: 0 20px; border: 0; border-radius: 12px; color: #696a73; background: transparent; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
 .credit-scheme-tag:hover { color: #111319; }
 .credit-scheme-tag.is-active { color: #111319; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
 .credit-scheme-tag:focus-visible { outline: 2px solid #1598e5; outline-offset: 2px; }
@@ -2097,7 +2097,6 @@ body.is-points-detail .simulation-switch {
 .scheme-one-table.is-editing, .scheme-two-table.is-editing { background: rgba(255, 255, 255, .72); }
 .sr-only { position: absolute; overflow: hidden; width: 1px; height: 1px; padding: 0; border: 0; margin: -1px; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 @media (max-width: 700px) {
-  .credit-scheme-switch-row { justify-content: flex-start; }
   #pointsOverview.is-all-types { min-width: 620px; grid-template-columns: repeat(3, minmax(180px, 1fr)); }
   #panel-credits.is-scheme-overview #creditTypeContent { overflow-x: auto; }
 }

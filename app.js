@@ -76,6 +76,7 @@ const state = {
   activeTab: "members",
   creditScheme: "overview",
   activeCreditType: "general",
+  memberCreditTypes: Object.fromEntries(initialSimulation.members.map((member) => [member.id, "general"])),
   detailAnalysisTab: "model",
   detailLedgerTab: "acquired",
   simulationMode: "all",
@@ -239,8 +240,13 @@ function allocationInputMarkup(member, type) {
   return `<div class="allocation-input"><input type="number" min="0" max="${max}" step="1" value="${escapeHTML(Number(state.draftCredits[type]))}" data-draft-input data-draft-field="after" data-member="${member.id}" data-credit-type="${type}" aria-label="${state.pools[type].label}调后" /></div>`;
 }
 
-function schemeCreditTypeSelector() {
-  return `<label class="scheme-credit-select"><span class="sr-only">积分类型</span><select data-scheme-credit-type aria-label="积分类型">${visibleCreditTypes().map((type) => `<option value="${type}"${type === state.activeCreditType ? " selected" : ""}>${escapeHTML(state.pools[type].label)}</option>`).join("")}</select><span class="scheme-credit-chevron" aria-hidden="true">⌄</span></label>`;
+function selectedMemberCreditType(memberId) {
+  const selected = state.memberCreditTypes[memberId] || "general";
+  return visibleCreditTypes().includes(selected) ? selected : "general";
+}
+
+function schemeCreditTypeSelector(member, selectedType) {
+  return `<label class="scheme-credit-select"><span class="sr-only">${escapeHTML(member.name)}的积分类型</span><select data-scheme-credit-type data-member-id="${member.id}" aria-label="${escapeHTML(member.name)}的积分类型">${visibleCreditTypes().map((type) => `<option value="${type}"${type === selectedType ? " selected" : ""}>${escapeHTML(state.pools[type].label)}</option>`).join("")}</select><span class="scheme-credit-chevron" aria-hidden="true">⌄</span></label>`;
 }
 
 function shortageTypes() {
@@ -283,12 +289,13 @@ function renderPointsRows() {
     }
 
     if (overviewScheme) {
+      const rowType = editing ? type : selectedMemberCreditType(member.id);
       return `<div class="${rowClasses.join(" ")}" data-member-id="${member.id}">
         <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span></span></div>
         ${staticRoleMarkup(member)}
-        ${pointMarkup(editing ? member.consumed[type] : consumedTotal(member))}
-        ${editing ? schemeCreditTypeSelector() : '<span class="credit-type-empty">—</span>'}
-        ${editing ? allocationStepperMarkup(member, type, "after") : pointMarkup(memberTotal(member))}
+        ${pointMarkup(member.consumed[rowType])}
+        ${schemeCreditTypeSelector(member, rowType)}
+        ${editing ? allocationStepperMarkup(member, type, "after") : pointMarkup(member.credits[rowType])}
         <div class="points-operation">${action}</div>
       </div>`;
     }
@@ -541,6 +548,7 @@ function applySimulationMode(mode) {
   state.pools = preset.pools;
   state.seats = preset.seats;
   state.members = preset.members;
+  state.memberCreditTypes = Object.fromEntries(preset.members.map((member) => [member.id, "general"]));
   state.pendingInvites = [];
   state.transactions = [];
   state.rechargeCredits = 0;
@@ -559,12 +567,13 @@ function beginCreditEdit(memberId) {
   }
   const member = state.members.find((item) => item.id === Number(memberId));
   if (!member) return;
+  if (state.creditScheme === "overview") state.activeCreditType = selectedMemberCreditType(member.id);
   state.editingMemberId = member.id;
   state.draftCredits = { ...member.credits };
   state.shortage = null;
   renderPointsRows();
   renderShortageBanner();
-  window.setTimeout(() => $("[data-draft-input]")?.select(), 20);
+  window.setTimeout(() => $("[data-draft-input]")?.focus(), 20);
 }
 
 function cancelCreditEdit() {
@@ -1157,13 +1166,20 @@ $("#modalBody").addEventListener("change", (event) => {
 
 document.addEventListener("change", (event) => {
   const selector = event.target.closest("[data-scheme-credit-type]");
-  if (!selector || state.editingMemberId === null) return;
+  if (!selector) return;
+  const memberId = Number(selector.dataset.memberId);
+  state.memberCreditTypes[memberId] = selector.value;
+  if (state.editingMemberId === null) {
+    renderPointsRows();
+    return;
+  }
+  if (memberId !== state.editingMemberId) return;
   state.activeCreditType = selector.value;
   state.shortage = null;
   renderPointCards();
   renderPointsRows();
   renderShortageBanner();
-  window.setTimeout(() => $("[data-draft-input]")?.select(), 20);
+  window.setTimeout(() => $("[data-draft-input]")?.focus(), 20);
 });
 
 document.addEventListener("keydown", (event) => {
