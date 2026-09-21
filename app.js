@@ -320,14 +320,11 @@ function renderSummary() {
   const assigned = assignedTotal();
   const available = availableTotal();
   const total = assigned + available;
-  const consumed = teamConsumedTotal();
-  const issued = total + consumed;
-  const remainingPercent = issued ? Math.round((total / issued) * 100) : 0;
+  const remainingPercent = 100;
   $("#availableTotal").textContent = format(total);
   $("#unallocatedSummaryTotal").textContent = format(available);
   $("#assignedSummaryTotal").textContent = format(assigned);
   $("#remainingPercent").textContent = `${remainingPercent}%`;
-  $("#allocationDonut").style.setProperty("--remaining-angle", `${remainingPercent * 3.6}deg`);
   $("#allocationDonut").setAttribute("aria-label", `积分剩余 ${remainingPercent}%，剩余总积分 ${format(total)}`);
   $("#seatUsed").textContent = String(state.seats.used);
   $("#seatTotal").textContent = String(state.seats.total);

@@ -2039,7 +2039,7 @@ body.is-points-detail .simulation-switch {
 .credit-summary-header { display: flex; align-items: center; justify-content: space-between; min-height: 20px; }
 .credit-summary-actions { display: flex; align-items: center; }
 .credit-summary-content { display: grid; grid-template-columns: 86px minmax(0, 1fr); align-items: center; gap: 20px; margin-top: 10px; }
-.credit-donut { --remaining-angle: 0deg; position: relative; display: grid; width: 82px; height: 82px; flex: 0 0 82px; place-items: center; border-radius: 50%; background: conic-gradient(#139be8 0 var(--remaining-angle), #d7e6ef var(--remaining-angle) 360deg); }
+.credit-donut { position: relative; display: grid; width: 82px; height: 82px; flex: 0 0 82px; place-items: center; border-radius: 50%; background: #139be8; }
 .credit-donut::after { position: absolute; inset: 11px; border-radius: 50%; background: #fff; content: ''; }
 .credit-donut-center { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
 .credit-donut-center strong { color: #111319; font-size: 22px; font-weight: 650; line-height: 26px; letter-spacing: -.6px; }
