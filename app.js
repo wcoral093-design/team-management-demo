@@ -74,6 +74,7 @@ const initialSimulation = cloneSimulationPreset("all");
 const state = {
   activeView: "team",
   activeTab: "members",
+  creditScheme: "overview",
   activeCreditType: "general",
   detailAnalysisTab: "model",
   detailLedgerTab: "acquired",
@@ -170,10 +171,34 @@ function visibleCreditTypes() {
 function renderPointCards() {
   const type = state.activeCreditType;
   const pool = state.pools[type];
+  const overviewScheme = state.creditScheme === "overview";
+  $("#panel-credits").classList.toggle("is-scheme-overview", overviewScheme);
+  $("#panel-credits").classList.toggle("is-scheme-tabs", !overviewScheme);
+  $$('[data-credit-scheme]').forEach((button) => {
+    const active = button.dataset.creditScheme === state.creditScheme;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-selected", String(active));
+    button.tabIndex = active ? 0 : -1;
+  });
   $("#creditTypeTabs").innerHTML = visibleCreditTypes().map((key) => `<button type="button" class="credit-subtab${key === type ? ' is-active' : ''}" id="credit-tab-${key}" role="tab" aria-selected="${key === type}" aria-controls="creditTypeContent" tabindex="${key === type ? 0 : -1}" data-credit-tab="${key}">${key === 'general' ? '通用积分' : key === 'sd25' ? 'SD 2.5' : 'SD 2.0'}</button>`).join('');
+  $("#creditTypeTabs").hidden = overviewScheme;
   $("#creditTypeContent").setAttribute("aria-labelledby", "credit-tab-" + type);
-  $("#pointsOverview").innerHTML = `<div class="unallocated-summary"><span>待分配${pool.label}</span><strong>${format(pool.available)}</strong></div><p class="allocation-guidance">支持成员积分灵活调配，回收的积分将归入此处</p>`;
-  $("#creditBalanceHeader").textContent = "剩余" + pool.label;
+  $("#pointsOverview").classList.toggle("is-all-types", overviewScheme);
+  $("#pointsOverview").innerHTML = overviewScheme
+    ? visibleCreditTypes().map((key) => `<div class="pool-summary-item"><span>${key === "general" ? "通用" : key === "sd25" ? "SD 2.5" : "SD 2.0"}待分配积分</span><strong>${format(state.pools[key].available)}</strong></div>`).join("")
+    : `<div class="unallocated-summary"><span>待分配${pool.label}</span><strong>${format(pool.available)}</strong></div><p class="allocation-guidance">支持成员积分灵活调配，回收的积分将归入此处</p>`;
+}
+
+function selectCreditScheme(scheme, focus = false) {
+  if (!["overview", "tabs"].includes(scheme) || scheme === state.creditScheme) return;
+  if (state.editingMemberId !== null) {
+    showToast("请先确认或取消当前积分调整");
+    return;
+  }
+  state.creditScheme = scheme;
+  renderPointCards();
+  renderPointsRows();
+  if (focus) $(`[data-credit-scheme="${scheme}"]`)?.focus();
 }
 
 function selectCreditTab(type, focus = false) {
@@ -214,12 +239,8 @@ function allocationInputMarkup(member, type) {
   return `<div class="allocation-input"><input type="number" min="0" max="${max}" step="1" value="${escapeHTML(Number(state.draftCredits[type]))}" data-draft-input data-draft-field="after" data-member="${member.id}" data-credit-type="${type}" aria-label="${state.pools[type].label}调后" /></div>`;
 }
 
-function creditEditorMarkup(member) {
-  const type = state.activeCreditType;
-  return `<div class="allocation-editor-line" data-allocation-type="${type}" role="group" aria-label="${escapeHTML(member.name)}${state.pools[type].label}调配">
-    ${allocationInputMarkup(member, type)}
-    ${allocationStepperMarkup(member, type, "delta")}
-  </div>`;
+function schemeCreditTypeSelector() {
+  return `<label class="scheme-credit-select"><span class="sr-only">积分类型</span><select data-scheme-credit-type aria-label="积分类型">${visibleCreditTypes().map((type) => `<option value="${type}"${type === state.activeCreditType ? " selected" : ""}>${escapeHTML(state.pools[type].label)}</option>`).join("")}</select><span class="scheme-credit-chevron" aria-hidden="true">⌄</span></label>`;
 }
 
 function shortageTypes() {
@@ -243,44 +264,42 @@ function readonlyCreditMarkup(member, type, candidate) {
 function renderPointsRows() {
   const type = state.activeCreditType;
   const isEditing = state.editingMemberId !== null;
-  $("#creditConsumedHeader").textContent = isEditing ? "调前" : "已消耗";
-  $("#creditBalanceHeader").textContent = isEditing ? "调后" : "剩余" + state.pools[type].label;
-  $("#creditActionHeader").textContent = isEditing ? "调整额" : "操作";
-  $("#creditEditOperationHeader").hidden = !isEditing;
-  $("#pointsTableHead").classList.toggle("is-credit-editing", isEditing);
+  const overviewScheme = state.creditScheme === "overview";
+  $("#pointsTableHead").className = `data-table points-table table-head ${overviewScheme ? "scheme-one-table" : "scheme-two-table"}`;
+  $("#pointsTableHead").innerHTML = overviewScheme
+    ? `<div>用户</div><div>团队角色</div><div>已消耗</div><div>积分类型 <span class="info-dot" title="选择本次调配的积分类型">i</span></div><div>剩余积分</div><div>操作 <span class="info-dot" title="调整成员可用积分">i</span></div>`
+    : `<div>用户</div><div>团队角色</div><div>已消耗</div><div>剩余积分</div><div>操作 <span class="info-dot" title="调整成员可用积分">i</span></div>`;
   $("#pointsRows").innerHTML = state.members.map((member) => {
     const editing = member.id === state.editingMemberId;
     const candidate = isRecoveryCandidate(member);
-    const rowClasses = ["data-table", "points-table", "table-row"];
+    const rowClasses = ["data-table", "points-table", "table-row", overviewScheme ? "scheme-one-table" : "scheme-two-table"];
     if (editing) rowClasses.push("is-editing");
     if (candidate) rowClasses.push("is-recovery-candidate");
-    if (editing) {
-      return `<div class="allocation-editor-row" data-member-id="${member.id}">
-        <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span></span></div>
-        ${staticRoleMarkup(member)}
-        <span class="allocation-before">${format(member.credits[type])}</span>
-        ${creditEditorMarkup(member)}
-        <div class="row-actions allocation-editor-actions"><button class="action-link confirm-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>
-        <div class="allocation-editor-footer"><span>输入调后积分，或按 ±100 调整额度，两列自动同步</span></div>
-      </div>`;
-    }
-    const creditCells = readonlyCreditMarkup(member, type, candidate);
 
     let action = `<button class="action-link" data-edit-credits="${member.id}"${state.editingMemberId !== null ? ' disabled title="请先确认或取消当前成员的修改"' : ''}>积分调配</button>`;
+    if (editing) action = `<div class="row-actions allocation-editor-actions"><button class="action-link confirm-link" data-confirm-credits>确认</button><button class="action-link" data-cancel-credits>取消</button></div>`;
     if (candidate) {
       action = `<div class="row-actions"><button class="action-link" data-recover-candidate="${member.id}">回收可用</button></div>`;
     }
 
-    return `
-      <div class="${rowClasses.join(" ")}${isEditing ? " is-credit-editing" : ""}" data-member-id="${member.id}">
+    if (overviewScheme) {
+      return `<div class="${rowClasses.join(" ")}" data-member-id="${member.id}">
         <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span></span></div>
         ${staticRoleMarkup(member)}
-        <div>${format(member.consumed[type])}</div>
-        ${creditCells}
-        ${isEditing ? '<div class="editing-adjustment-placeholder"></div>' : ""}
+        ${pointMarkup(editing ? member.consumed[type] : consumedTotal(member))}
+        ${editing ? schemeCreditTypeSelector() : '<span class="credit-type-empty">—</span>'}
+        ${editing ? allocationStepperMarkup(member, type, "after") : pointMarkup(memberTotal(member))}
         <div class="points-operation">${action}</div>
-      </div>
-    `;
+      </div>`;
+    }
+
+    return `<div class="${rowClasses.join(" ")}" data-member-id="${member.id}">
+      <div class="user-cell">${avatarMarkup(member)}<span class="member-identity"><span class="user-name">${escapeHTML(member.name)}</span></span></div>
+      ${staticRoleMarkup(member)}
+      ${pointMarkup(member.consumed[type])}
+      ${editing ? allocationStepperMarkup(member, type, "after") : readonlyCreditMarkup(member, type, candidate)}
+      <div class="points-operation">${action}</div>
+    </div>`;
   }).join("");
 }
 
@@ -988,6 +1007,11 @@ async function copyText(value, successMessage) {
 }
 
 document.addEventListener("click", (event) => {
+  const schemeButton = event.target.closest("[data-credit-scheme]");
+  if (schemeButton) {
+    selectCreditScheme(schemeButton.dataset.creditScheme, true);
+    return;
+  }
   const creditTab = event.target.closest("[data-credit-tab]");
   if (creditTab) {
     selectCreditTab(creditTab.dataset.creditTab, true);
@@ -1129,6 +1153,17 @@ document.addEventListener("input", (event) => {
 $("#modalForm").addEventListener("submit", handleModalSubmit);
 $("#modalBody").addEventListener("change", (event) => {
   if (event.target.id === "recoveryType") updateRecoveryLimit();
+});
+
+document.addEventListener("change", (event) => {
+  const selector = event.target.closest("[data-scheme-credit-type]");
+  if (!selector || state.editingMemberId === null) return;
+  state.activeCreditType = selector.value;
+  state.shortage = null;
+  renderPointCards();
+  renderPointsRows();
+  renderShortageBanner();
+  window.setTimeout(() => $("[data-draft-input]")?.select(), 20);
 });
 
 document.addEventListener("keydown", (event) => {

@@ -2072,3 +2072,32 @@ body.is-points-detail .simulation-switch {
   .credit-balance-panel { width: 100%; }
   .credit-balance-main { align-items: flex-start; flex-direction: column; gap: 4px; }
 }
+
+/* Two design proposals for the credit-management workspace. */
+.credit-scheme-switch-row { display: flex; justify-content: flex-end; margin: -2px 0 14px; }
+.credit-scheme-switch { display: inline-flex; gap: 3px; padding: 3px; border-radius: 10px; background: #ececee; }
+.credit-scheme-tag { min-width: 68px; height: 32px; padding: 0 14px; border: 0; border-radius: 8px; color: #62636b; background: transparent; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+.credit-scheme-tag:hover { color: #111319; }
+.credit-scheme-tag.is-active { color: #111319; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
+.credit-scheme-tag:focus-visible { outline: 2px solid #1598e5; outline-offset: 2px; }
+#panel-credits.is-scheme-overview .credit-workspace-toolbar { display: none; }
+#pointsOverview.is-all-types { display: grid; min-height: 92px; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; padding: 0; }
+.pool-summary-item { display: flex; min-width: 0; flex-direction: column; justify-content: center; gap: 6px; padding: 18px 28px; }
+.pool-summary-item + .pool-summary-item { border-left: 1px solid var(--line); }
+.pool-summary-item span { overflow: hidden; color: var(--text-secondary); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.pool-summary-item strong { color: #202126; font-size: 27px; font-weight: 500; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.points-table.scheme-one-table { min-width: 900px; grid-template-columns: minmax(190px, 1.35fr) minmax(105px, .72fr) minmax(100px, .72fr) minmax(140px, .9fr) minmax(150px, 1fr) minmax(120px, .78fr); }
+.points-table.scheme-two-table { min-width: 740px; grid-template-columns: minmax(220px, 1.6fr) minmax(110px, 1fr) minmax(100px, 1fr) minmax(160px, 1.2fr) 122px; }
+.scheme-credit-select { position: relative; display: inline-flex; width: max-content; max-width: 132px; align-items: center; }
+.scheme-credit-select select { width: 100%; min-width: 106px; padding: 7px 27px 7px 9px; border: 0; outline: 0; color: #26272c; background: transparent; font: inherit; font-size: 14px; appearance: none; cursor: pointer; }
+.scheme-credit-select:focus-within { border-radius: 7px; outline: 2px solid #1598e5; outline-offset: 1px; }
+.scheme-credit-chevron { position: absolute; right: 8px; top: 50%; color: #303137; font-size: 16px; pointer-events: none; transform: translateY(-55%); }
+.credit-type-empty { color: #9a9ba1; }
+.scheme-one-table .point-value, .scheme-two-table .point-value { color: #69bff3; }
+.scheme-one-table.is-editing, .scheme-two-table.is-editing { background: rgba(255, 255, 255, .72); }
+.sr-only { position: absolute; overflow: hidden; width: 1px; height: 1px; padding: 0; border: 0; margin: -1px; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+@media (max-width: 700px) {
+  .credit-scheme-switch-row { justify-content: flex-start; }
+  #pointsOverview.is-all-types { min-width: 620px; grid-template-columns: repeat(3, minmax(180px, 1fr)); }
+  #panel-credits.is-scheme-overview #creditTypeContent { overflow-x: auto; }
+}
