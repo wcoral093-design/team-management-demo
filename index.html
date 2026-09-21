@@ -80,19 +80,23 @@
 
       <section class="summary-grid" aria-label="团队概览">
         <article class="summary-card credits-card">
-          <div class="credit-summary-actions"><button class="link-button" data-action="details">明细</button><button class="link-button" data-action="buy">购买</button></div>
-          <div class="credit-summary-flow">
-            <section class="credit-summary-metric" aria-label="剩余总积分">
-              <div class="card-label">剩余总积分</div>
-              <div class="large-number" id="availableTotal">0</div>
-            </section>
-            <div class="credit-allocation-bridge">
-              <div class="credit-donut" id="allocationDonut" role="img" aria-label="剩余总积分中的待分配积分占比"></div>
-              <div class="credit-flow-arrow" aria-hidden="true"></div>
+          <div class="credit-summary-header">
+            <div class="card-label">积分概览</div>
+            <div class="credit-summary-actions"><button class="link-button" data-action="details">明细</button><button class="link-button" data-action="buy">购买</button></div>
+          </div>
+          <div class="credit-summary-content">
+            <div class="credit-donut" id="allocationDonut" role="img" aria-label="团队积分剩余比例">
+              <div class="credit-donut-center"><strong id="remainingPercent">0%</strong><span>积分剩余</span></div>
             </div>
-            <section class="credit-summary-metric credit-unallocated-metric" aria-label="待分配积分">
-              <div class="card-label">待分配积分</div>
-              <div class="large-number" id="unallocatedSummaryTotal">0</div>
+            <section class="credit-balance-panel" aria-label="剩余总积分">
+              <div class="credit-balance-main">
+                <div class="credit-balance-title">剩余总积分 <span class="info-dot" title="成员剩余积分与待分配积分之和">i</span></div>
+                <div class="large-number" id="availableTotal">0</div>
+              </div>
+              <div class="credit-balance-breakdown">
+                <span><i class="credit-legend credit-legend-unallocated"></i>待分配积分 <strong id="unallocatedSummaryTotal">0</strong></span>
+                <span><i class="credit-legend credit-legend-assigned"></i>已分配积分 <strong id="assignedSummaryTotal">0</strong></span>
+              </div>
             </section>
           </div>
         </article>
@@ -100,8 +104,8 @@
         <article class="summary-card seats-card">
           <div class="summary-topline">
             <div>
-              <div class="card-label">席位数</div>
-              <div class="seat-number"><span id="seatUsed">2</span><small>/<span id="seatTotal">3</span></small></div>
+              <div class="card-label">可用席位/总席位</div>
+              <div class="seat-number"><span id="seatUsed">2</span><small> / <span id="seatTotal">3</span></small></div>
             </div>
             <button class="link-button" data-action="seats">增加席位</button>
           </div>
