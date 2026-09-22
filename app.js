@@ -324,6 +324,9 @@ function renderSummary() {
   $("#availableTotal").textContent = format(total);
   $("#unallocatedSummaryTotal").textContent = format(available);
   $("#assignedSummaryTotal").textContent = format(assigned);
+  $("#tooltipUnallocated").textContent = format(available);
+  $("#tooltipAssigned").textContent = format(assigned);
+  $("#tooltipConsumed").textContent = format(2000);
   $("#remainingPercent").textContent = `${remainingPercent}%`;
   $("#allocationDonut").setAttribute("aria-label", `积分剩余 ${remainingPercent}%，剩余总积分 ${format(total)}`);
   $("#seatUsed").textContent = String(state.seats.used);

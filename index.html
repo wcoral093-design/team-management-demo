@@ -85,8 +85,13 @@
             <div class="credit-summary-actions"><button class="link-button" data-action="details">明细</button><button class="link-button" data-action="buy">购买</button></div>
           </div>
           <div class="credit-summary-content">
-            <div class="credit-donut" id="allocationDonut" role="img" aria-label="团队积分剩余比例">
+            <div class="credit-donut" id="allocationDonut" role="img" tabindex="0" aria-label="团队积分剩余比例" aria-describedby="creditDonutTooltip">
               <div class="credit-donut-center"><strong id="remainingPercent">91%</strong><span>积分剩余</span></div>
+              <div class="credit-donut-tooltip" id="creditDonutTooltip" role="tooltip">
+                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-unallocated"></i><span>待分配积分</span><strong>✨<span id="tooltipUnallocated">0</span></strong></div>
+                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-assigned"></i><span>已分配积分</span><strong>✨<span id="tooltipAssigned">0</span></strong></div>
+                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-consumed"></i><span>已消耗</span><strong>✨<span id="tooltipConsumed">2,000</span></strong></div>
+              </div>
             </div>
             <section class="credit-balance-panel" aria-label="剩余总积分">
               <div class="credit-balance-main">
