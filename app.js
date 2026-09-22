@@ -320,7 +320,7 @@ function renderSummary() {
   const assigned = assignedTotal();
   const available = availableTotal();
   const total = assigned + available;
-  const remainingPercent = 100;
+  const remainingPercent = 91;
   $("#availableTotal").textContent = format(total);
   $("#unallocatedSummaryTotal").textContent = format(available);
   $("#assignedSummaryTotal").textContent = format(assigned);
