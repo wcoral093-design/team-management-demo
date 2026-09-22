@@ -85,12 +85,21 @@
             <div class="credit-summary-actions"><button class="link-button" data-action="details">明细</button><button class="link-button" data-action="buy">购买</button></div>
           </div>
           <div class="credit-summary-content">
-            <div class="credit-donut" id="allocationDonut" role="img" tabindex="0" aria-label="团队积分剩余比例" aria-describedby="creditDonutTooltip">
+            <div class="credit-donut" id="allocationDonut" aria-label="团队积分构成">
+              <svg class="credit-donut-chart" viewBox="0 0 82 82" role="group" aria-label="团队积分构成，悬浮或聚焦不同颜色查看对应积分">
+                <circle id="segmentAssigned" class="credit-donut-segment is-assigned" cx="41" cy="41" r="30" pathLength="100" stroke-dasharray="11 89" stroke-dashoffset="0" tabindex="0" role="img" aria-describedby="tooltipAssignedCard"></circle>
+                <circle id="segmentConsumed" class="credit-donut-segment is-consumed" cx="41" cy="41" r="30" pathLength="100" stroke-dasharray="14 86" stroke-dashoffset="-11" tabindex="0" role="img" aria-describedby="tooltipConsumedCard"></circle>
+                <circle id="segmentUnallocated" class="credit-donut-segment is-unallocated" cx="41" cy="41" r="30" pathLength="100" stroke-dasharray="75 25" stroke-dashoffset="-25" tabindex="0" role="img" aria-describedby="tooltipUnallocatedCard"></circle>
+              </svg>
               <div class="credit-donut-center"><strong id="remainingPercent">91%</strong><span>积分剩余</span></div>
-              <div class="credit-donut-tooltip" id="creditDonutTooltip" role="tooltip">
-                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-unallocated"></i><span>待分配积分</span><strong>✨<span id="tooltipUnallocated">0</span></strong></div>
-                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-assigned"></i><span>已分配积分</span><strong>✨<span id="tooltipAssigned">0</span></strong></div>
-                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-consumed"></i><span>已消耗</span><strong>✨<span id="tooltipConsumed">2,000</span></strong></div>
+              <div class="credit-donut-tooltip is-assigned-tooltip" id="tooltipAssignedCard" role="tooltip">
+                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-assigned"></i><span>已分配积分：</span><strong>✨<span id="tooltipAssigned">0</span></strong></div>
+              </div>
+              <div class="credit-donut-tooltip is-consumed-tooltip" id="tooltipConsumedCard" role="tooltip">
+                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-consumed"></i><span>已消耗：</span><strong>✨<span id="tooltipConsumed">2,000</span></strong></div>
+              </div>
+              <div class="credit-donut-tooltip is-unallocated-tooltip" id="tooltipUnallocatedCard" role="tooltip">
+                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-unallocated"></i><span>待分配积分：</span><strong>✨<span id="tooltipUnallocated">0</span></strong></div>
               </div>
             </div>
             <section class="credit-balance-panel" aria-label="剩余总积分">

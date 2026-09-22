@@ -2047,17 +2047,25 @@ body.is-points-detail .simulation-switch {
 .credit-summary-header { display: flex; align-items: center; justify-content: space-between; min-height: 20px; }
 .credit-summary-actions { display: flex; align-items: center; }
 .credit-summary-content { display: grid; grid-template-columns: 86px minmax(0, 1fr); align-items: center; gap: 20px; margin-top: 10px; }
-.credit-donut { position: relative; display: grid; width: 82px; height: 82px; flex: 0 0 82px; place-items: center; border-radius: 50%; background: conic-gradient(#8fcae9 0 11%, #e1e3e6 11% 25%, #139be8 25% 100%); }
-.credit-donut::after { position: absolute; inset: 11px; border-radius: 50%; background: #fff; content: ''; }
-.credit-donut-center { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+.credit-donut { position: relative; display: grid; width: 82px; height: 82px; flex: 0 0 82px; place-items: center; border-radius: 50%; }
+.credit-donut-chart { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; overflow: visible; transform: rotate(-90deg); }
+.credit-donut-segment { fill: none; stroke-width: 11; stroke-linecap: butt; cursor: help; pointer-events: stroke; transition: filter 140ms ease, stroke-width 140ms ease; }
+.credit-donut-segment.is-unallocated { stroke: #139be8; }
+.credit-donut-segment.is-assigned { stroke: #8fcae9; }
+.credit-donut-segment.is-consumed { stroke: #e1e3e6; }
+.credit-donut-segment:hover,
+.credit-donut-segment:focus-visible { stroke-width: 12; filter: drop-shadow(0 2px 3px rgba(20, 30, 45, .18)); outline: none; }
+.credit-donut-center { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
 .credit-donut-center strong { color: #111319; font-size: 22px; font-weight: 650; line-height: 26px; letter-spacing: -.6px; }
 .credit-donut-center span { margin-top: 1px; color: var(--text-secondary); font-size: 10px; line-height: 14px; }
-.credit-donut:focus-visible { outline: 2px solid #1598e5; outline-offset: 4px; }
-.credit-donut-tooltip { position: absolute; z-index: 20; top: 50%; left: calc(100% + 14px); display: grid; width: 218px; gap: 10px; padding: 14px 16px; border: 1px solid rgba(21, 23, 28, .1); border-radius: 10px; background: rgba(255, 255, 255, .98); box-shadow: 0 10px 30px rgba(20, 30, 45, .14); opacity: 0; pointer-events: none; transform: translate(6px, -50%); transition: opacity 160ms ease, transform 160ms ease; }
+.credit-donut-tooltip { position: absolute; z-index: 20; top: 50%; left: calc(100% + 14px); display: grid; width: max-content; min-width: 154px; padding: 12px 14px; border: 1px solid rgba(21, 23, 28, .1); border-radius: 10px; background: rgba(255, 255, 255, .98); box-shadow: 0 10px 30px rgba(20, 30, 45, .14); opacity: 0; pointer-events: none; transform: translate(6px, -50%); transition: opacity 160ms ease, transform 160ms ease; }
 .credit-donut-tooltip::before { position: absolute; top: 50%; left: -6px; width: 10px; height: 10px; border-left: 1px solid rgba(21, 23, 28, .1); border-bottom: 1px solid rgba(21, 23, 28, .1); background: #fff; content: ''; transform: translateY(-50%) rotate(45deg); }
-.credit-donut:hover .credit-donut-tooltip,
-.credit-donut:focus .credit-donut-tooltip,
-.credit-donut:focus-within .credit-donut-tooltip { opacity: 1; transform: translate(0, -50%); }
+.credit-donut:has(.is-assigned:hover) .is-assigned-tooltip,
+.credit-donut:has(.is-assigned:focus-visible) .is-assigned-tooltip,
+.credit-donut:has(.is-consumed:hover) .is-consumed-tooltip,
+.credit-donut:has(.is-consumed:focus-visible) .is-consumed-tooltip,
+.credit-donut:has(.is-unallocated:hover) .is-unallocated-tooltip,
+.credit-donut:has(.is-unallocated:focus-visible) .is-unallocated-tooltip { opacity: 1; transform: translate(0, -50%); }
 .credit-tooltip-row { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; align-items: center; gap: 8px; color: #5f626b; font-size: 12px; line-height: 18px; white-space: nowrap; }
 .credit-tooltip-row strong { color: #202126; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .credit-tooltip-dot { width: 8px; height: 8px; border-radius: 50%; }
@@ -2093,9 +2101,12 @@ body.is-points-detail .simulation-switch {
   .credit-balance-main { align-items: flex-start; flex-direction: column; gap: 4px; }
   .credit-donut-tooltip { top: calc(100% + 12px); left: 50%; transform: translate(-50%, 6px); }
   .credit-donut-tooltip::before { top: -6px; left: 50%; transform: translateX(-50%) rotate(135deg); }
-  .credit-donut:hover .credit-donut-tooltip,
-  .credit-donut:focus .credit-donut-tooltip,
-  .credit-donut:focus-within .credit-donut-tooltip { transform: translate(-50%, 0); }
+  .credit-donut:has(.is-assigned:hover) .is-assigned-tooltip,
+  .credit-donut:has(.is-assigned:focus-visible) .is-assigned-tooltip,
+  .credit-donut:has(.is-consumed:hover) .is-consumed-tooltip,
+  .credit-donut:has(.is-consumed:focus-visible) .is-consumed-tooltip,
+  .credit-donut:has(.is-unallocated:hover) .is-unallocated-tooltip,
+  .credit-donut:has(.is-unallocated:focus-visible) .is-unallocated-tooltip { transform: translate(-50%, 0); }
 }
 
 /* Two design proposals for the credit-management workspace. */
@@ -2206,12 +2217,21 @@ body.is-points-detail .simulation-switch {
             <div class="credit-summary-actions"><button class="link-button" data-action="details">明细</button><button class="link-button" data-action="buy">购买</button></div>
           </div>
           <div class="credit-summary-content">
-            <div class="credit-donut" id="allocationDonut" role="img" tabindex="0" aria-label="团队积分剩余比例" aria-describedby="creditDonutTooltip">
+            <div class="credit-donut" id="allocationDonut" aria-label="团队积分构成">
+              <svg class="credit-donut-chart" viewBox="0 0 82 82" role="group" aria-label="团队积分构成，悬浮或聚焦不同颜色查看对应积分">
+                <circle id="segmentAssigned" class="credit-donut-segment is-assigned" cx="41" cy="41" r="30" pathLength="100" stroke-dasharray="11 89" stroke-dashoffset="0" tabindex="0" role="img" aria-describedby="tooltipAssignedCard"></circle>
+                <circle id="segmentConsumed" class="credit-donut-segment is-consumed" cx="41" cy="41" r="30" pathLength="100" stroke-dasharray="14 86" stroke-dashoffset="-11" tabindex="0" role="img" aria-describedby="tooltipConsumedCard"></circle>
+                <circle id="segmentUnallocated" class="credit-donut-segment is-unallocated" cx="41" cy="41" r="30" pathLength="100" stroke-dasharray="75 25" stroke-dashoffset="-25" tabindex="0" role="img" aria-describedby="tooltipUnallocatedCard"></circle>
+              </svg>
               <div class="credit-donut-center"><strong id="remainingPercent">91%</strong><span>积分剩余</span></div>
-              <div class="credit-donut-tooltip" id="creditDonutTooltip" role="tooltip">
-                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-unallocated"></i><span>待分配积分</span><strong>✨<span id="tooltipUnallocated">0</span></strong></div>
-                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-assigned"></i><span>已分配积分</span><strong>✨<span id="tooltipAssigned">0</span></strong></div>
-                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-consumed"></i><span>已消耗</span><strong>✨<span id="tooltipConsumed">2,000</span></strong></div>
+              <div class="credit-donut-tooltip is-assigned-tooltip" id="tooltipAssignedCard" role="tooltip">
+                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-assigned"></i><span>已分配积分：</span><strong>✨<span id="tooltipAssigned">0</span></strong></div>
+              </div>
+              <div class="credit-donut-tooltip is-consumed-tooltip" id="tooltipConsumedCard" role="tooltip">
+                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-consumed"></i><span>已消耗：</span><strong>✨<span id="tooltipConsumed">2,000</span></strong></div>
+              </div>
+              <div class="credit-donut-tooltip is-unallocated-tooltip" id="tooltipUnallocatedCard" role="tooltip">
+                <div class="credit-tooltip-row"><i class="credit-tooltip-dot is-unallocated"></i><span>待分配积分：</span><strong>✨<span id="tooltipUnallocated">0</span></strong></div>
               </div>
             </div>
             <section class="credit-balance-panel" aria-label="剩余总积分">
@@ -2764,7 +2784,9 @@ function renderSummary() {
   $("#tooltipAssigned").textContent = format(assigned);
   $("#tooltipConsumed").textContent = format(2000);
   $("#remainingPercent").textContent = `${remainingPercent}%`;
-  $("#allocationDonut").setAttribute("aria-label", `积分剩余 ${remainingPercent}%，剩余总积分 ${format(total)}`);
+  $("#segmentUnallocated").setAttribute("aria-label", `待分配积分：${format(available)}`);
+  $("#segmentAssigned").setAttribute("aria-label", `已分配积分：${format(assigned)}`);
+  $("#segmentConsumed").setAttribute("aria-label", "已消耗：2,000");
   $("#seatUsed").textContent = String(state.seats.used);
   $("#seatTotal").textContent = String(state.seats.total);
 }

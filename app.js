@@ -328,7 +328,9 @@ function renderSummary() {
   $("#tooltipAssigned").textContent = format(assigned);
   $("#tooltipConsumed").textContent = format(2000);
   $("#remainingPercent").textContent = `${remainingPercent}%`;
-  $("#allocationDonut").setAttribute("aria-label", `积分剩余 ${remainingPercent}%，剩余总积分 ${format(total)}`);
+  $("#segmentUnallocated").setAttribute("aria-label", `待分配积分：${format(available)}`);
+  $("#segmentAssigned").setAttribute("aria-label", `已分配积分：${format(assigned)}`);
+  $("#segmentConsumed").setAttribute("aria-label", "已消耗：2,000");
   $("#seatUsed").textContent = String(state.seats.used);
   $("#seatTotal").textContent = String(state.seats.total);
 }
